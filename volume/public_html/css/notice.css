@@ -1,0 +1,23 @@
+.notice {
+    box-sizing: border-box;
+    background-color: whitesmoke;
+    padding: 5px 10px;
+}
+.notice + .notice {
+    margin-top: 5px;
+}
+.notice.sx-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.notice.sx-warning {
+    background-color: #ffc107;
+}
+.notice.sx-info {
+    background-color: #17a2b8;
+    color: white;
+}
+.notice.sx-success {
+    background-color: #28a745;
+    color: white;
+}

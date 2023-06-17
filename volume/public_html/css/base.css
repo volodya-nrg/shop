@@ -1,0 +1,194 @@
+#body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: white;
+    font-family: Arial, sans-serif;
+    color: #4f4f4f;
+}
+
+.layer-center {
+    width: 1024px;
+    margin: 0 auto;
+}
+
+.header {
+    border-bottom: lightgrey solid 1px;
+}
+
+.header-block {
+    display: flex;
+    justify-content: space-between;
+    height: 35px;
+}
+
+.header-block > *:not(:last-child) {
+    margin-right: 10px;
+}
+
+.header-block__block-left {
+    display: flex;
+    padding: 5px 0;
+}
+
+.header-block__block-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-block__block-right > *:not(:first-child) {
+    margin-left: 10px;
+}
+
+.header-block__cart {
+    display: flex;
+}
+
+.header-block__cart-img {
+    height: 17px;
+}
+
+.header-block__cart > *:not(:first-child) {
+    margin-left: 5px;
+}
+
+.main {
+    min-height: 50px;
+}
+
+.footer {
+    flex: 1 0 auto;
+    background-color: whitesmoke;
+}
+
+.text-mute {
+    color: #999;
+}
+
+.text-mute a {
+    color: gray;
+}
+
+.text-small {
+    font-size: small;
+}
+
+.text-capitalize {
+    text-transform: capitalize;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.align-center {
+    text-align: center;
+}
+
+.hr {
+    height: 1px;
+    border: none;
+    color: #e5e5e5;
+    background: #e5e5e5;
+    margin: 20px 0;
+}
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+    color: black;
+}
+
+.h1 {
+    font-size: 24px;
+}
+
+.h2 {
+    font-size: 20px;
+}
+
+.h3 {
+    font-size: 18px;
+}
+
+.h4 {
+    font-size: 16px;
+}
+
+.h5 {
+    font-size: 14px;
+}
+
+a {
+    color: #66f;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+a.sx-gray {
+    color: gray;
+}
+
+a.sx-lightgray {
+    color: lightgray;
+}
+
+a.sx-inverse {
+    text-decoration: none;
+}
+
+a.sx-inverse:hover {
+    text-decoration: underline;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.d-block {
+    display: block;
+    width: 100%;
+}
+
+.sx-selected {
+    background-color: gold;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border: whitesmoke solid 1px;
+}
+
+.table thead {
+    background-color: whitesmoke;
+}
+
+.table th, .table td {
+    padding: 5px;
+}
+
+.table td {
+    border: whitesmoke solid 1px;
+}
+
+.float-left {
+    float: left;
+}
+
+.float-right {
+    float: right;
+}
+
+.block_center_and_slim {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+@media (max-width: 1200px) {
+}

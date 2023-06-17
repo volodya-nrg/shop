@@ -1,0 +1,29 @@
+.page-cat {
+    display: flex;
+}
+
+.page-cat > *:not(:last-child) {
+    margin-right: 10px;
+}
+
+.page-cat__menu {
+    flex: 0 0 200px;
+}
+
+.page-cat__main {
+    flex-basis: 100%;
+}
+
+.page-cat__breakcrumbs {
+    margin-bottom: 10px;
+    padding-top: 10px;
+}
+
+.page-cat__items {
+    display: table;
+    width: 100%;
+}
+
+.page-cat__paginator {
+    margin-top: 10px;
+}

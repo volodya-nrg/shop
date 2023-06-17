@@ -1,0 +1,25 @@
+.module-counter {
+    display: inline-flex;
+}
+
+.module-counter__minus, .module-counter__plus {
+    width: 25px;
+}
+
+.module-counter input[type="number"] { /* переназначим явно */
+    width: 40px;
+    /* верзем назад значения */
+    padding: initial;
+    display: initial;
+    height: initial;
+}
+
+.module-counter.sx-lg .module-counter__minus, .module-counter.sx-lg .module-counter__plus {
+    width: 35px;
+    font-size: 20px;
+}
+
+.module-counter.sx-lg input[type="number"] {
+    width: 60px;
+    font-size: 20px;
+}

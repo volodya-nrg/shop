@@ -1,0 +1,34 @@
+.page-item {
+    margin-top: 10px;
+}
+
+.page-item__breadcrumbs {
+}
+
+.page-item__main {
+    display: flex;
+    margin-top: 10px;
+}
+
+.page-item__main > *:not(:first-child) {
+    margin-left: 10px;
+}
+
+.page-item__cover {
+    flex: 0 0 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: whitesmoke;
+}
+
+.page-item__cover img {
+    display: block;
+    width: 50px;
+    height: 50px;
+}
+
+.page-item__data {
+    flex-basis: 100%;
+}

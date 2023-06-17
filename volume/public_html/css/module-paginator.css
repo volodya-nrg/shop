@@ -1,0 +1,10 @@
+.module-paginator ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.module-paginator ul > li:not(:first-child) {
+    margin-left: 10px;
+}

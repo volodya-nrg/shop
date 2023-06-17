@@ -1,0 +1,55 @@
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], select {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    border: lightgray solid 1px;
+    padding: 5px;
+    height: 30px;
+    font-family: Arial, sans-serif;
+}
+
+textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    border: lightgray solid 1px;
+    padding: 5px;
+    font-family: Arial, sans-serif;
+}
+
+.btn {
+    box-sizing: border-box;
+    padding: 10px;
+    border: lightgray solid 1px;
+    background-color: whitesmoke;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: white;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.btn[disabled]:hover {
+    cursor: default;
+    box-shadow: none;
+    background-color: whitesmoke;
+}
+
+.btn.sx-small-padding-top {
+    padding: 6px 10px;
+}
+
+.form {
+    display: block;
+}
+
+.form__row + .form__row {
+    margin-top: 15px;
+}
+
+.form__title {
+    margin-bottom: 5px;
+}

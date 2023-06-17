@@ -1,0 +1,16 @@
+.module-catalog-menu h2 {
+    margin: 10px 0;
+}
+.module-catalog-menu ul {
+    display: block;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.module-catalog-menu ul ul {
+    margin-top: 1px;
+    margin-left: 10px;
+}
+.module-catalog-menu ul li {
+    margin-bottom: 1px;
+}

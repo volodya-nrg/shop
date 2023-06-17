@@ -1,0 +1,40 @@
+.module-item {
+    width: 200px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border: lightgrey solid 1px;
+}
+.module-item:hover {
+    border-color: darkgray;
+}
+.module-item__cover {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    overflow: hidden;
+    background-color: whitesmoke;
+}
+.module-item__content {
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+}
+.module-item__content > *:not(:last-child) {
+    margin-bottom: 10px;
+}
+.module-item__title {
+    height: 53px;
+    overflow: hidden;
+}
+.module-item__price-and-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.module-item__price-and-counter > *:not(:last-child) {
+    margin-right: 0px;
+}
+.module-item__price {
+    white-space: nowrap;
+}

@@ -1,0 +1,16 @@
+.page-cart {
+    display: flex;
+}
+
+.page-cart > *:not(:first-child) {
+    margin-left: 10px;
+}
+
+.page-cart__main {
+    flex-basis: 100%;
+}
+
+.page-cart__checkout {
+    flex: 0 0 200px;
+    background-color: whitesmoke;
+}
