@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 session_start();
 const DEV_MODE = true;
 
@@ -12,9 +11,6 @@ if (DEV_MODE) {
 }
 
 $filename_env = ".env";
-if (DEV_MODE) {
-    $filename_env = ".env_dev";
-}
 foreach (explode(PHP_EOL, file_get_contents("../{$filename_env}")) as $row) {
     if (empty($row)) {
         continue;
