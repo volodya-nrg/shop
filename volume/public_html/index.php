@@ -27,7 +27,6 @@ try {
         [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC]
     );
     $PDO->exec("SET NAMES " . DB_CHARSET);
-
 } catch (\PDOException $e) {
     http_response_code(500);
     die(DEV_MODE ? $e->getMessage() : ErrNotConnectToDatabase);
@@ -45,7 +44,7 @@ try {
         throw new Exception(ErrNotFoundClass);
     }
     if ($class === "ControllerItem") {
-        if ($method == "index" || count($aArgs)) {
+        if ($method === "index" || count($aArgs)) {
             throw new Exception(ErrNotFoundMethod);
         }
         $aArgs = [$method];

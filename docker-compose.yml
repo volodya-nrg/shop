@@ -1,9 +1,9 @@
 version: "3.8"
 services:
   service_remtochkacom:
-    image: volodyanrg/debian-bullseye-slim_nginx_php8
+    image: volodyanrg/debian_nginx_php
     ports: # dev-mode
-      - "127.0.0.1:80:80" # 127... для локальной-dev разработки
+      - "80:80" # 127... для локальной-dev разработки
     volumes:
       - ./volume:/var/www
     deploy:
@@ -11,7 +11,7 @@ services:
       resources:
         limits:
           cpus: '0.50'
-          memory: 50M
+          memory: 200M
         reservations:
           cpus: '0.25'
           memory: 20M
