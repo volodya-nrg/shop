@@ -1,19 +1,17 @@
 <?php
-$errors = $__data[FieldErrors] ?? [];
+$error = $__data[FieldError] ?? "";
 $dataSendMsg = $__data[FieldDataSendMsg] ?? "";
 ?>
 <div class="block_center_and_slim">
     <h1 class="align-center">Восстановление доступа</h1>
 
-    <?php if (count($errors)): ?>
+    <?php if ($error != ""): ?>
         <div>
             <?php
-            foreach ($errors as $msg) {
-                echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
-                    FieldMsg => $msg,
-                    FieldType => NoticeStyleClassDanger,
-                ]);
-            }
+            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+                FieldMsg => $error,
+                FieldType => NoticeStyleClassDanger,
+            ]);
             ?>
         </div>
         <br/>

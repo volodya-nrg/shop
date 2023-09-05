@@ -1,4 +1,5 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
@@ -20,28 +21,44 @@ class ControllerRecoverTest extends TestCase
 
     public function testIndex(): void
     {
-        $requestedEmail = randomString(10);
-        $tplFn = function (Response $response, int $code) {
-            $this->assertEquals(ViewPageRecover, $response->getViewName());
-            $this->assertEquals($code, $response->getHttpCode());
+        $req = new RequestRecover(randomString(10));
+        $fnTpl = function (int $expectedCode, RequestRecover $req, MyResponse $resp, int $countData) {
+            $this->assertEquals(ViewPageRecover, $resp->getViewName());
+            $this->assertEquals($expectedCode, $resp->getHttpCode());
+            $this->assertCount($countData, $resp->data);
+
+            if ($expectedCode >= 200 && $expectedCode < 300) {
+                $this->assertArrayNotHasKey(FieldError, $resp->data);
+            } else {
+                $this->assertArrayHasKey(FieldError, $resp->data);
+            }
         };
 
-        $this->client->recover(function (Response $response) use ($tplFn, &$requestedEmail) { // Ok
-            $tplFn($response, 200);
-            $this->assertCount(0, $response->data);
+        // GET 200
+        $this->client->recover(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 0);
 
-            $_POST[FieldEmail] = $requestedEmail; // зададим не правильный е-мэйл
-        })->recover(function (Response $response) use ($tplFn, &$requestedEmail) { // Err
-            $tplFn($response, 400);
-            $this->assertCount(1, $response->data[FieldErrors]);
-            $this->assertEquals(ErrEmailNotCorrect, $response->data[FieldErrors][0]);
+            $_POST[FieldEmail] = $req->getEmail();
 
-            $requestedEmail = randomEmail();
-            $_POST[FieldEmail] = $requestedEmail;
-        })->recover(function (Response $response) use ($tplFn, &$requestedEmail) { // Ok
-            $tplFn($response, 200);
-            $this->assertArrayNotHasKey(FieldErrors, $response->data);
-            $this->assertEquals(sprintf(DicRecoverDataSendMsgTpl, $requestedEmail), $response->data[FieldDataSendMsg]);
+            // е-мэйл не правильный, будет ошибка
+        })->recover(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 2);
+            $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+
+            $req->setEmail(randomEmail());
+            $_POST[FieldEmail] = $req->getEmail();
+
+            // ok
+        })->recover(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 2);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+            $this->assertArrayHasKey(FieldDataSendMsg, $resp->data);
+
+            $msg = sprintf(DicRecoverDataSendMsgTpl, $resp->data[FieldRequestedEmail]);
+            $this->assertEquals($msg, $resp->data[FieldDataSendMsg]);
         })->run();
     }
 }

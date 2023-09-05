@@ -1,5 +1,5 @@
 <?php
-$errors = $__data[FieldErrors] ?? [];
+$error = $__data[FieldError] ?? "";
 ?>
 <div class="page-cat">
     <div class="page-cat__menu">

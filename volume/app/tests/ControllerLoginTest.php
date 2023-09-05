@@ -1,4 +1,5 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
@@ -20,38 +21,51 @@ class ControllerLoginTest extends TestCase
 
     public function testIndex(): void
     {
-        $requestedEmail = randomString(10);
-        $requestedPass = randomString(PassMinLen - 1);
-        $tplFn = function (Response $response, int $code) {
-            $this->assertEquals(ViewPageLogin, $response->getViewName());
-            $this->assertEquals($code, $response->getHttpCode());
+        $req = new RequestLogin(randomString(10), randomString(PassMinLen - 1));
+        $fnTpl = function (int $expectedCode, RequestLogin $req, MyResponse $resp, int $countData): void {
+            $this->assertEquals(ViewPageLogin, $resp->getViewName());
+            $this->assertEquals($expectedCode, $resp->getHttpCode());
+            $this->assertCount($countData, $resp->data);
+
+            if ($expectedCode >= 200 && $expectedCode < 300) {
+                $this->assertArrayNotHasKey(FieldError, $resp->data);
+            } else {
+                $this->assertArrayHasKey(FieldError, $resp->data);
+            }
         };
 
-        $this->client->login(function (Response $response) use ($tplFn, &$requestedEmail, &$requestedPass) { // Ok. Просто открыли страницу
-            $tplFn($response, 200);
-            $this->assertCount(0, $response->data);
+        // GET 200
+        $this->client->login(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 0);
 
-            $_POST[FieldEmail] = $requestedEmail; // зададим не правильный е-мэйл
-            $_POST[FieldPassword] = $requestedPass; // зададим короткий пароль
-        })->login(function (Response $response) use ($tplFn, &$requestedEmail) { // Err. Е-мэйл и пароль не валидны
-            $tplFn($response, 400);
-            $this->assertCount(2, $response->data[FieldErrors]);
-            $this->assertEquals(ErrEmailNotCorrect, $response->data[FieldErrors][0]);
-            $this->assertEquals(ErrPassIsShort, $response->data[FieldErrors][1]);
+            $_POST[FieldEmail] = $req->getEmail();
+            $_POST[FieldPassword] = $req->getPass();
 
-            $requestedEmail = randomEmail();
-            $_POST[FieldEmail] = $requestedEmail;
-        })->login(function (Response $response) use ($tplFn, &$requestedEmail, &$requestedPass) { // Err. Пароль не валидный
-            $tplFn($response, 400);
-            $this->assertCount(1, $response->data[FieldErrors]);
-            $this->assertEquals(ErrPassIsShort, $response->data[FieldErrors][0]);
-            $this->assertEquals($requestedEmail, $response->data[FieldRequestedEmail]);
+            // е-мэйл не верен, будет ошибка
+        })->login(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 2);
+            $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
 
-            $requestedPass = randomString(10);
-            $_POST[FieldPassword] = $requestedPass;
-        })->login(function (Response $response) use ($tplFn) { // Ok
-            $tplFn($response, 200);
-            $this->assertArrayNotHasKey(FieldErrors, $response->data);
+            $req->setEmail(randomEmail());
+            $_POST[FieldEmail] = $req->getEmail();
+
+            // пароль не верен, будет ошибка
+        })->login(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 2);
+            $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+
+            $req->setPass(randomString(PassMinLen));
+            $_POST[FieldPassword] = $req->getPass();
+
+            // ok
+        })->login(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 1);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
         })->run();
     }
 }

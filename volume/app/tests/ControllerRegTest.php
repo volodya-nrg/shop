@@ -1,4 +1,5 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
@@ -20,57 +21,94 @@ class ControllerRegTest extends TestCase
 
     public function testIndex(): void
     {
-        $requestedEmail = randomString(10);
-        $requestedPass = randomString(PassMinLen - 1);
-        $requestedPassConfirm = randomString(PassMinLen - 1);
-        $requestedAgreement = randomString(2);
-        $requestedPrivatePolicy = randomString(2);
-        $tplFn = function (Response $response, int $code) {
-            $this->assertEquals(ViewPageReg, $response->getViewName());
-            $this->assertEquals($code, $response->getHttpCode());
+        $req = new RequestReg(randomString(10), randomString(PassMinLen - 1), randomString(PassMinLen), false, false);
+        $fnTpl = function (int $expectedCode, RequestReg $req, MyResponse $resp, int $countData): void {
+            $this->assertEquals(ViewPageReg, $resp->getViewName());
+            $this->assertEquals($expectedCode, $resp->getHttpCode());
+            $this->assertCount($countData, $resp->data);
+
+            if ($expectedCode >= 200 && $expectedCode < 300) {
+                $this->assertArrayNotHasKey(FieldError, $resp->data);
+            } else {
+                $this->assertArrayHasKey(FieldError, $resp->data);
+            }
         };
 
-        $this->client->reg(function (Response $response) use ($tplFn, &$requestedEmail, &$requestedPass, &$requestedPassConfirm) { // Ok. Простая загрузка страницы
-            $tplFn($response, 200);
-            $this->assertCount(0, $response->data);
+        // GET 200
+        $this->client->reg(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 0);
 
-            $_POST[FieldEmail] = $requestedEmail; // зададим не правильный е-мэйл
-            $_POST[FieldPassword] = $requestedPass; // зададим короткий пароль
-            $_POST[FieldPasswordConfirm] = $requestedPassConfirm; // зададим короткий пароль и другой
-        })->reg(function (Response $response) use ($tplFn, &$requestedEmail, &$requestedPass, &$requestedPassConfirm) { // Err. Не правильный е-мэйл и пароли
-            $tplFn($response, 400);
-            $this->assertCount(4, $response->data[FieldErrors]);
-            $this->assertEquals(ErrEmailNotCorrect, $response->data[FieldErrors][0]);
-            $this->assertEquals(ErrPassIsShort, $response->data[FieldErrors][1]);
-            $this->assertEquals(ErrAcceptAgreement, $response->data[FieldErrors][2]);
-            $this->assertEquals(ErrAcceptPrivatePolicy, $response->data[FieldErrors][3]);
+            $_POST[FieldEmail] = $req->getEmail();
+            $_POST[FieldPassword] = $req->getPass();
+            $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
+            $_POST[FieldAgreement] = $req->getAgreement();
+            $_POST[FieldPrivacyPolicy] = $req->getPrivatePolicy();
 
-            $requestedEmail = randomEmail();
-            $requestedPass = randomString(PassMinLen);
-            $requestedPassConfirm = randomString(PassMinLen);
-            $_POST[FieldEmail] = $requestedEmail; // зададим правильный е-мэйл
-            $_POST[FieldPassword] = $requestedPass; // зададим валидиный пароль
-            $_POST[FieldPasswordConfirm] = $requestedPassConfirm; // зададим валидный пароль, но другой
-        })->reg(function (Response $response) use ($tplFn, &$requestedPass, &$requestedPassConfirm) { // Err. Пароли валидные, но разные и не хватает чекбоксов
-            $tplFn($response, 400);
-            $this->assertCount(3, $response->data[FieldErrors]);
-            $this->assertEquals(ErrPasswordsNotEqual, $response->data[FieldErrors][0]);
-            $this->assertEquals(ErrAcceptAgreement, $response->data[FieldErrors][1]);
-            $this->assertEquals(ErrAcceptPrivatePolicy, $response->data[FieldErrors][2]);
+            // e-mail не правильный, будет ошибка
+        })->reg(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 4);
+            $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $requestedPassConfirm = $requestedPass;
-            $_POST[FieldPasswordConfirm] = $requestedPassConfirm; // зададим валидный пароль
-        })->reg(function (Response $response) use ($tplFn, &$requestedAgreement, &$requestedPrivatePolicy) { // Err. Не хватает чекбоксов
-            $tplFn($response, 400);
-            $this->assertCount(2, $response->data[FieldErrors]);
-            $this->assertEquals(ErrAcceptAgreement, $response->data[FieldErrors][0]);
-            $this->assertEquals(ErrAcceptPrivatePolicy, $response->data[FieldErrors][1]);
+            $req->setEmail(randomEmail());
+            $_POST[FieldEmail] = $req->getEmail();
 
-            $_POST[FieldAgreement] = $requestedAgreement; // зададим подтверждение соглашения
-            $_POST[FieldPrivacyPolicy] = $requestedPrivatePolicy; // зададим подтверждение приват. инф-ии
-        })->reg(function (Response $response) use ($tplFn) { // Ok
-            $tplFn($response, 200);
-            $this->assertArrayNotHasKey(FieldErrors, $response->data);
+            // пароль не верный, будет ошибка
+        })->reg(function (MyResponse $resp) use (&$req, &$fnTpl) {
+            $fnTpl(400, $req, $resp, 4);
+            $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+
+            // зададим верный пароль
+            $req->setPass(randomString(PassMinLen));
+            $_POST[FieldPassword] = $req->getPass();
+
+            // пароли не равны между собой, будет ошибка
+        })->reg(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 4);
+            $this->assertEquals(ErrPasswordsNotEqual, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+
+            $req->setPassConfirm($req->getPass());
+            $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
+
+            // не выбран agreement, будет ошибка
+        })->reg(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 4);
+            $this->assertEquals(ErrAcceptAgreement, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+
+            $req->setAgreement(true);
+            $_POST[FieldAgreement] = "on";
+
+            // не выбран privatePolicy, будет ошибка
+        })->reg(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 4);
+            $this->assertEquals(ErrAcceptPrivatePolicy, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+
+            $req->setPrivatePolicy(true);
+            $_POST[FieldPrivacyPolicy] = "on";
+
+            // ok
+        })->reg(function (MyResponse $resp) use (&$req, &$fnTpl) {
+            $fnTpl(200, $req, $resp, 3);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
+            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+            $this->assertTrue($resp->data[FieldRequestedAgreement]);
+            $this->assertTrue($resp->data[FieldRequestedPrivatePolicy]);
         })->run();
     }
 }

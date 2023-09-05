@@ -1,19 +1,17 @@
 <?php
-$errors = $__data[FieldErrors] ?? [];
+$error = $__data[FieldError] ?? "";
 $requestedEmail = $__data[FieldRequestedEmail] ?? "";
 ?>
 <div class="block_center_and_slim">
     <h1 class="align-center">Вход</h1>
 
-    <?php if (count($errors)): ?>
+    <?php if ($error !== ""): ?>
         <div>
             <?php
-            foreach ($errors as $msg) {
-                echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
-                    FieldMsg => $msg,
-                    FieldType => NoticeStyleClassDanger,
-                ]);
-            }
+            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+                FieldMsg => $error,
+                FieldType => NoticeStyleClassDanger,
+            ]);
             ?>
         </div>
         <br/>
@@ -22,7 +20,8 @@ $requestedEmail = $__data[FieldRequestedEmail] ?? "";
     <form method="post" class="form" action="">
         <div class="form__row">
             <div class="form__title">Е-мэйл</div>
-            <input type="email" name="<?php echo FieldEmail ?>" value="<?php echo $requestedEmail ?>" required="required"/>
+            <input type="email" name="<?php echo FieldEmail ?>" value="<?php echo $requestedEmail ?>"
+                   required="required"/>
         </div>
         <div class="form__row">
             <div class="form__title">Пароль</div>

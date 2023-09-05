@@ -5,25 +5,36 @@ class ControllerRecover extends ControllerBase
     public string $title = DicRecoverAccess;
     public string $description = "";
 
-    public function index(array $args): Response
+    public function index(array $args): MyResponse
     {
-        $response = new Response(ViewPageRecover);
+        $resp = new MyResponse(ViewPageRecover);
 
-        if (!empty($_POST[FieldEmail])) {
-            $requestedEmail = trim($_POST[FieldEmail]);
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestRecover();
+            $req->parsePOST($_POST);
 
-            if (!filter_var($requestedEmail, FILTER_VALIDATE_EMAIL)) {
-                $response->data[FieldErrors][] = ErrEmailNotCorrect;
+            $resp->data[FieldRequestedEmail] = $req->getEmail();
+
+            $err = $this->check($req);
+            if ($err !== null) {
+                $resp->setHttpCode($err->getCode());
+                $resp->data[FieldError] = $err->getMessage();
+                return $resp;
             }
 
-            if (isset($response->data[FieldErrors]) && count($response->data[FieldErrors])) {
-                $response->setHttpCode(400);
-            } else {
-                // тут надо проверить, есть ли такой вообще е-мэйл
-                $response->data[FieldDataSendMsg] = sprintf(DicRecoverDataSendMsgTpl, $requestedEmail);
-            }
+            // подключение к БД и тд
+            $resp->data[FieldDataSendMsg] = sprintf(DicRecoverDataSendMsgTpl, $req->getEmail());;
         }
 
-        return $response;
+        return $resp;
+    }
+
+    private function check(RequestRecover $req): ?Error
+    {
+        if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
+            return new Error(ErrEmailNotCorrect, 400);
+        }
+
+        return null;
     }
 }

@@ -1,20 +1,18 @@
 <?php
-$errors = $__data[FieldErrors] ?? [];
+$error = $__data[FieldError] ?? "";
 $requestedEmail = $__data[FieldEmail] ?? "";
 $requestedPhoneNumber = $__data[FieldPhoneNumber] ?? "";
 $requestedFIO = $__data[FieldFIO] ?? "";
 $requestedDeliveryTo = $__data[FieldDeliveryTo] ?? "";
 ?>
 <div class="page-order">
-    <?php if (count($errors)): ?>
+    <?php if ($error != ""): ?>
         <div>
             <?php
-            foreach ($errors as $msg) {
-                echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
-                    FieldMsg => $msg,
-                    FieldType => NoticeStyleClassDanger,
-                ]);
-            }
+            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+                FieldMsg => $error,
+                FieldType => NoticeStyleClassDanger,
+            ]);
             ?>
         </div>
         <br/>
@@ -22,11 +20,13 @@ $requestedDeliveryTo = $__data[FieldDeliveryTo] ?? "";
     <form method="post" class="form" action="">
         <div class="form__row">
             <div class="form__title">Е-мэйл *</div>
-            <input type="email" name="<?php echo FieldEmail ?>" value="<?php echo $requestedEmail ?>" required="required"/>
+            <input type="email" name="<?php echo FieldEmail ?>" value="<?php echo $requestedEmail ?>"
+                   required="required"/>
         </div>
         <div class="form__row">
             <div class="form__title">Номер телефона *</div>
-            <input type="password" name="<?php echo FieldPhoneNumber ?>" value="<?php echo $requestedPhoneNumber ?>" required="required"/>
+            <input type="password" name="<?php echo FieldPhoneNumber ?>" value="<?php echo $requestedPhoneNumber ?>"
+                   required="required"/>
         </div>
         <div class="form__row">
             <div class="form__title">ФИО</div>

@@ -57,7 +57,7 @@ try {
     if (!is_callable([$oPage, $method])) { // проверим можно ли вызывать (public, protected)
         throw new Exception(ErrMethodNotAllowed);
     }
-    $response = call_user_func([$oPage, $method], $aArgs);
+    $resp = call_user_func([$oPage, $method], $aArgs);
 
 //    // если json, xml
 //    foreach (headers_list() as $val) {
@@ -67,14 +67,14 @@ try {
 //    }
 } catch (Exception $e) {
     $oPage = new ControllerNotFound();
-    $response = $oPage->index($aArgs);
+    $resp = $oPage->index($aArgs);
 
     if (DEV_MODE) {
         echo $e->getMessage();
     }
 }
 
-http_response_code($response->getHttpCode());
+http_response_code($resp->getHttpCode());
 ?>
 <!doctype html>
 <html lang="ru">
@@ -113,7 +113,7 @@ http_response_code($response->getHttpCode());
 </header>
 <main class="main">
     <div class="layer-center">
-        <?php echo template(DIR_TEMPLATES . "/{$response->getViewName()}", $response->data); ?>
+        <?php echo template(DIR_TEMPLATES . "/{$resp->getViewName()}", $resp->data); ?>
     </div>
 </main>
 <footer class="footer">

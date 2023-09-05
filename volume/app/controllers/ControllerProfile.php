@@ -5,8 +5,8 @@ class ControllerProfile extends ControllerBase
     public string $title = DicAdministration;
     public string $description = "";
 
-    public function index(array $args): Response
+    public function index(array $args): MyResponse
     {
-        return new Response(ViewPageProfile);
+        return new MyResponse(ViewPageProfile);
     }
 }

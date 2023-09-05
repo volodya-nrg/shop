@@ -1,10 +1,10 @@
 <?php
 
-class Response
+class MyResponse
 {
     private string $viewName;
     private int $httpCode;
-    public array $data;
+    public array $data; // сюда помещаются все данные, каторые используются во view
 
     public function __construct(string $viewName, int $httpCode = 200, array $data = [])
     {

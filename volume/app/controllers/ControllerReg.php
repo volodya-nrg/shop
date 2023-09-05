@@ -5,41 +5,50 @@ class ControllerReg extends ControllerBase
     public string $title = DicRegistration;
     public string $description = "";
 
-    public function index(array $args): Response
+    public function index(array $args): MyResponse
     {
-        $response = new Response(ViewPageReg);
+        $resp = new MyResponse(ViewPageReg);
 
-        if (!empty($_POST[FieldEmail]) && !empty($_POST[FieldPassword]) && !empty($_POST[FieldPasswordConfirm])) {
-            $tmpEmail = trim($_POST[FieldEmail]);
-            $tmpPassword = trim($_POST[FieldPassword]);
-            $tmpPasswordConfirm = trim($_POST[FieldPasswordConfirm]);
-            $response->data[FieldRequestedAgreement] = isset($_POST[FieldAgreement]) && trim($_POST[FieldAgreement]) != "";
-            $response->data[FieldRequestedPrivatePolicy] = isset($_POST[FieldPrivacyPolicy]) && trim($_POST[FieldPrivacyPolicy]) != "";
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestReg();
+            $req->parsePOST($_POST);
 
-            if (!filter_var($tmpEmail, FILTER_VALIDATE_EMAIL)) {
-                $response->data[FieldErrors][] = ErrEmailNotCorrect;
-            } else {
-                $response->data[FieldRequestedEmail] = $tmpEmail;
-            }
-            if (strlen($tmpPassword) < PassMinLen) {
-                $response->data[FieldErrors][] = ErrPassIsShort;
-            } else {
-                if ($tmpPassword != $tmpPasswordConfirm) {
-                    $response->data[FieldErrors][] = ErrPasswordsNotEqual;
-                }
-            }
-            if (!$response->data[FieldRequestedAgreement]) {
-                $response->data[FieldErrors][] = ErrAcceptAgreement;
-            }
-            if (!$response->data[FieldRequestedPrivatePolicy]) {
-                $response->data[FieldErrors][] = ErrAcceptPrivatePolicy;
+            // для сохранения значение, чтоб в случае ошибки выставить на фронте их еще раз
+            $resp->data[FieldRequestedEmail] = $req->getEmail();
+            $resp->data[FieldRequestedAgreement] = $req->getAgreement();
+            $resp->data[FieldRequestedPrivatePolicy] = $req->getPrivatePolicy();
+
+            $err = $this->check($req);
+            if ($err !== null) {
+                $resp->setHttpCode($err->getCode());
+                $resp->data[FieldError] = $err->getMessage();
+                return $resp;
             }
 
-            if (isset($response->data[FieldErrors]) && count($response->data[FieldErrors])) {
-                $response->setHttpCode(400);
-            }
+            // подключение к БД и тд
         }
 
-        return $response;
+        return $resp;
+    }
+
+    private function check(RequestReg $req): ?Error
+    {
+        if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
+            return new Error(ErrEmailNotCorrect, 400);
+        }
+        if (strlen($req->getPass()) < PassMinLen) {
+            return new Error(ErrPassIsShort, 400);
+        }
+        if ($req->getPass() != $req->getPassConfirm()) {
+            return new Error(ErrPasswordsNotEqual, 400);
+        }
+        if (!$req->getAgreement()) {
+            return new Error(ErrAcceptAgreement, 400);
+        }
+        if (!$req->getPrivatePolicy()) {
+            return new Error(ErrAcceptPrivatePolicy, 400);
+        }
+
+        return null;
     }
 }

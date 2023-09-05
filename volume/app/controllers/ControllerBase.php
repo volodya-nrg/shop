@@ -5,9 +5,9 @@ class ControllerBase
     protected string $title = "";
     protected string $description = "";
 
-    protected function index(array $args): Response
+    protected function index(array $args): MyResponse
     {
-        return new Response("");
+        return new MyResponse("");
     }
 
     protected function view(string $tplPath, array $aData = []): string

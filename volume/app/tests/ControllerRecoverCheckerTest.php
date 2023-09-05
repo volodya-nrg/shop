@@ -1,4 +1,5 @@
 <?php
+
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
@@ -20,51 +21,63 @@ class ControllerRecoverCheckerTest extends TestCase
 
     public function testIndex(): void
     {
-        $hash = randomString();
-        $requestedPass = randomString(PassMinLen-1);
-        $requestedPassConfirm = randomString(PassMinLen-1);
-        $tplFn = function (Response $response, int $code) {
-            $this->assertEquals(ViewPageRecoverChecker, $response->getViewName());
-            $this->assertEquals($code, $response->getHttpCode());
+        $req = new RequestRecoverChecker(randomString(PassMinLen - 1), randomString(10));
+        $fnTpl = function (int $expectedCode, RequestRecoverChecker $req, MyResponse $resp, int $countData) {
+            $this->assertEquals(ViewPageRecoverChecker, $resp->getViewName());
+            $this->assertEquals($expectedCode, $resp->getHttpCode());
+            $this->assertCount($countData, $resp->data);
+
+            if ($expectedCode >= 200 && $expectedCode < 300) {
+                $this->assertArrayNotHasKey(FieldError, $resp->data);
+            } else {
+                $this->assertArrayHasKey(FieldError, $resp->data);
+            }
         };
 
-        $this->client->recoverChecker(function (Response $response) use ($tplFn, $hash) { // Ok. Открываем просто страницу
-            $tplFn($response, 200);
-            $this->assertCount(1, $response->data);
-            $this->assertEquals("", $response->data[FieldEmail]);
+        // GET 200
+        $this->client->recoverChecker(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 0);
 
-            $_GET[FieldHash] = $hash;
-        })->recoverChecker(function (Response $response) use ($tplFn, $hash, &$requestedPass, &$requestedPassConfirm) { // Ok. Прислали хеш и он есть, соответственно и е-мэйл
-            $tplFn($response, 200);
-            $this->assertCount(1, $response->data);
-            $this->assertNotEmpty($response->data[FieldEmail]);
+            $_GET[FieldHash] = randomString();
 
-            $_POST[FieldPassword] = $requestedPass;
-            $_POST[FieldPasswordConfirm] = $requestedPassConfirm;
-        })->recoverChecker(function (Response $response) use ($tplFn, $hash, &$requestedPass, &$requestedPassConfirm) { // Err. Изменяют пароль, оба пароля разные и короткие
-            $tplFn($response, 400);
-            $this->assertCount(2, $response->data);
-            $this->assertCount(1, $response->data[FieldErrors]);
-            $this->assertEquals(ErrPassIsShort, $response->data[FieldErrors][0]);
+            // подкинем hash, e-mail появится в data-е
+        })->recoverChecker(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 1);
+            $this->assertArrayHasKey(FieldEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldEmail]) > 0);
 
-            $requestedPass = randomString(PassMinLen);
-            $requestedPassConfirm = randomString(PassMinLen);
-            $_POST[FieldPassword] = $requestedPass;
-            $_POST[FieldPasswordConfirm] = $requestedPassConfirm;
-        })->recoverChecker(function (Response $response) use ($tplFn, $hash, &$requestedPass, &$requestedPassConfirm) { // Err. Изменяют пароль, оба пароля валидные, но разные
-            $tplFn($response, 400);
-            $this->assertCount(2, $response->data);
-            $this->assertCount(1, $response->data[FieldErrors]);
-            $this->assertEquals(ErrPasswordsNotEqual, $response->data[FieldErrors][0]);
+            $_POST[FieldPassword] = $req->getPass();
+            $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
 
-            $requestedPassConfirm = $requestedPass;
-            $_POST[FieldPasswordConfirm] = $requestedPassConfirm;
-        })->recoverChecker(function (Response $response) use ($tplFn) { // Ok. Все хорошо
-            $tplFn($response, 200);
-            $this->assertCount(2, $response->data);
-            $this->assertArrayNotHasKey(FieldErrors, $response->data);
-            $this->assertNotEmpty($response->data[FieldEmail]);
-            $this->assertEquals(DicPasswordChangedSuccessfully, $response->data[FieldSuccess]);
+            // пароль короткий, будет ошибка
+        })->recoverChecker(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 2);
+            $this->assertArrayHasKey(FieldEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldEmail]) > 0);
+            $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
+
+            $req->setPass(randomString(PassMinLen));
+            $req->setPassConfirm(randomString(PassMinLen));
+            $_POST[FieldPassword] = $req->getPass();
+            $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
+
+            // пароли не верны между собой, будет ошибка
+        })->recoverChecker(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $req, $resp, 2);
+            $this->assertArrayHasKey(FieldEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldEmail]) > 0);
+            $this->assertEquals(ErrPasswordsNotEqual, $resp->data[FieldError]);
+
+            $req->setPassConfirm($req->getPass());
+            $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
+
+            // ok
+        })->recoverChecker(function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $req, $resp, 2);
+            $this->assertArrayHasKey(FieldEmail, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldEmail]) > 0);
+            $this->assertArrayHasKey(FieldSuccess, $resp->data);
+            $this->assertEquals(DicPasswordChangedSuccessfully, $resp->data[FieldSuccess]);
         })->run();
     }
 }

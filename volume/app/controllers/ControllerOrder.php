@@ -5,12 +5,12 @@ class ControllerOrder extends ControllerBase
     public string $title = DicOrder;
     public string $description = "";
 
-    public function index(array $args): Response
+    public function index(array $args): MyResponse
     {
-        return new Response(ViewPageOrder);
+        return new MyResponse(ViewPageOrder);
     }
-    public function ok(array $args): Response
+    public function ok(array $args): MyResponse
     {
-        return new Response(ViewPageOrderOk);
+        return new MyResponse(ViewPageOrderOk);
     }
 }

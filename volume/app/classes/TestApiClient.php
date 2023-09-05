@@ -10,28 +10,20 @@ class TestApiClient
     private ControllerRecover $pageRecover;
     private ControllerRecoverChecker $pageRecoverChecker;
 
-    public function login(?callable $cb = null): TestApiClient
+    public function login(callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($cb) {
             $this->pageLogin = new ControllerLogin();
-            $response = $this->pageLogin->index([]);
-
-            if ($cb) {
-                $cb($response);
-            }
+            $cb($this->pageLogin->index([]));
         };
 
         return $this;
     }
-    public function reg(?callable $cb = null): TestApiClient
+    public function reg(callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($cb) {
             $this->pageReg = new ControllerReg();
-            $response = $this->pageReg->index([]);
-
-            if ($cb) {
-                $cb($response);
-            }
+            $cb($this->pageReg->index([]));
         };
 
         return $this;

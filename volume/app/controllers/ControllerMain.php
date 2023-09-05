@@ -5,8 +5,8 @@ class ControllerMain extends ControllerBase
     public string $title = DicPageMain;
     public string $description = "";
 
-    public function index(array $args): Response
+    public function index(array $args): MyResponse
     {
-        return new Response(ViewPageMain);
+        return new MyResponse(ViewPageMain);
     }
 }

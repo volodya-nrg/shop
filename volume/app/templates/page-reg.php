@@ -1,5 +1,5 @@
 <?php
-$errors = $__data[FieldErrors] ?? [];
+$error = $__data[FieldError] ?? "";
 $requestedEmail = $__data[FieldRequestedEmail] ?? "";
 $requestedAgreement = $__data[FieldRequestedAgreement] ?? false;
 $requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
@@ -7,15 +7,13 @@ $requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
 <div class="block_center_and_slim">
     <h1 class="align-center">Регистрация</h1>
 
-    <?php if (count($errors)): ?>
+    <?php if ($error != ""): ?>
         <div>
             <?php
-            foreach ($errors as $msg) {
-                echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
-                    FieldMsg => $msg,
-                    FieldType => NoticeStyleClassDanger,
-                ]);
-            }
+            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+                FieldMsg => $error,
+                FieldType => NoticeStyleClassDanger,
+            ]);
             ?>
         </div>
         <br/>

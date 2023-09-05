@@ -13,6 +13,7 @@ const DIR_PUBLIC_HTML = DIR_APP . "/../public_html";
 const DIR_TEMPLATES = DIR_APP . "/templates";
 const DIR_CONTROLLERS = DIR_APP . "/controllers";
 const DIR_CLASSES = DIR_APP . "/classes";
+const DIR_REQUESTS = DIR_APP . "/requests";
 
 // other
 const PassMinLen = 5;
@@ -29,7 +30,7 @@ const FieldPassword = "password";
 const FieldPasswordConfirm = "password_confirm";
 const FieldAgreement = "agreement";
 const FieldPrivacyPolicy = "privacy_policy";
-const FieldErrors = "errors";
+const FieldError = "error";
 const FieldRequestedEmail = "requested_email";
 const FieldRequestedAgreement = "requested_agreement";
 const FieldRequestedPrivatePolicy = "requested_private_policy";
@@ -142,10 +143,10 @@ function myAutoload($className): void
 
     if (substr($className, 0, mb_strlen("Controller")) === "Controller") {
         $aParts[] = DIR_CONTROLLERS;
-    } else {
-        if (file_exists(DIR_CLASSES . "/" . $file)) {
-            $aParts[] = DIR_CLASSES;
-        }
+    } else if (substr($className, 0, mb_strlen("Request")) === "Request") {
+        $aParts[] = DIR_REQUESTS;
+    } else if (file_exists(DIR_CLASSES . "/" . $file)) { // поищем в папке classes
+        $aParts[] = DIR_CLASSES;
     }
 
     $aParts[] = $file;
@@ -156,7 +157,8 @@ function myAutoload($className): void
     }
 }
 
-function finePrice(int $price): string {
+function finePrice(int $price): string
+{
     return sprintf("%d", $price);
 }
 

@@ -5,8 +5,8 @@ class ControllerNotFound extends ControllerBase
     public string $title = DicPageNotFound;
     public string $description = "";
 
-    public function index(array $args): Response
+    public function index(array $args): MyResponse
     {
-        return new Response(ViewPageNotFound, 404);
+        return new MyResponse(ViewPageNotFound, 404);
     }
 }
