@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 
-class TestApiClient
+final class TestApiClient
 {
     private array $tasks = [];
     private ControllerLogin $pageLogin;

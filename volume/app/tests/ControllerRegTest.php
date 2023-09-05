@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
 
-class ControllerRegTest extends TestCase
+final class ControllerRegTest extends TestCase
 {
     private TestApiClient $client;
 

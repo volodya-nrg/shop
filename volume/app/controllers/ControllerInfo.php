@@ -1,6 +1,6 @@
 <?php
 
-class ControllerInfo extends ControllerBase
+final class ControllerInfo extends ControllerBase
 {
     public string $title = DicAdministration;
     public string $description = "";

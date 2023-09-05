@@ -1,6 +1,6 @@
 <?php
 
-class ControllerOrder extends ControllerBase
+final class ControllerOrder extends ControllerBase
 {
     public string $title = DicOrder;
     public string $description = "";

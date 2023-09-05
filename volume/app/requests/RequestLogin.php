@@ -1,6 +1,6 @@
 <?php
 
-class RequestLogin
+final class RequestLogin
 {
     private string $email;
     private string $pass;

@@ -1,6 +1,6 @@
 <?php
 
-class ControllerPrivacyPolicy extends ControllerBase
+final class ControllerPrivacyPolicy extends ControllerBase
 {
     public string $title = DicAdministration;
     public string $description = "";

@@ -1,6 +1,6 @@
 <?php
 
-class ControllerRecover extends ControllerBase
+final class ControllerRecover extends ControllerBase
 {
     public string $title = DicRecoverAccess;
     public string $description = "";

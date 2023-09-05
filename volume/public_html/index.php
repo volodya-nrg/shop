@@ -54,7 +54,7 @@ try {
     }
 
     $oPage = new $class();
-    if (!is_callable([$oPage, $method])) { // проверим можно ли вызывать (public, protected)
+    if (!is_callable([$oPage, $method])) { // проверим можно ли вызывать (public, protected). Если private, то не получится вызвать.
         throw new Exception(ErrMethodNotAllowed);
     }
     $resp = call_user_func([$oPage, $method], $aArgs);

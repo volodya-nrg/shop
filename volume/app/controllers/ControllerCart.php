@@ -1,6 +1,6 @@
 <?php
 
-class ControllerCart extends ControllerBase
+final class ControllerCart extends ControllerBase
 {
     public string $title = DicAdministration;
     public string $description = "";

@@ -1,6 +1,6 @@
 <?php
 
-class MyResponse
+final class MyResponse
 {
     private string $viewName;
     private int $httpCode;

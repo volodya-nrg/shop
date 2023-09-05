@@ -1,6 +1,6 @@
 <?php
 
-class ControllerNotFound extends ControllerBase
+final class ControllerNotFound extends ControllerBase
 {
     public string $title = DicPageNotFound;
     public string $description = "";

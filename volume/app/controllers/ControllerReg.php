@@ -1,6 +1,6 @@
 <?php
 
-class ControllerReg extends ControllerBase
+final class ControllerReg extends ControllerBase
 {
     public string $title = DicRegistration;
     public string $description = "";

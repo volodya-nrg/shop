@@ -1,6 +1,6 @@
 <?php
 
-class RequestReg
+final class RequestReg
 {
     private string $email;
     private string $pass;

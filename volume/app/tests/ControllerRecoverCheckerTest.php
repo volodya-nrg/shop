@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
 
-class ControllerRecoverCheckerTest extends TestCase
+final class ControllerRecoverCheckerTest extends TestCase
 {
     private TestApiClient $client;
 

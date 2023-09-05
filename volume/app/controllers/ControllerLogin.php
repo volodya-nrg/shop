@@ -1,6 +1,6 @@
 <?php
 
-class ControllerLogin extends ControllerBase
+final class ControllerLogin extends ControllerBase
 {
     public string $title = DicEnter;
     public string $description = "";

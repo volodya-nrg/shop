@@ -1,6 +1,6 @@
 <?php
 
-class ControllerCheckout extends ControllerBase
+final class ControllerCheckout extends ControllerBase
 {
     public string $title = DicAdministration;
     public string $description = "";

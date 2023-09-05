@@ -1,6 +1,6 @@
 <?php
 
-class ControllerItem extends ControllerBase
+final class ControllerItem extends ControllerBase
 {
     public string $title = DicAdministration;
     public string $description = "";

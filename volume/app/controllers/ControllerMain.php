@@ -1,6 +1,6 @@
 <?php
 
-class ControllerMain extends ControllerBase
+final class ControllerMain extends ControllerBase
 {
     public string $title = DicPageMain;
     public string $description = "";

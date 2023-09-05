@@ -1,6 +1,6 @@
 <?php
 
-class ControllerContacts extends ControllerBase
+final class ControllerContacts extends ControllerBase
 {
     public string $title = DicAdministration;
     public string $description = "";

@@ -1,6 +1,6 @@
 <?php
 
-class RequestRecover
+final class RequestRecover
 {
     private string $email;
 

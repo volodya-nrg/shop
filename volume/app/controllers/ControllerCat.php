@@ -1,6 +1,6 @@
 <?php
 
-class ControllerCat extends ControllerBase
+final class ControllerCat extends ControllerBase
 {
     public string $title = DicCatalog;
     public string $description = "";

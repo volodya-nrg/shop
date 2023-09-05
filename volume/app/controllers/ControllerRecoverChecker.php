@@ -1,6 +1,6 @@
 <?php
 
-class ControllerRecoverChecker extends ControllerBase
+final class ControllerRecoverChecker extends ControllerBase
 {
     public string $title = DicChangePassword;
     public string $description = "";

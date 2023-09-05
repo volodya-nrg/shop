@@ -1,6 +1,6 @@
 <?php
 
-class ControllerAgreement extends ControllerBase
+final class ControllerAgreement extends ControllerBase
 {
     public string $title = DicAgreement;
     public string $description = "";
