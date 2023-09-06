@@ -2,10 +2,13 @@
 
 final class Item
 {
-    public int $id = 0;
-    public string $title = "";
-    public array $pics = [];
+    public int $itemId = 0;
+    public string $name = "";
+    public string $slug = "";
+    public int $catId = 0;
+    public ?string $description = "";
     public int $price = 0;
-    public array $props = [];
-    public string $description = "";
+    public bool $isDisabled = false;
+    public string $updatedAt = "";
+    public string $createdAt = "";
 }
