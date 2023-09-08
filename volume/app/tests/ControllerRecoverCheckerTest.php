@@ -17,6 +17,7 @@ final class ControllerRecoverCheckerTest extends TestCase
 
     protected function tearDown(): void
     {
+        $a = 5;
     }
 
     public function testIndex(): void

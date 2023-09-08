@@ -8,6 +8,34 @@ final class ControllerLogin extends ControllerBase
     public function index(array $args): MyResponse
     {
         $resp = new MyResponse(ViewPageLogin);
+//        $serviceUsers = new ServiceUsers();
+//
+//        $errOrUser = $serviceUsers->one(3);
+//        if ($errOrUser instanceof Error) {
+//            $resp->setHttpCode($errOrUser->getCode());
+//            $resp->data[FieldError] = $errOrUser->getMessage();
+//            return $resp;
+//        }
+//
+//        $user = $errOrUser;
+//        $user->email = "b@b.b2";
+//
+//        $errOrId = $serviceUsers->createOrUpdate($user);
+//        if ($errOrId instanceof Error) {
+//            $resp->setHttpCode($errOrUser->getCode());
+//            $resp->data[FieldError] = $errOrUser->getMessage();
+//            return $resp;
+//        }
+//
+//        $result = $serviceUsers->delete($errOrId);
+//        die($result);
+//
+//        $users = $serviceUsers->all();
+//        if ($users instanceof Error) {
+//            $resp->setHttpCode($users->getCode());
+//            $resp->data[FieldError] = $users->getMessage();
+//            return $resp;
+//        }
 
         if (isset($_POST) && count($_POST)) {
             $req = new RequestLogin();

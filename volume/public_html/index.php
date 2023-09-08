@@ -10,27 +10,7 @@ if (DEV_MODE) {
     error_reporting(E_ALL);
 }
 
-$filename_env = ".env";
-foreach (explode(PHP_EOL, file_get_contents("../{$filename_env}")) as $row) {
-    if (empty($row)) {
-        continue;
-    }
-    putenv($row);
-}
-
 require_once "../app/init.php";
-
-try {
-    $PDOPattern = "mysql:host=%s;dbname=%s;charset=%s";
-    $PDOConn = sprintf($PDOPattern, DB_HOST, DB_NAME, DB_CHARSET);
-    $PDO = new \PDO($PDOConn, DB_USER, DB_PASS,
-        [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC]
-    );
-    $PDO->exec("SET NAMES " . DB_CHARSET);
-} catch (\PDOException $e) {
-    http_response_code(500);
-    die(DEV_MODE ? $e->getMessage() : ErrNotConnectToDatabase);
-}
 
 $aURLData = parse_url($_SERVER['REQUEST_URI']);
 $aURLPath = explode("/", $aURLData["path"]);
