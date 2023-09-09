@@ -16,7 +16,7 @@ final class ServiceUsers extends ServiceDB
         }
 
         foreach ($stmt->fetchAll() as $row) {
-            $user = new User();
+            $user = new Info();
             $user->parse($row);
 
             $list[] = $user;
@@ -25,7 +25,7 @@ final class ServiceUsers extends ServiceDB
         return $list;
     }
 
-    public function one(int $userId): User|Error
+    public function one(int $userId): Info|Error
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE user_id=?");
@@ -38,16 +38,25 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $user = new User();
+        $user = new Info();
         $user->parse($data);
 
         return $user;
     }
 
-    public function createOrUpdate(User $user): int|Error
+    public function createOrUpdate(Info $user): int|Error
     {
         $id = 0;
-        $arData = [$user->email, $user->pass, $user->hashForCheckEmail, $user->avatar, $user->birthdayMon, $user->birthdayDay, $user->updatedAt, $user->createdAt];
+        $arData = [
+            $user->email,
+            $user->pass,
+            $user->hashForCheckEmail,
+            $user->avatar,
+            $user->birthdayMon,
+            $user->birthdayDay,
+            $user->updatedAt,
+            $user->createdAt
+        ];
 
         try {
             if ($user->userId > 0) {

@@ -48,7 +48,16 @@ final class ServiceOrders extends ServiceDB
     public function createOrUpdate(Order $user): int|Error
     {
         $id = 0;
-        $arData = [$user->userId, $user->contactPhone, $user->contactName, $user->comment, $user->placeDelivery, $user->ip, $user->updatedAt, $user->createdAt];
+        $arData = [
+            $user->userId,
+            $user->contactPhone,
+            $user->contactName,
+            $user->comment,
+            $user->placeDelivery,
+            $user->ip,
+            $user->updatedAt,
+            $user->createdAt
+        ];
 
         try {
             if ($user->orderId > 0) {

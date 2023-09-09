@@ -1,22 +1,22 @@
 <?php
 
-final class ServiceItems extends ServiceDB
+final class ServiceProps extends ServiceDB
 {
-    protected string $table = "items";
-    protected array $fields = ["item_id", "name", "slug", "cat_id", "description", "price", "is_disabled", "updated_at", "created_at"];
+    protected string $table = "props";
+    protected array $fields = ["prop_id", "name"];
 
     public function all(): array|Error
     {
         $list = [];
 
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY item_id DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY prop_id DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
         foreach ($stmt->fetchAll() as $row) {
-            $item = new Item();
+            $item = new Prop();
             $item->parse($row);
 
             $list[] = $item;
@@ -25,47 +25,40 @@ final class ServiceItems extends ServiceDB
         return $list;
     }
 
-    public function one(int $itemId): Item|Error
+    public function one(int $propId): Prop|Error
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE item_id=?");
-            $stmt->execute([$itemId]);
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE prop_id=?");
+            $stmt->execute([$propId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found item_id");
+                throw new PDOException("not found prop_id");
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        $item = new Item();
-        $item->parse($data);
+        $prop = new Prop();
+        $prop->parse($data);
 
-        return $item;
+        return $prop;
     }
 
-    public function createOrUpdate(Item $item): int|Error
+    public function createOrUpdate(Prop $prop): int|Error
     {
         $id = 0;
         $arData = [
-            $item->itemId,
-            $item->name,
-            $item->slug,
-            $item->catId,
-            $item->description,
-            $item->price,
-            $item->isDisabled,
-            $item->updatedAt,
-            $item->createdAt
+            $prop->propId,
+            $prop->name,
         ];
 
         try {
-            if ($item->itemId > 0) {
+            if ($prop->propId > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE item_id=?");
-                $arData[] = $item->itemId;
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE prop_id=?");
+                $arData[] = $prop->propId;
                 $stmt->execute($arData);
-                $id = $item->itemId;
+                $id = $prop->propId;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 
@@ -85,10 +78,11 @@ final class ServiceItems extends ServiceDB
         return $id;
     }
 
-    public function delete(int $itemId): bool|Error
+    public function delete(int $propId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE item_id=?")->execute([$itemId]);
+            return $this->db->prepare("DELETE FROM {$this->table} WHERE prop_id=?")->execute([$propId]);
+            // тут почистить все его значения
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

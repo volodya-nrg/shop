@@ -1,68 +1,72 @@
 <?php
 
-require_once dirname(__FILE__) . "/ServiceDB.php";
-
 final class ServiceCats extends ServiceDB
 {
-    protected string $table = "users";
-    protected string $fields = "user_id, email, pass, hash_for_check_email, avatar, birthday_day, birthday_mon, updated_at, created_at";
+    protected string $table = "cats";
+    protected array $fields = ["cat_id", "name", "slug", "parent_id", "pos", "is_disabled"];
 
     public function all(): array|Error
     {
         $list = [];
 
         try {
-            $stmt = $this->db->query("SELECT {$this->fields} FROM {$this->table} ORDER BY `user_id` DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY cat_id DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
         foreach ($stmt->fetchAll() as $row) {
-            $user = new User();
-            $user->parse($row);
+            $item = new Cat();
+            $item->parse($row);
 
-            $list[] = $user;
+            $list[] = $item;
         }
 
         return $list;
     }
 
-    public function one(int $userId): User|Error
+    public function one(int $itemId): Cat|Error
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fields} FROM {$this->table} WHERE `user_id`=?");
-            $stmt->execute([$userId]);
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE cat_id=?");
+            $stmt->execute([$itemId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found user_id");
+                throw new PDOException("not found cat_id");
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        $user = new User();
-        $user->parse($data);
+        $item = new Cat();
+        $item->parse($data);
 
-        return $user;
+        return $item;
     }
 
-    public function createOrUpdate(User $user): int|Error
+    public function createOrUpdate(Cat $item): int|Error
     {
         $id = 0;
-        $arData = [$user->email, $user->pass, $user->hashForCheckEmail, $user->avatar, $user->birthdayMon, $user->birthdayDay, $user->updatedAt, $user->createdAt];
+        $arData = [
+            $item->name,
+            $item->slug,
+            $item->parentId,
+            $item->pos,
+            $item->isDisabled,
+        ];
+
         try {
-            if ($user->userId > 0) {
-                $stmt = $this->db->prepare("
-                UPDATE {$this->table} 
-                SET `email`=?, `pass`=?, `hash_for_check_email`=?, `avatar`=?, `birthday_day`=?, `birthday_mon`=?, `updated_at`=?, `created_at`=?
-                WHERE `user_id`=?");
-                $arData[] = $user->userId;
+            if ($item->catId > 0) {
+                $fields = $this->fieldsAsString(true, "=?,") . "=?";
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE cat_id=?");
+                $arData[] = $item->catId;
                 $stmt->execute($arData);
-                $id = $user->userId;
+                $id = $item->catId;
             } else {
                 $stmt = $this->db->prepare("
-                INSERT INTO {$this->table} (`email`, `pass`, `hash_for_check_email`, `avatar`, `birthday_day`, `birthday_mon`, `updated_at`, `created_at`) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 
+                    VALUES ({$this->questionsAsString(true)})");
+
                 $stmt->execute($arData);
 
                 $tmp = $this->db->lastInsertId();
@@ -77,10 +81,10 @@ final class ServiceCats extends ServiceDB
         return $id;
     }
 
-    public function delete(int $userId): bool|Error
+    public function delete(int $catId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE `user_id` = ?")->execute([$userId]);
+            return $this->db->prepare("DELETE FROM {$this->table} WHERE cat_id=?")->execute([$catId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

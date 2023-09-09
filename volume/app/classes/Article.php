@@ -1,25 +1,21 @@
 <?php
 
-final class Item
+class Article // Info занят php
 {
-    public int $itemId = 0;
-    public string $name = "";
+    public int $articleId = 0;
+    public string $title = "";
     public string $slug = "";
-    public int $catId = 0;
-    public ?string $description = "";
-    public int $price = 0;
+    public string $description = "";
     public bool $isDisabled = false;
     public string $updatedAt = "";
     public string $createdAt = "";
 
     public function parse(array $data): void
     {
-        $this->itemId = $data["item_id"];
-        $this->name = $data["name"];
+        $this->articleId = $data["article_id"];
+        $this->title = $data["title"];
         $this->slug = $data["slug"];
-        $this->catId = $data["cat_id"];
         $this->description = $data["description"];
-        $this->price = $data["price"];
         $this->isDisabled = $data["is_disabled"];
         $this->updatedAt = $data["updated_at"];
         $this->createdAt = $data["created_at"];
