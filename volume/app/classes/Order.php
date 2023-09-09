@@ -11,4 +11,17 @@ class Order
     public string $ip = ""; // на всякий случай и ip
     public string $updatedAt = "";
     public string $createdAt = "";
+
+    public function parse(array $data): void
+    {
+        $this->orderId = $data["order_id"];
+        $this->userId = $data["user_id"];
+        $this->contactPhone = $data["contact_phone"];
+        $this->contactName = $data["contact_name"];
+        $this->comment = $data["comment"];
+        $this->placeDelivery = $data["place_delivery"];
+        $this->ip = $data["ip"];
+        $this->updatedAt = $data["updated_at"];
+        $this->createdAt = $data["created_at"];
+    }
 }

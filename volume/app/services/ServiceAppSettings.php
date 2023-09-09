@@ -2,7 +2,7 @@
 
 require_once dirname(__FILE__) . "/ServiceDB.php";
 
-final class ServiceInfos extends ServiceDB
+final class ServiceAppSettings extends ServiceDB
 {
     protected string $table = "users";
     protected string $fields = "user_id, email, pass, hash_for_check_email, avatar, birthday_day, birthday_mon, updated_at, created_at";

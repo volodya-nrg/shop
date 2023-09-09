@@ -1,16 +1,16 @@
 <?php
 
-final class ServiceUsers extends ServiceBase
+final class ServiceUsers extends ServiceDB
 {
     protected string $table = "users";
-    protected string $fields = "user_id, email, pass, hash_for_check_email, avatar, birthday_day, birthday_mon, updated_at, created_at";
+    protected array $fields = ["user_id", "email", "pass", "hash_for_check_email", "avatar", "birthday_day", "birthday_mon", "updated_at", "created_at"];
 
     public function all(): array|Error
     {
         $list = [];
 
         try {
-            $stmt = $this->db->query("SELECT {$this->fields} FROM {$this->table} ORDER BY user_id DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY user_id DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
@@ -28,7 +28,7 @@ final class ServiceUsers extends ServiceBase
     public function one(int $userId): User|Error
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fields} FROM {$this->table} WHERE user_id=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE user_id=?");
             $stmt->execute([$userId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -48,19 +48,19 @@ final class ServiceUsers extends ServiceBase
     {
         $id = 0;
         $arData = [$user->email, $user->pass, $user->hashForCheckEmail, $user->avatar, $user->birthdayMon, $user->birthdayDay, $user->updatedAt, $user->createdAt];
+
         try {
             if ($user->userId > 0) {
-                $stmt = $this->db->prepare("
-                UPDATE {$this->table} 
-                SET `email`=?, `pass`=?, `hash_for_check_email`=?, `avatar`=?, `birthday_day`=?, `birthday_mon`=?, `updated_at`=?, `created_at`=?
-                WHERE `user_id`=?");
+                $fields = $this->fieldsAsString(true, "=?,") . "=?";
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE user_id=?");
                 $arData[] = $user->userId;
                 $stmt->execute($arData);
                 $id = $user->userId;
             } else {
                 $stmt = $this->db->prepare("
-                INSERT INTO {$this->table} (`email`, `pass`, `hash_for_check_email`, `avatar`, `birthday_day`, `birthday_mon`, `updated_at`, `created_at`) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 
+                    VALUES ({$this->questionsAsString(true)})");
+
                 $stmt->execute($arData);
 
                 $tmp = $this->db->lastInsertId();
@@ -78,7 +78,7 @@ final class ServiceUsers extends ServiceBase
     public function delete(int $userId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE user_id = ?")->execute([$userId]);
+            return $this->db->prepare("DELETE FROM {$this->table} WHERE user_id=?")->execute([$userId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
