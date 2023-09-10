@@ -8,34 +8,6 @@ final class ControllerLogin extends ControllerBase
     public function index(array $args): MyResponse
     {
         $resp = new MyResponse(ViewPageLogin);
-//        $serviceUsers = new ServiceUsers();
-//
-//        $errOrUser = $serviceUsers->one(3);
-//        if ($errOrUser instanceof Error) {
-//            $resp->setHttpCode($errOrUser->getCode());
-//            $resp->data[FieldError] = $errOrUser->getMessage();
-//            return $resp;
-//        }
-//
-//        $user = $errOrUser;
-//        $user->email = "b@b.b2";
-//
-//        $errOrId = $serviceUsers->createOrUpdate($user);
-//        if ($errOrId instanceof Error) {
-//            $resp->setHttpCode($errOrUser->getCode());
-//            $resp->data[FieldError] = $errOrUser->getMessage();
-//            return $resp;
-//        }
-//
-//        $result = $serviceUsers->delete($errOrId);
-//        die($result);
-//
-//        $users = $serviceUsers->all();
-//        if ($users instanceof Error) {
-//            $resp->setHttpCode($users->getCode());
-//            $resp->data[FieldError] = $users->getMessage();
-//            return $resp;
-//        }
 
         if (isset($_POST) && count($_POST)) {
             $req = new RequestLogin();
@@ -43,21 +15,40 @@ final class ControllerLogin extends ControllerBase
 
             $resp->data[FieldRequestedEmail] = $req->getEmail();
 
-            $err = $this->check($req);
+            $err = $this->check_request($req);
             if ($err !== null) {
                 $resp->setHttpCode($err->getCode());
                 $resp->data[FieldError] = $err->getMessage();
                 return $resp;
             }
 
-            // подключение к БД и тд
-            // редирекст на страницу профиля
+            $serviceUsers = new ServiceUsers();
+
+            // проверим пользователя
+            $result = $serviceUsers->oneByEmail($req->getEmail());
+            if ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $result->getMessage()));
+                return $resp;
+            } else if ($result === null) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrNotFoundUser;
+                return $resp;
+            } else if ($result instanceof User && $result->hashForCheckEmail != "") {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrCheckYourEmail;
+                return $resp;
+            }
+
+            $_SESSION["user"] = $result;
+
+            redirect("/profile");
         }
 
         return $resp;
     }
 
-    private function check(RequestLogin $req): ?Error
+    private function check_request(RequestLogin $req): ?Error
     {
         if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
             return new Error(ErrEmailNotCorrect, 400);

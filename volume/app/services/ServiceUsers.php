@@ -16,7 +16,7 @@ final class ServiceUsers extends ServiceDB
         }
 
         foreach ($stmt->fetchAll() as $row) {
-            $user = new Info();
+            $user = new User();
             $user->parse($row);
 
             $list[] = $user;
@@ -25,26 +25,45 @@ final class ServiceUsers extends ServiceDB
         return $list;
     }
 
-    public function one(int $userId): Info|Error
+    public function one(int $userId): null|Error|User
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE user_id=?");
             $stmt->execute([$userId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found user_id");
+                return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        $user = new Info();
+        $user = new User();
         $user->parse($data);
 
         return $user;
     }
 
-    public function createOrUpdate(Info $user): int|Error
+    public function oneByEmail(string $email): Error|null|User
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE email=?");
+            $stmt->execute([$email]);
+            $data = $stmt->fetch();
+            if ($data === false) {
+                return null;
+            }
+        } catch (\PDOException $e) {
+            return new Error($e->getMessage());
+        }
+
+        $user = new User();
+        $user->parse($data);
+
+        return $user;
+    }
+
+    public function createOrUpdate(User $user): int|Error
     {
         $id = 0;
         $arData = [

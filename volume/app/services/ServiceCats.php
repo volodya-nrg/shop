@@ -25,14 +25,14 @@ final class ServiceCats extends ServiceDB
         return $list;
     }
 
-    public function one(int $itemId): Cat|Error
+    public function one(int $itemId): null|Error|Cat
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE cat_id=?");
             $stmt->execute([$itemId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found cat_id");
+                return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

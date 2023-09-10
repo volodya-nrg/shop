@@ -25,14 +25,14 @@ final class ServiceArticles extends ServiceDB
         return $list;
     }
 
-    public function one(int $articleId): Article|Error
+    public function one(int $articleId): null|Error|Article
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE article_id=?");
             $stmt->execute([$articleId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found article_id");
+                return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

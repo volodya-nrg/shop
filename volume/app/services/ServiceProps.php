@@ -25,14 +25,14 @@ final class ServiceProps extends ServiceDB
         return $list;
     }
 
-    public function one(int $propId): Prop|Error
+    public function one(int $propId): null|Error|Prop
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE prop_id=?");
             $stmt->execute([$propId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found prop_id");
+                return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

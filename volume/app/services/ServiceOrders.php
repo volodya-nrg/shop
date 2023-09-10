@@ -26,14 +26,14 @@ final class ServiceOrders extends ServiceDB
         return $list;
     }
 
-    public function one(int $orderId): Order|Error
+    public function one(int $orderId): null|Error|Order
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE `order_id`=?");
             $stmt->execute([$orderId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found order_id");
+                return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

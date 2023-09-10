@@ -25,14 +25,14 @@ final class ServiceItems extends ServiceDB
         return $list;
     }
 
-    public function one(int $itemId): Item|Error
+    public function one(int $itemId): null|Error|Item
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE item_id=?");
             $stmt->execute([$itemId]);
             $data = $stmt->fetch();
             if ($data === false) {
-                throw new PDOException("not found item_id");
+                return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

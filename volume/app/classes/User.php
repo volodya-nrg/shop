@@ -1,6 +1,6 @@
 <?php
 
-class Info
+class User
 {
     public int $userId = 0;
     public string $email = "";

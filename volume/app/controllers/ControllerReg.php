@@ -18,35 +18,82 @@ final class ControllerReg extends ControllerBase
             $resp->data[FieldRequestedAgreement] = $req->getAgreement();
             $resp->data[FieldRequestedPrivatePolicy] = $req->getPrivatePolicy();
 
-            $err = $this->check($req);
+            $err = $this->check_request($req);
             if ($err !== null) {
-                $resp->setHttpCode($err->getCode());
+                $resp->setHttpCode(400);
                 $resp->data[FieldError] = $err->getMessage();
                 return $resp;
             }
 
-            // подключение к БД и тд
+            $serviceUsers = new ServiceUsers();
+
+            // проверим пользователя
+            $result = $serviceUsers->oneByEmail($req->getEmail());
+            if ($result instanceof User) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ($result->hashForCheckEmail !== "") ? ErrCheckYourEmail : ErrUserAlreadyHas;
+                return $resp;
+            } elseif ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $result->getMessage()));
+                return $resp;
+            }
+
+            $user = new User();
+            $user->email = $req->getEmail();
+            $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT); // password_verify('rasmuslerdorf', $hash)
+            $user->hashForCheckEmail = randomString();
+
+            $result = $serviceUsers->createOrUpdate($user);
+            if ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $result->getMessage()));
+                return $resp;
+            }
+
+            // отправить хеш на е-мэйл
+            redirect("/reg/ok?" . FieldEmail . "={$user->email}");
+            // FieldHash
         }
+
+        //redirect("/reg/check?".FieldHash."=asd");
 
         return $resp;
     }
 
-    private function check(RequestReg $req): ?Error
+    public function ok(): MyResponse
+    {
+        $resp = new MyResponse(ViewPageRegOK);
+        $resp->data[FieldEmail] = $_GET[FieldEmail];
+        return $resp;
+    }
+
+    public function check(): MyResponse
+    {
+        $resp = new MyResponse(ViewPageRegCheck);
+        $hash = $_GET[FieldHash] ?? "";
+        $resp->data[FieldError] = "===";
+        return $resp;
+    }
+
+    private function check_request(RequestReg $req): ?Error
     {
         if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
-            return new Error(ErrEmailNotCorrect, 400);
+            return new Error(ErrEmailNotCorrect);
         }
         if (strlen($req->getPass()) < PassMinLen) {
-            return new Error(ErrPassIsShort, 400);
+            return new Error(ErrPassIsShort);
         }
         if ($req->getPass() != $req->getPassConfirm()) {
-            return new Error(ErrPasswordsNotEqual, 400);
+            return new Error(ErrPasswordsNotEqual);
         }
         if (!$req->getAgreement()) {
-            return new Error(ErrAcceptAgreement, 400);
+            return new Error(ErrAcceptAgreement);
         }
         if (!$req->getPrivatePolicy()) {
-            return new Error(ErrAcceptPrivatePolicy, 400);
+            return new Error(ErrAcceptPrivatePolicy);
         }
 
         return null;
