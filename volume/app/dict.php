@@ -12,3 +12,5 @@ const DicChangePassword = "Смена пароля";
 const DicPasswordChangedSuccessfully = "пароль успешно изменен";
 const DicCatalog = "Каталог";
 const DicOrder = "Заказ";
+const DicVerifyEmail = "Верификация е-мэйла";
+

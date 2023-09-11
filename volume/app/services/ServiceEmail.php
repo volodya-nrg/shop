@@ -10,14 +10,16 @@ final class ServiceEmail
     private string $login;
     private string $pass;
     private string $from;
+    private bool $isTestMode;
 
-    public function __construct(string $smtpServer, int $port, string $login, string $pass, string $from)
+    public function __construct(string $smtpServer, int $port, string $login, string $pass, string $from, bool $isTestMode)
     {
         $this->smtpServer = $smtpServer;
         $this->port = $port;
         $this->login = $login;
         $this->pass = $pass;
         $this->from = $from;
+        $this->isTestMode = $isTestMode;
     }
 
     public function send(string $to, string $subject, string $msg, array $aFilepath = []): null|Error
@@ -75,6 +77,11 @@ final class ServiceEmail
             $header .= "Content-Transfer-Encoding: base64" . $this->br;
 
             $msg = base64_encode($msg);
+        }
+
+        // если тестовый режим, то далее нет смысла идти
+        if ($this->isTestMode) {
+            return null;
         }
 
         $this->conn = fsockopen(

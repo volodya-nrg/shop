@@ -1,4 +1,5 @@
 <?php
+define("ADDRESS", getenv("ADDRESS") ?: "http://localhost");
 
 define("DB_HOST", getenv("DB_HOST") ?: "");
 define("DB_NAME", getenv("DB_NAME") ?: "");
@@ -15,7 +16,7 @@ define("EMAIL_FROM", getenv("EMAIL_FROM") ?: "");
 // paths
 define("DIR_APP", dirname(__FILE__));
 const DIR_PUBLIC_HTML = DIR_APP . "/../public_html";
-const DIR_TEMPLATES = DIR_APP . "/views";
+const DIR_VIEWS = DIR_APP . "/views";
 const DIR_CONTROLLERS = DIR_APP . "/controllers";
 const DIR_CLASSES = DIR_APP . "/classes";
 const DIR_REQUESTS = DIR_APP . "/requests";
@@ -23,6 +24,7 @@ const DIR_SERVICES = DIR_APP . "/services";
 
 // other
 const PassMinLen = 5;
+const DatePattern = "Y-m-d H:i:s";
 
 // notice
 const NoticeStyleClassDanger = "sx-danger";
@@ -50,6 +52,9 @@ const FieldItem = "item";
 const FieldPhoneNumber = "phone_number";
 const FieldFIO = "fio";
 const FieldDeliveryTo = "delivery_to";
+const FieldAddress = "address";
+const FieldProfile = "profile";
+const FieldModeIsTest = "MODE_IS_TEST";
 
 // viewNames
 const ViewModuleCounter = "module-counter.php";
@@ -80,3 +85,4 @@ const ViewPageRegCheck = "page-reg_check.php";
 const ViewPageSearch = "page-search.php";
 const ViewPageOrder = "page-order.php";
 const ViewPageOrderOk = "page-order-ok.php";
+const ViewEmailVerify = "email-verify.php";

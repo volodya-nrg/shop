@@ -3,7 +3,7 @@
 final class ServiceUsers extends ServiceDB
 {
     protected string $table = "users";
-    protected array $fields = ["user_id", "email", "pass", "hash_for_check_email", "avatar", "birthday_day", "birthday_mon", "updated_at", "created_at"];
+    protected array $fields = ["user_id", "email", "pass", "email_hash", "avatar", "birthday_day", "birthday_mon", "role", "updated_at", "created_at"];
 
     public function all(): array|Error
     {
@@ -69,10 +69,11 @@ final class ServiceUsers extends ServiceDB
         $arData = [
             $user->email,
             $user->pass,
-            $user->hashForCheckEmail,
+            $user->emailHash,
             $user->avatar,
             $user->birthdayMon,
             $user->birthdayDay,
+            $user->role,
             $user->updatedAt,
             $user->createdAt
         ];

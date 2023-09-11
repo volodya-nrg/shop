@@ -19,32 +19,33 @@ final class ControllerReg extends ControllerBase
             $resp->data[FieldRequestedPrivatePolicy] = $req->getPrivatePolicy();
 
             $err = $this->check_request($req);
-            if ($err !== null) {
+            if ($err instanceof Error) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = $err->getMessage();
                 return $resp;
             }
 
             $serviceUsers = new ServiceUsers();
-            $serviceEmail = new ServiceEmail(EMAIL_SMTP_SERVER, EMAIL_PORT, EMAIL_LOGIN, EMAIL_PASS, EMAIL_FROM);
+            $serviceEmail = new ServiceEmail(EMAIL_SMTP_SERVER, EMAIL_PORT, EMAIL_LOGIN, EMAIL_PASS, EMAIL_FROM, $_SERVER[FieldModeIsTest] === true);
 
             // проверим пользователя
             $result = $serviceUsers->oneByEmail($req->getEmail());
             if ($result instanceof User) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = ($result->hashForCheckEmail !== "") ? ErrCheckYourEmail : ErrUserAlreadyHas;
+                $resp->data[FieldError] = ($result->emailHash !== "") ? ErrCheckYourEmail : ErrUserAlreadyHas;
                 return $resp;
             } elseif ($result instanceof Error) {
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $result->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->oneByEmail", $result->getMessage()));
                 return $resp;
             }
 
             $user = new User();
             $user->email = $req->getEmail();
             $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT); // password_verify('rasmuslerdorf', $hash)
-            $user->hashForCheckEmail = randomString();
+            $user->emailHash = randomString(32, true);
+            $user->updatedAt = $user->createdAt = date(DatePattern, time());
 
             // запишем в базу и отправим е-мэйл
             $serviceUsers->db->beginTransaction();
@@ -55,11 +56,15 @@ final class ControllerReg extends ControllerBase
 
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $result->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->createOrUpdate", $result->getMessage()));
                 return $resp;
             }
 
-            $err = $serviceEmail->send($user->email, "validate email", $user->hashForCheckEmail);
+            $template = $this->view(DIR_VIEWS . "/" . ViewEmailVerify, [
+                FieldAddress => ADDRESS . "/reg/check?" . FieldHash . "={$user->emailHash}",
+            ]);
+
+            $err = $serviceEmail->send($user->email, DicVerifyEmail, $template);
             if ($err instanceof Error) {
                 $serviceUsers->db->rollBack();
 
@@ -71,10 +76,12 @@ final class ControllerReg extends ControllerBase
 
             $serviceUsers->db->commit();
 
-            redirect("/reg/ok?" . FieldEmail . "={$user->email}");
-        }
+            $resp->data = []; // т.к. происходит далее редирект, то data нам не нужен
 
-        //redirect("/reg/check?".FieldHash."=asd");
+            if (!$_SERVER[FieldModeIsTest]) {
+                redirect("/reg/ok?" . FieldEmail . "={$user->email}");
+            }
+        }
 
         return $resp;
     }
@@ -94,7 +101,7 @@ final class ControllerReg extends ControllerBase
         return $resp;
     }
 
-    private function check_request(RequestReg $req): ?Error
+    private function check_request(RequestReg $req): Error|null
     {
         if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
             return new Error(ErrEmailNotCorrect);

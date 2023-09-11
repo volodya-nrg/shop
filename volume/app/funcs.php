@@ -1,6 +1,6 @@
 <?php
 
-function template(string $__view, array $__data = [])
+function template(string $__view, array $__data = []): string
 {
     $output = "";
 
@@ -14,21 +14,28 @@ function template(string $__view, array $__data = [])
     return $output;
 }
 
-function redirect($url)
+function redirect($url): never
 {
     header("Location: {$url}");
     exit;
 }
 
-function randomString(int $length = 20): string
+function randomString(int $len = 32, bool $isAttachNumber = false): string
 {
-    $characters = "abcdefghijklmnopqrstuvwxyz";
-    $charactersLength = strlen($characters);
-    $randomString = "";
-    for ($i = 0; $i < $length; $i++) {
-        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    $chars = "abcdefghijklmnopqrstuvwxyz";
+
+    if ($isAttachNumber) {
+        $chars .= "0123456789";
     }
-    return $randomString;
+
+    $charsLen = strlen($chars);
+    $result = "";
+
+    for ($i = 0; $i < $len; $i++) {
+        $result .= $chars[rand(0, $charsLen - 1)];
+    }
+
+    return $result;
 }
 
 function randomEmail(): string

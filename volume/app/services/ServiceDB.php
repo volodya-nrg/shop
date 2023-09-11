@@ -25,7 +25,7 @@ class ServiceDB
     protected function questionsAsString(bool $isWithoutFirstElement = false): string
     {
         $questionsStr = str_repeat("?", count($this->fields));
-        $questionsArray = explode("", $questionsStr);
+        $questionsArray = str_split($questionsStr);
 
         if ($isWithoutFirstElement) {
             array_shift($questionsArray);

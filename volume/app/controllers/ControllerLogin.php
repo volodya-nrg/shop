@@ -16,8 +16,8 @@ final class ControllerLogin extends ControllerBase
             $resp->data[FieldRequestedEmail] = $req->getEmail();
 
             $err = $this->check_request($req);
-            if ($err !== null) {
-                $resp->setHttpCode($err->getCode());
+            if ($err instanceof Error) {
+                $resp->setHttpCode(400);
                 $resp->data[FieldError] = $err->getMessage();
                 return $resp;
             }
@@ -34,13 +34,13 @@ final class ControllerLogin extends ControllerBase
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } else if ($result instanceof User && $result->hashForCheckEmail != "") {
+            } else if ($result instanceof User && $result->emailHash != "") {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
             }
 
-            $_SESSION["user"] = $result;
+            $_SESSION[FieldProfile] = $result;
 
             redirect("/profile");
         }
@@ -48,13 +48,13 @@ final class ControllerLogin extends ControllerBase
         return $resp;
     }
 
-    private function check_request(RequestLogin $req): ?Error
+    private function check_request(RequestLogin $req): Error|null
     {
         if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
-            return new Error(ErrEmailNotCorrect, 400);
+            return new Error(ErrEmailNotCorrect);
         }
         if (strlen($req->getPass()) < PassMinLen) {
-            return new Error(ErrPassIsShort, 400);
+            return new Error(ErrPassIsShort);
         }
 
         return null;

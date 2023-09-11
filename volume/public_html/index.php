@@ -1,14 +1,4 @@
 <?php
-session_start();
-const DEV_MODE = true;
-
-if (DEV_MODE) {
-    ini_set('display_errors', '1');
-    ini_set('display_startup_errors', '1');
-    ini_set('max_execution_time', '3600');
-    ini_set('memory_limit', '-1');
-    error_reporting(E_ALL);
-}
 
 require_once "../app/init.php";
 
@@ -93,7 +83,7 @@ http_response_code($resp->getHttpCode());
 </header>
 <main class="main">
     <div class="layer-center">
-        <?php echo template(DIR_TEMPLATES . "/{$resp->getViewName()}", $resp->data); ?>
+        <?php echo template(DIR_VIEWS . "/{$resp->getViewName()}", $resp->data); ?>
     </div>
 </main>
 <footer class="footer">

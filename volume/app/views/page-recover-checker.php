@@ -9,7 +9,7 @@ $email = $__data[FieldEmail] ?? "";
     <?php if ($error != ""): ?>
         <div>
             <?php
-            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
                 FieldMsg => $error,
                 FieldType => NoticeStyleClassDanger,
             ]);
@@ -19,7 +19,7 @@ $email = $__data[FieldEmail] ?? "";
     <?php elseif ($successMsg != ""): ?>
         <div>
             <?php
-            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
                 FieldMsg => $successMsg,
                 FieldType => NoticeStyleClassSuccess,
             ]);

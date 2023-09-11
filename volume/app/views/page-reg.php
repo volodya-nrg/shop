@@ -10,7 +10,7 @@ $requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
     <?php if ($error != ""): ?>
         <div>
             <?php
-            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
                 FieldMsg => $error,
                 FieldType => NoticeStyleClassDanger,
             ]);

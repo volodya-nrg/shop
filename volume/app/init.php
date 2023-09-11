@@ -1,16 +1,26 @@
 <?php
+session_start();
 
-foreach (explode(PHP_EOL, file_get_contents(dirname(__FILE__) . "/../.env")) as $row) {
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+ini_set('max_execution_time', '3600');
+ini_set('memory_limit', '-1');
+
+error_reporting(E_ALL);
+
+$envContent = file_get_contents(dirname(__FILE__) . "/../.env");
+$envRows = explode(PHP_EOL, $envContent);
+foreach ($envRows as $row) {
     if (empty($row)) {
         continue;
     }
     putenv($row);
 }
 
-require_once dirname(__FILE__) . "/constants.php";
-require_once dirname(__FILE__) . "/dictionary.php";
-require_once dirname(__FILE__) . "/errors.php";
-require_once dirname(__FILE__) . "/functions.php";
+require_once dirname(__FILE__) . "/consts.php";
+require_once dirname(__FILE__) . "/dict.php";
+require_once dirname(__FILE__) . "/errs.php";
+require_once dirname(__FILE__) . "/funcs.php";
 
 try {
     $PDOPattern = "mysql:host=%s;dbname=%s;charset=%s";

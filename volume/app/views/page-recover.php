@@ -8,7 +8,7 @@ $dataSendMsg = $__data[FieldDataSendMsg] ?? "";
     <?php if ($error != ""): ?>
         <div>
             <?php
-            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
                 FieldMsg => $error,
                 FieldType => NoticeStyleClassDanger,
             ]);
@@ -18,7 +18,7 @@ $dataSendMsg = $__data[FieldDataSendMsg] ?? "";
     <?php elseif ($dataSendMsg != ""): ?>
         <div>
             <?php
-            echo template(DIR_TEMPLATES . "/" . ViewModuleNotice, [
+            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
                 FieldMsg => $dataSendMsg,
                 FieldType => NoticeStyleClassSuccess,
             ]);

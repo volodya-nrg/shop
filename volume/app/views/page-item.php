@@ -4,7 +4,7 @@ $item = $__data[FieldItem] ?? new Item();
 <div class="page-item">
     <div class="page-item__breadcrumbs">
         <?php
-        echo template(DIR_TEMPLATES . "/" . ViewModuleBreakCrumbs, []);
+        echo template(DIR_VIEWS . "/" . ViewModuleBreakCrumbs, []);
         ?>
     </div>
     <div class="page-item__main">
@@ -28,7 +28,7 @@ $item = $__data[FieldItem] ?? new Item();
             <?php endif; ?>
             <div class="text-nowrap">
                 Цена: <span class="h3"><?php echo finePrice($item->price) ?></span> ₽
-                <?php echo template(DIR_TEMPLATES . "/" . ViewModuleCounter, [
+                <?php echo template(DIR_VIEWS . "/" . ViewModuleCounter, [
                     FieldStyles => "sx-lg",
                     FieldItem => $item,
                 ]) ?>

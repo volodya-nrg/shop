@@ -13,10 +13,12 @@ final class ControllerRegTest extends TestCase
         $this->client = new TestApiClient();
         $_GET = [];
         $_POST = [];
+        $_SERVER[FieldModeIsTest] = true;
     }
 
     protected function tearDown(): void
     {
+        // зайти под админом и удалить пользвоателя
     }
 
     public function testIndex(): void
@@ -102,13 +104,7 @@ final class ControllerRegTest extends TestCase
 
             // ok
         })->reg(function (MyResponse $resp) use (&$req, &$fnTpl) {
-            $fnTpl(200, $req, $resp, 3);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
-            $this->assertTrue($resp->data[FieldRequestedAgreement]);
-            $this->assertTrue($resp->data[FieldRequestedPrivatePolicy]);
+            $fnTpl(200, $req, $resp, 0);
         })->run();
     }
 }

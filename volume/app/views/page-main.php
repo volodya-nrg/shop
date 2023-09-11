@@ -3,7 +3,7 @@
 <div>
     <?php
     for ($i=0; $i < 6; $i++) {
-        echo template(DIR_TEMPLATES . "/" . ViewModuleItem, []);
+        echo template(DIR_VIEWS . "/" . ViewModuleItem, []);
     }
     ?>
 </div>
