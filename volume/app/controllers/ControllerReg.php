@@ -26,6 +26,7 @@ final class ControllerReg extends ControllerBase
             }
 
             $serviceUsers = new ServiceUsers();
+            $serviceEmail = new ServiceEmail(EMAIL_SMTP_SERVER, EMAIL_PORT, EMAIL_LOGIN, EMAIL_PASS, EMAIL_FROM);
 
             // проверим пользователя
             $result = $serviceUsers->oneByEmail($req->getEmail());
@@ -45,17 +46,32 @@ final class ControllerReg extends ControllerBase
             $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT); // password_verify('rasmuslerdorf', $hash)
             $user->hashForCheckEmail = randomString();
 
+            // запишем в базу и отправим е-мэйл
+            $serviceUsers->db->beginTransaction();
+
             $result = $serviceUsers->createOrUpdate($user);
             if ($result instanceof Error) {
+                $serviceUsers->db->rollBack();
+
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $result->getMessage()));
                 return $resp;
             }
 
-            // отправить хеш на е-мэйл
+            $err = $serviceEmail->send($user->email, "validate email", $user->hashForCheckEmail);
+            if ($err instanceof Error) {
+                $serviceUsers->db->rollBack();
+
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "send email", $result->getMessage()));
+                return $resp;
+            }
+
+            $serviceUsers->db->commit();
+
             redirect("/reg/ok?" . FieldEmail . "={$user->email}");
-            // FieldHash
         }
 
         //redirect("/reg/check?".FieldHash."=asd");

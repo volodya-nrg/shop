@@ -4,8 +4,7 @@ class ServiceDB
 {
     protected string $table = "";
     protected array $fields = [];
-
-    protected \PDO $db;
+    public \PDO $db; // открыт для транзакций
 
     public function __construct()
     {
