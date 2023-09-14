@@ -13,20 +13,23 @@ try {
     if (!class_exists($class)) {
         throw new Exception(ErrNotFoundClass);
     }
+
     if ($class === "ControllerItem") {
         if ($method === "index" || count($aArgs)) {
             throw new Exception(ErrNotFoundMethod);
         }
         $aArgs = [$method];
         $method = "index";
-    } else if (!method_exists($class, $method)) {
+    } elseif (!method_exists($class, $method)) {
         throw new Exception(ErrNotFoundMethod);
     }
 
     $oPage = new $class();
+
     if (!is_callable([$oPage, $method])) { // проверим можно ли вызывать (public, protected). Если private, то не получится вызвать.
         throw new Exception(ErrMethodNotAllowed);
     }
+
     $resp = call_user_func([$oPage, $method], $aArgs);
 
 //    // если json, xml

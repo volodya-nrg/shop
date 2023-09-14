@@ -41,6 +41,15 @@ final class TestApiClient
         return $this;
     }
 
+    public function logout(callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($cb) {
+            $cb((new ControllerLogout())->index([]));
+        };
+
+        return $this;
+    }
+
     public function reg(?RequestReg $req, callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($req, $cb) {
@@ -83,6 +92,15 @@ final class TestApiClient
             }
 
             $cb((new ControllerRecover())->check([]));
+        };
+
+        return $this;
+    }
+
+    public function adm(callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($cb) {
+            $cb((new ControllerAdm())->index([]));
         };
 
         return $this;

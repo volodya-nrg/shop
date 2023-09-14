@@ -78,6 +78,7 @@ const ViewPageItem = "page-item.php";
 const ViewPageLogin = "page-login.php";
 const ViewPageMain = "page-main.php";
 const ViewPageNotFound = "page-notfound.php";
+const ViewPageAccessDined = "page-access-dined.php";
 const ViewPagePrivacyPolicy = "page-privacy-policy.php";
 const ViewPageProfile = "page-profile.php";
 const ViewPageRecover = "page-recover.php";

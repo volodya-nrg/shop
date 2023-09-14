@@ -1,5 +1,6 @@
 <?php
 
+const ErrNotHasAccess = "нет доступа";
 const ErrNotConnectToDatabase = "нет соединения с БД";
 const ErrNotFoundClass = "не найден class";
 const ErrNotFoundMethod = "не найден method";
