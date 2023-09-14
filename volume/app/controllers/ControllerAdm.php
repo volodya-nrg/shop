@@ -10,4 +10,16 @@ final class ControllerAdm extends ControllerBase
         // тут проверить на права
         return new MyResponse(ViewPageAdm);
     }
+
+    public function items(array $args): MyResponse
+    {
+        // тут список
+        return new MyResponse(ViewPageAdmItems);
+    }
+
+    public function item(array $args): MyResponse
+    {
+        // тут конкретный товар
+        return new MyResponse(ViewPageAdmItem);
+    }
 }

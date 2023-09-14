@@ -43,7 +43,7 @@ final class ControllerReg extends ControllerBase
 
             $user = new User();
             $user->email = $req->getEmail();
-            $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT); // password_verify('rasmuslerdorf', $hash)
+            $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT);
             $user->emailHash = randomString(32, true);
             $user->updatedAt = $user->createdAt = date(DatePattern, time());
 

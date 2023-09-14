@@ -37,7 +37,9 @@ final class ControllerLoginTest extends TestCase
             }
         };
         $password = "12345";
+        $passwordWrong = "123456";
         $profile = getRandomUser($password);
+        $admin = getRandomUser($password, "admin");
 
         // открываем страницу
         $this->client->login(null, function (MyResponse $resp) use ($fnTpl, $req) {
@@ -72,16 +74,38 @@ final class ControllerLoginTest extends TestCase
             $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
 
             // создадим пользователя
-        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($req, $profile, $password) {
+        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($req, $profile, $passwordWrong) {
             $this->assertEquals(200, $resp->getHttpCode());
 
             $req->setEmail($profile->email);
+            $req->setPass($passwordWrong);
+
+            // аунтентификация под профилем с не верным паролем, будет ошибка
+        })->login($req, function (MyResponse $resp) use ($fnTpl, $req, $password) {
+            $fnTpl(400, $resp, 2);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            $this->assertEquals(ErrLoginOrPasswordNotCorrect, $resp->data[FieldError]);
+
             $req->setPass($password);
 
-            // ok
+            // аунтентификация под профилем с верным паролем, ok
         })->login($req, function (MyResponse $resp) use ($fnTpl, $req) {
             $fnTpl(200, $resp, 0);
             $this->assertArrayHasKey(FieldProfile, $_SESSION);
+            $this->assertArrayNotHasKey(FieldAdmin, $_SESSION);
+
+            // создадим админа
+        })->createOrUpdateProfile($admin, function (MyResponse $resp) use ($req, $admin, $password) {
+            $this->assertEquals(200, $resp->getHttpCode());
+
+            $req->setEmail($admin->email);
+            $req->setPass($password);
+
+            // аунтентификация под админом
+        })->login($req, function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $resp, 0);
+            $this->assertArrayHasKey(FieldProfile, $_SESSION);
+            $this->assertArrayHasKey(FieldAdmin, $_SESSION);
         })->run();
     }
 }

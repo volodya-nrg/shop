@@ -3,7 +3,6 @@
 const ErrNotConnectToDatabase = "нет соединения с БД";
 const ErrNotFoundClass = "не найден class";
 const ErrNotFoundMethod = "не найден method";
-const ErrNotFoundFileTpl = "не найден файл: %s";
 const ErrNotFoundUser = "пользователь не найден";
 const ErrNotFoundNode = "не найдена запись";
 const ErrPassIsShort = "пароль слишком короткий (минимум " . PassMinLen . " символов)";
@@ -16,3 +15,4 @@ const ErrUserAlreadyHas = "такой пользователь уже сущес
 const ErrCheckYourEmail = "подтвердите свой е-мэйл";
 const ErrInternalServer = "внутреняя ошибка сервера";
 const ErrInWhenTpl = "error in %s when '%s' -> %s";
+const ErrLoginOrPasswordNotCorrect = "логин или пароль не корректны";

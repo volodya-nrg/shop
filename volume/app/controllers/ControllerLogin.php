@@ -24,24 +24,35 @@ final class ControllerLogin extends ControllerBase
 
             $serviceUsers = new ServiceUsers();
 
-            // проверим пользователя
-            $result = $serviceUsers->oneByEmail($req->getEmail());
-            if ($result instanceof Error) {
+            // достанем пользователя
+            $user = $serviceUsers->oneByEmail($req->getEmail());
+            if ($user instanceof Error) {
                 $resp->setHttpCode(500);
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $result->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $user->getMessage()));
                 return $resp;
-            } else if ($result === null) {
+            } else if ($user === null) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } else if ($result instanceof User && $result->emailHash != "") {
+            } else if ($user instanceof User && $user->emailHash != "") {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
             }
 
-            $_SESSION[FieldProfile] = $result;
+            // проверим по паролю
+            if (!password_verify($req->getPass(), $user->pass)) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrLoginOrPasswordNotCorrect;
+                return $resp;
+            }
+
+            $_SESSION[FieldProfile] = $user;
             $resp->data = [];
+
+            if ($user->role === "admin") {
+                $_SESSION[FieldAdmin] = true;
+            }
 
             if (!$_SERVER[FieldModeIsTest]) {
                 redirect("/profile");

@@ -54,6 +54,7 @@ const FieldFIO = "fio";
 const FieldDeliveryTo = "delivery_to";
 const FieldAddress = "address";
 const FieldProfile = "profile";
+const FieldAdmin = "admin";
 const FieldModeIsTest = "MODE_IS_TEST";
 
 // viewNames
@@ -65,6 +66,8 @@ const ViewModuleBreakCrumbs = "module-breakcrumbs.php";
 const ViewModuleCatalogMenu = "module-catalog-menu.php";
 const ViewModulePaginator = "module-paginator.php";
 const ViewPageAdm = "page-adm.php";
+const ViewPageAdmItems = "page-adm-items.php";
+const ViewPageAdmItem = "page-adm-item.php";
 const ViewPageAgreement = "page-agreement.php";
 const ViewPageCart = "page-cart.php";
 const ViewPageCat = "page-cat.php";
