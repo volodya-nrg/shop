@@ -38,10 +38,7 @@ try {
 } catch (Exception $e) {
     $oPage = new ControllerNotFound();
     $resp = $oPage->index($aArgs);
-
-    if (DEV_MODE) {
-        echo $e->getMessage();
-    }
+    error_log(sprintf(ErrInWhenTpl, "index.php", "call class-method", $e->getMessage()));
 }
 
 http_response_code($resp->getHttpCode());
@@ -57,7 +54,7 @@ http_response_code($resp->getHttpCode());
 
     <title><?php echo $oPage->title ?></title>
 
-    <link type="image/x-icon" rel="icon" href="/images/favicon.png">
+    <link type="image/x-icon" rel="icon" href="/images/internal/favicon.png">
     <link rel="stylesheet" href="/css.php"/>
     <script src="/js.php"></script>
 </head>
@@ -66,7 +63,7 @@ http_response_code($resp->getHttpCode());
     <div class="layer-center">
         <div class="header-block">
             <a class="header-block__block-left" href="/">
-                <img src="/images/logo.png"/>
+                <img src="/images/internal/logo.png"/>
             </a>
             <div class="header-block__block-center">
                 search
@@ -74,7 +71,7 @@ http_response_code($resp->getHttpCode());
             <div class="header-block__block-right">
                 <a class="header-block__login" href="/login">Вход</a>
                 <a class="header-block__cart sx-inverse" href="/cart">
-                    <img class="header-block__cart-img" src="/images/cart-shopping-solid.svg"/>
+                    <img class="header-block__cart-img" src="/images/internal/cart-shopping-solid.svg"/>
                     <span>0</span>
                 </a>
             </div>

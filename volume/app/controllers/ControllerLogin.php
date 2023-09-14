@@ -41,8 +41,11 @@ final class ControllerLogin extends ControllerBase
             }
 
             $_SESSION[FieldProfile] = $result;
+            $resp->data = [];
 
-            redirect("/profile");
+            if (!$_SERVER[FieldModeIsTest]) {
+                redirect("/profile");
+            }
         }
 
         return $resp;

@@ -14,7 +14,7 @@ $item = $__data[FieldItem] ?? new Item();
                     <img src="<?php echo $val ?>">
                 <?php endforeach; ?>
             <?php else: ?>
-                <img src="/images/default-item.png">
+                <img src="/images/internal/default-item.png">
             <?php endif; ?>
         </div>
         <div class="page-item__data">

@@ -13,4 +13,6 @@ const DicPasswordChangedSuccessfully = "пароль успешно измене
 const DicCatalog = "Каталог";
 const DicOrder = "Заказ";
 const DicVerifyEmail = "Верификация е-мэйла";
+const DicGoAheadForVerifyEmail = "Пройдите по ссылке, для верификации е-мэйла:";
+const DicGoAheadForRecoverPass = "Пройдите по ссылке, для восстановления пароля:";
 

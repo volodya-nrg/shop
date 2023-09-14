@@ -79,10 +79,10 @@ final class RequestReg
             $this->passConfirm = trim($post[FieldPasswordConfirm]);
         }
         if (isset($post[FieldAgreement])) {
-            $this->agreement = $post[FieldAgreement] === "on";
+            $this->agreement = !empty($post[FieldAgreement]);
         }
         if (isset($post[FieldPrivacyPolicy])) {
-            $this->privatePolicy = $post[FieldPrivacyPolicy] === "on";
+            $this->privatePolicy = !empty($post[FieldPrivacyPolicy]);
         }
     }
 }

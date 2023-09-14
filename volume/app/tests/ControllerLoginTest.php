@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__FILE__) . "/../init.php";
+require_once dirname(__FILE__) . "/helper.php";
 
 final class ControllerLoginTest extends TestCase
 {
@@ -11,18 +12,20 @@ final class ControllerLoginTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_GET = [];
-        $_POST = [];
+        $_SERVER[FieldModeIsTest] = true;
     }
 
     protected function tearDown(): void
     {
+        $_GET = [];
+        $_POST = [];
+        $_SESSION = [];
     }
 
     public function testIndex(): void
     {
-        $req = new RequestLogin(randomString(10), randomString(PassMinLen - 1));
-        $fnTpl = function (int $expectedCode, RequestLogin $req, MyResponse $resp, int $countData): void {
+        $req = new RequestLogin("", "");
+        $fnTpl = function (int $expectedCode, MyResponse $resp, int $countData): void {
             $this->assertEquals(ViewPageLogin, $resp->getViewName());
             $this->assertEquals($expectedCode, $resp->getHttpCode());
             $this->assertCount($countData, $resp->data);
@@ -33,39 +36,52 @@ final class ControllerLoginTest extends TestCase
                 $this->assertArrayHasKey(FieldError, $resp->data);
             }
         };
+        $password = "12345";
+        $profile = getRandomUser($password);
 
-        // GET 200
-        $this->client->login(function (MyResponse $resp) use ($fnTpl, $req) {
-            $fnTpl(200, $req, $resp, 0);
+        // открываем страницу
+        $this->client->login(null, function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $resp, 0);
 
-            $_POST[FieldEmail] = $req->getEmail();
-            $_POST[FieldPassword] = $req->getPass();
+            $req->setEmail(randomString(10));
+            $req->setPass(randomString(PassMinLen - 1));
 
             // е-мэйл не верен, будет ошибка
-        })->login(function (MyResponse $resp) use ($fnTpl, $req) {
-            $fnTpl(400, $req, $resp, 2);
+        })->login($req, function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $resp, 2);
             $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
 
             $req->setEmail(randomEmail());
-            $_POST[FieldEmail] = $req->getEmail();
 
             // пароль не верен, будет ошибка
-        })->login(function (MyResponse $resp) use ($fnTpl, $req) {
-            $fnTpl(400, $req, $resp, 2);
+        })->login($req, function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $resp, 2);
             $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
 
             $req->setPass(randomString(PassMinLen));
-            $_POST[FieldPassword] = $req->getPass();
 
-            // ok
-        })->login(function (MyResponse $resp) use ($fnTpl, $req) {
-            $fnTpl(200, $req, $resp, 1);
+            // пользователь не найден, будет ошибка
+        })->login($req, function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(400, $resp, 2);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+            $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
+
+            // создадим пользователя
+        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($req, $profile, $password) {
+            $this->assertEquals(200, $resp->getHttpCode());
+
+            $req->setEmail($profile->email);
+            $req->setPass($password);
+
+            // ok
+        })->login($req, function (MyResponse $resp) use ($fnTpl, $req) {
+            $fnTpl(200, $resp, 0);
+            $this->assertArrayHasKey(FieldProfile, $_SESSION);
         })->run();
     }
 }

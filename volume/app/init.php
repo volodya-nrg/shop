@@ -32,5 +32,6 @@ try {
     $GLOBALS["PDO"] = $PDO;
 } catch (\PDOException $e) {
     http_response_code(500);
-    die(DEV_MODE ? $e->getMessage() : ErrNotConnectToDatabase);
+    error_log(sprintf(ErrInWhenTpl, "init.php", "PDO", $e->getMessage()));
+    die(ErrNotConnectToDatabase);
 }

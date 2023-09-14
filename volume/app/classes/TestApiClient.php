@@ -3,45 +3,86 @@
 final class TestApiClient
 {
     private array $tasks = [];
-    private ControllerReg $pageReg;
-    private ControllerRecover $pageRecover;
-    private ControllerRecoverChecker $pageRecoverChecker;
 
-    public function login(callable $cb): TestApiClient
+    public function createOrUpdateProfile(User $user, callable $cb): TestApiClient
     {
-        $this->tasks[] = function () use ($cb) {
-            $pageLogin = new ControllerLogin();
-            $cb($pageLogin->index([]));
+        $this->tasks[] = function () use ($user, $cb) {
+            $serviceUsers = new ServiceUsers();
+            $errCode = 200;
+            $data = [];
+
+            $result = $serviceUsers->createOrUpdate($user);
+            if ($result instanceof Error) {
+                $errCode = 500;
+                $data[FieldError] = $result->getMessage();
+            } else {
+                $user->userId = $result;
+            }
+
+            $cb(new MyResponse("", $errCode, $data));
+        };
+        return $this;
+    }
+
+    // createAdmin
+
+    public function login(?RequestLogin $req, callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($req, $cb) {
+            $_POST = [];
+            if ($req !== null) {
+                $_POST[FieldEmail] = $req->getEmail();
+                $_POST[FieldPassword] = $req->getPass();
+            }
+
+            $cb((new ControllerLogin())->index([]));
         };
 
         return $this;
     }
 
-    public function reg(callable $cb): TestApiClient
+    public function reg(?RequestReg $req, callable $cb): TestApiClient
     {
-        $this->tasks[] = function () use ($cb) {
-            $this->pageReg = new ControllerReg();
-            $cb($this->pageReg->index([]));
+        $this->tasks[] = function () use ($req, $cb) {
+            $_POST = [];
+            if ($req !== null) {
+                $_POST[FieldEmail] = $req->getEmail();
+                $_POST[FieldPassword] = $req->getPass();
+                $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
+                $_POST[FieldAgreement] = $req->getAgreement();
+                $_POST[FieldPrivacyPolicy] = $req->getPrivatePolicy();
+            }
+
+            $cb((new ControllerReg())->index([]));
         };
 
         return $this;
     }
 
-    public function recover(callable $cb): TestApiClient
+    public function recover(?RequestRecover $req, callable $cb): TestApiClient
     {
-        $this->tasks[] = function () use ($cb) {
-            $this->pageRecover = new ControllerRecover();
-            $cb($this->pageRecover->index([]));
+        $this->tasks[] = function () use ($req, $cb) {
+            $_POST = [];
+            if ($req !== null) {
+                $_POST[FieldEmail] = $req->getEmail();
+            }
+
+            $cb((new ControllerRecover())->index([]));
         };
 
         return $this;
     }
 
-    public function recoverChecker(callable $cb): TestApiClient
+    public function recoverCheck(?RequestRecoverCheck $req, callable $cb): TestApiClient
     {
-        $this->tasks[] = function () use ($cb) {
-            $this->pageRecoverChecker = new ControllerRecoverChecker();
-            $cb($this->pageRecoverChecker->index([]));
+        $this->tasks[] = function () use ($req, $cb) {
+            $_POST = [];
+            if ($req !== null) {
+                $_POST[FieldPassword] = $req->getPass();
+                $_POST[FieldPasswordConfirm] = $req->getPassConfirm();
+            }
+
+            $cb((new ControllerRecover())->check([]));
         };
 
         return $this;

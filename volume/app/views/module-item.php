@@ -1,6 +1,6 @@
 <div class="module-item float-left">
     <a class="module-item__cover" href="/item/1">
-        <img src="/images/default-item.png" alt="Lorem ipsum dolor"/>
+        <img src="/images/internal/default-item.png" alt="Lorem ipsum dolor"/>
     </a>
     <div class="module-item__content">
         <a class="module-item__title" href="/item/1">Lorem ipsum dolor</a>

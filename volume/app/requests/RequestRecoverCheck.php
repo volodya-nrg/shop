@@ -1,6 +1,6 @@
 <?php
 
-final class RequestRecoverChecker
+final class RequestRecoverCheck
 {
     private string $pass;
     private string $passConfirm;

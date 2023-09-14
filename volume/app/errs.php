@@ -5,6 +5,7 @@ const ErrNotFoundClass = "не найден class";
 const ErrNotFoundMethod = "не найден method";
 const ErrNotFoundFileTpl = "не найден файл: %s";
 const ErrNotFoundUser = "пользователь не найден";
+const ErrNotFoundNode = "не найдена запись";
 const ErrPassIsShort = "пароль слишком короткий (минимум " . PassMinLen . " символов)";
 const ErrPasswordsNotEqual = "пароли не совподают";
 const ErrEmailNotCorrect = "е-мэйл не корректный";

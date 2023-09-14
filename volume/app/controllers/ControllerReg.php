@@ -60,7 +60,8 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $template = $this->view(DIR_VIEWS . "/" . ViewEmailVerify, [
+            $template = $this->view(DIR_VIEWS . "/" . ViewEmailMsgAndLink, [
+                FieldMsg => DicGoAheadForVerifyEmail,
                 FieldAddress => ADDRESS . "/reg/check?" . FieldHash . "={$user->emailHash}",
             ]);
 
