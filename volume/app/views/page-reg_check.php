@@ -1,6 +1,8 @@
 <?php
 $err = $__data[FieldError] ?? "";
+$msg = $__data[FieldMsg] ?? "";
 ?>
 <div class="block_center_and_slim">
-    <h1 class="align-center">проверка е-мэйла <?php echo $err ?></h1>
+    <?php echo $err ?>
+    <?php echo $msg ?>
 </div>

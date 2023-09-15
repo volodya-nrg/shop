@@ -114,7 +114,51 @@ final class ControllerRegTest extends TestCase
 
             // успешная регистрация
         })->reg($req, function (MyResponse $resp) use ($fnTpl) {
+            $fnTpl(200, $resp, 1);
+            $this->assertArrayHasKey(FieldHash, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
+        })->run();
+    }
+
+    public function testCheck(): void
+    {
+        $pass = randomString(PassMinLen);
+        $req = new RequestReg(randomEmail(), $pass, $pass, true, true);
+        $fnTpl = function (int $expectedCode, MyResponse $resp, int $countData): void {
+            $this->assertEquals(ViewPageRegCheck, $resp->getViewName());
+            $this->assertEquals($expectedCode, $resp->getHttpCode());
+            $this->assertCount($countData, $resp->data);
+
+            if ($expectedCode >= 200 && $expectedCode < 300) {
+                $this->assertArrayNotHasKey(FieldError, $resp->data);
+            } else {
+                $this->assertArrayHasKey(FieldError, $resp->data);
+            }
+        };
+
+        // открываем страницу
+        $this->client->regCheck(function (MyResponse $resp) use ($fnTpl) {
             $fnTpl(200, $resp, 0);
+
+            $_GET[FieldHash] = "x";
+
+            // подкинем не верный хеш, будет ошибка
+        })->regCheck(function (MyResponse $resp) use ($fnTpl) {
+            $fnTpl(400, $resp, 1);
+            $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
+
+            // зарегистрируем пользователя
+        })->reg($req, function (MyResponse $resp) use ($fnTpl, $req) {
+            $this->assertEquals(200, $resp->getHttpCode());
+            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
+
+            $_GET[FieldHash] = $resp->data[FieldHash];
+
+            // проверим хеш, ok
+        })->regCheck(function (MyResponse $resp) use ($fnTpl) {
+            $fnTpl(200, $resp, 1);
+            $this->assertArrayHasKey(FieldMsg, $resp->data);
+            $this->assertEquals(DicEmailSuccessfullyConfirmed, $resp->data[FieldMsg]);
         })->run();
     }
 }

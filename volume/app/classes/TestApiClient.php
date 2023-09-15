@@ -68,6 +68,15 @@ final class TestApiClient
         return $this;
     }
 
+    public function regCheck(callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($cb, $hash) {
+            $cb((new ControllerReg())->check([]));
+        };
+
+        return $this;
+    }
+
     public function recover(?RequestRecover $req, callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($req, $cb) {

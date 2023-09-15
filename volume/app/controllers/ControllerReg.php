@@ -78,6 +78,7 @@ final class ControllerReg extends ControllerBase
             $serviceUsers->db->commit();
 
             $resp->data = []; // т.к. происходит далее редирект, то data нам не нужен
+            $resp->data[FieldHash] = $user->emailHash; // нужен для теста
 
             if (!$_SERVER[FieldModeIsTest]) {
                 redirect("/reg/ok?" . FieldEmail . "={$user->email}");
@@ -98,7 +99,36 @@ final class ControllerReg extends ControllerBase
     {
         $resp = new MyResponse(ViewPageRegCheck);
         $hash = $_GET[FieldHash] ?? "";
-        $resp->data[FieldError] = "===";
+
+        if ($hash) {
+            $serviceUsers = new ServiceUsers();
+
+            $user = $serviceUsers->oneByEmailHash($hash);
+            if ($user instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->oneByEmailHash", $user->getMessage()));
+                return $resp;
+            } elseif ($user === null) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrNotFoundUser;
+                return $resp;
+            }
+
+            $user->emailHash = "";
+
+            $err = $serviceUsers->createOrUpdate($user);
+            if ($err instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->createOrUpdate", $user->getMessage()));
+                return $resp;
+            }
+
+            $resp->data = [];
+            $resp->data[FieldMsg] = DicEmailSuccessfullyConfirmed;
+        }
+
         return $resp;
     }
 

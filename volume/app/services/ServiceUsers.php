@@ -62,6 +62,24 @@ final class ServiceUsers extends ServiceDB
 
         return $user;
     }
+    public function oneByEmailHash(string $hash): Error|null|User
+    {
+        try {
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE email_hash=?");
+            $stmt->execute([$hash]);
+            $data = $stmt->fetch();
+            if ($data === false) {
+                return null;
+            }
+        } catch (\PDOException $e) {
+            return new Error($e->getMessage());
+        }
+
+        $user = new User();
+        $user->parse($data);
+
+        return $user;
+    }
 
     public function createOrUpdate(User $user): int|Error
     {

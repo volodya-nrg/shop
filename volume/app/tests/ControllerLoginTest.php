@@ -24,7 +24,7 @@ final class ControllerLoginTest extends TestCase
 
     public function testIndex(): void
     {
-        $req = new RequestLogin("", "");
+        $req = new RequestLogin();
         $fnTpl = function (int $expectedCode, MyResponse $resp, int $countData): void {
             $this->assertEquals(ViewPageLogin, $resp->getViewName());
             $this->assertEquals($expectedCode, $resp->getHttpCode());
@@ -37,7 +37,7 @@ final class ControllerLoginTest extends TestCase
             }
         };
         $password = "12345";
-        $passwordWrong = "123456";
+        $passwordWrong = "54321";
         $profile = getRandomUser($password);
         $admin = getRandomUser($password, "admin");
 
@@ -93,6 +93,10 @@ final class ControllerLoginTest extends TestCase
             $fnTpl(200, $resp, 0);
             $this->assertArrayHasKey(FieldProfile, $_SESSION);
             $this->assertArrayNotHasKey(FieldAdmin, $_SESSION);
+
+            // выйдем
+        })->logout(function (MyResponse $resp) {
+            $this->assertEquals(200, $resp->getHttpCode());
 
             // создадим админа
         })->createOrUpdateProfile($admin, function (MyResponse $resp) use ($req, $admin, $password) {
