@@ -11,7 +11,6 @@ final class ControllerAdm extends ControllerBase
         if ($err instanceof Error) {
             return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
         }
-        // тут проверить на права
         return new MyResponse(ViewPageAdm);
     }
 
