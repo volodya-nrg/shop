@@ -34,7 +34,7 @@ final class ControllerLogin extends ControllerBase
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } else if ($user instanceof User && $user->emailHash != "") {
+            } else if ($user instanceof UserTbl && $user->emailHash != "") {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;

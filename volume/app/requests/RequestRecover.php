@@ -1,28 +1,13 @@
 <?php
 
-final class RequestRecover
+final class RequestRecover implements InterfaceConstructData
 {
-    private string $email;
+    public string $email = "";
 
-    public function __construct(string $email = "")
+    public function __construct(array $data)
     {
-        $this->email = $email;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $val): void
-    {
-        $this->email = $val;
-    }
-
-    public function parsePOST(array $post = []): void
-    {
-        if (isset($post[FieldEmail])) {
-            $this->email = trim($post[FieldEmail]);
+        if (isset($data[FieldEmail])) {
+            $this->email = trim($data[FieldEmail]);
         }
     }
 }

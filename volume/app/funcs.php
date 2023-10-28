@@ -60,7 +60,9 @@ spl_autoload_register(function ($className): void {
         $aParts[] = DIR_REQUESTS;
     } else if (substr($className, 0, mb_strlen("Service")) === "Service") {
         $aParts[] = DIR_SERVICES;
-    } else if (file_exists(DIR_CLASSES . "/" . $file)) { // поищем в папке classes
+    } else if (substr($className, 0, mb_strlen("Interface")) === "Interface") {
+        $aParts[] = DIR_INTERFACES;
+    } else if (file_exists(DIR_CLASSES . "/" . $file)) { // иначе поищем в папке classes
         $aParts[] = DIR_CLASSES;
     }
 

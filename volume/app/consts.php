@@ -21,6 +21,7 @@ const DIR_CONTROLLERS = DIR_APP . "/controllers";
 const DIR_CLASSES = DIR_APP . "/classes";
 const DIR_REQUESTS = DIR_APP . "/requests";
 const DIR_SERVICES = DIR_APP . "/services";
+const DIR_INTERFACES = DIR_APP . "/interfaces";
 
 // other
 const PassMinLen = 5;
@@ -56,6 +57,15 @@ const FieldAddress = "address";
 const FieldProfile = "profile";
 const FieldAdmin = "admin";
 const FieldModeIsTest = "MODE_IS_TEST";
+const FieldItemId = "item_id";
+const FieldName = "name";
+const FieldSlug = "slug";
+const FieldCatId = "cat_id";
+const FieldDescription = "description";
+const FieldPrice = "price";
+const FieldIsDisabled = "is_disabled";
+const FieldUpdatedAt = "updated_at";
+const FieldCreatedAt = "created_at";
 
 // viewNames
 const ViewModuleCounter = "module-counter.php";

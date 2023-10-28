@@ -3,32 +3,33 @@
 final class ServiceArticles extends ServiceDB
 {
     protected string $table = "articles";
-    protected array $fields = ["article_id", "title", "slug", "description", "is_disabled", "updated_at", "created_at"];
+
+    public function __construct(ArticleTbl $item)
+    {
+        parent::__construct();
+        $this->fields = $item->fields;
+    }
 
     public function all(): array|Error
     {
-        $list = [];
-
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY article_id DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
+        $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $article = new Article();
-            $article->parse($row);
-
-            $list[] = $article;
+            $list[] = new ArticleTbl($row);
         }
 
         return $list;
     }
 
-    public function one(int $articleId): null|Error|Article
+    public function one(int $articleId): null|Error|ArticleTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE article_id=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
             $stmt->execute([$articleId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -38,13 +39,10 @@ final class ServiceArticles extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $article = new Article();
-        $article->parse($data);
-
-        return $article;
+        return new ArticleTbl($data);
     }
 
-    public function createOrUpdate(Article $article): int|Error
+    public function createOrUpdate(ArticleTbl $article): int|Error
     {
         $id = 0;
         $arData = [
@@ -59,7 +57,7 @@ final class ServiceArticles extends ServiceDB
         try {
             if ($article->articleId > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE article_id=?");
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
                 $arData[] = $article->articleId;
                 $stmt->execute($arData);
                 $id = $article->articleId;
@@ -85,7 +83,9 @@ final class ServiceArticles extends ServiceDB
     public function delete(int $articleId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE article_id=?")->execute([$articleId]);
+            return $this->db->
+            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
+            execute([$articleId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

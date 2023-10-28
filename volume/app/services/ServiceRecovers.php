@@ -1,14 +1,19 @@
 <?php
 
-final class ServiceRecover extends ServiceDB
+final class ServiceRecovers extends ServiceDB
 {
-    protected string $table = "recover";
-    protected array $fields = ["hash", "user_id"];
+    protected string $table = "recovers";
 
-    public function one(string $hash): null|Error|Recover
+    public function __construct(RecoverTbl $item)
+    {
+        parent::__construct();
+        $this->fields = $item->fields;
+    }
+
+    public function one(string $hash): null|Error|RecoverTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE hash=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
             $stmt->execute([$hash]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -18,13 +23,10 @@ final class ServiceRecover extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $user = new Recover();
-        $user->parse($data);
-
-        return $user;
+        return new RecoverTbl($data);
     }
 
-    public function create(Recover $recover): null|Error
+    public function create(RecoverTbl $recover): null|Error
     {
         try {
             $stmt = $this->db->prepare("
@@ -44,7 +46,9 @@ final class ServiceRecover extends ServiceDB
     public function deleteByUserId(int $userId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE user_id=?")->execute([$userId]);
+            return $this->db->
+            prepare("DELETE FROM {$this->table} WHERE {$this->fields[1]}=?")->
+            execute([$userId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

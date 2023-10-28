@@ -2,9 +2,9 @@
 
 use PHPUnit\Framework\TestCase;
 
-function getRandomUser(string $pass, string $role = ""): User
+function getRandomUser(string $pass, string $role = ""): UserTbl
 {
-    $user = new User();
+    $user = new UserTbl([]);
     $user->userId = 0;
     $user->email = randomEmail();
     $user->pass = password_hash($pass, PASSWORD_DEFAULT);

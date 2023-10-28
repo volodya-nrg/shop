@@ -4,7 +4,7 @@ final class TestApiClient
 {
     private array $tasks = [];
 
-    public function createOrUpdateProfile(User $user, callable $cb): TestApiClient
+    public function createOrUpdateProfile(UserTbl $user, callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($user, $cb) {
             $serviceUsers = new ServiceUsers();

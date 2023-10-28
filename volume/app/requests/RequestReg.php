@@ -2,87 +2,28 @@
 
 final class RequestReg
 {
-    private string $email;
-    private string $pass;
-    private string $passConfirm;
-    private bool $agreement;
-    private bool $privatePolicy;
+    public string $email = "";
+    public string $pass = "";
+    public string $passConfirm = "";
+    public bool $agreement = false;
+    public bool $privatePolicy = false;
 
-    public function __construct(string $email = "", string $pass = "", string $passConfirm = "", bool $agreement = false, bool $privatePolicy = false)
+    public function __construct(array $data)
     {
-        $this->email = $email;
-        $this->pass = $pass;
-        $this->passConfirm = $passConfirm;
-        $this->agreement = $agreement;
-        $this->privatePolicy = $privatePolicy;
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function getPass(): string
-    {
-        return $this->pass;
-    }
-
-    public function getPassConfirm(): string
-    {
-        return $this->passConfirm;
-    }
-
-    public function getAgreement(): bool
-    {
-        return $this->agreement;
-    }
-
-    public function getPrivatePolicy(): bool
-    {
-        return $this->privatePolicy;
-    }
-
-    public function setEmail(string $val): void
-    {
-        $this->email = $val;
-    }
-
-    public function setPass(string $val): void
-    {
-        $this->pass = $val;
-    }
-
-    public function setPassConfirm(string $val): void
-    {
-        $this->passConfirm = $val;
-    }
-
-    public function setAgreement(bool $val): void
-    {
-        $this->agreement = $val;
-    }
-
-    public function setPrivatePolicy(bool $val): void
-    {
-        $this->privatePolicy = $val;
-    }
-
-    public function parsePOST(array $post = []): void
-    {
-        if (isset($post[FieldEmail])) {
-            $this->email = trim($post[FieldEmail]);
+        if (isset($data[FieldEmail])) {
+            $this->email = trim($data[FieldEmail]);
         }
-        if (isset($post[FieldPassword])) {
-            $this->pass = trim($post[FieldPassword]);
+        if (isset($data[FieldPassword])) {
+            $this->pass = trim($data[FieldPassword]);
         }
-        if (isset($post[FieldPasswordConfirm])) {
-            $this->passConfirm = trim($post[FieldPasswordConfirm]);
+        if (isset($data[FieldPasswordConfirm])) {
+            $this->passConfirm = trim($data[FieldPasswordConfirm]);
         }
-        if (isset($post[FieldAgreement])) {
-            $this->agreement = !empty($post[FieldAgreement]);
+        if (isset($data[FieldAgreement])) {
+            $this->agreement = !empty($data[FieldAgreement]);
         }
-        if (isset($post[FieldPrivacyPolicy])) {
-            $this->privatePolicy = !empty($post[FieldPrivacyPolicy]);
+        if (isset($data[FieldPrivacyPolicy])) {
+            $this->privatePolicy = !empty($data[FieldPrivacyPolicy]);
         }
     }
 }

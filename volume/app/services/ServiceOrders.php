@@ -4,32 +4,32 @@ final class ServiceOrders extends ServiceDB
 {
     protected string $table = "orders";
 
-    protected array $fields = ["order_id", "user_id", "contact_phone", "contact_name", "comment", "place_delivery", "ip", "updated_at", "created_at"];
+    public function __construct(OrderTbl $item)
+    {
+        parent::__construct();
+        $this->fields = $item->fields;
+    }
 
     public function all(): array|Error
     {
-        $list = [];
-
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY `order_id` DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
+        $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $item = new Order();
-            $item->parse($row);
-
-            $list[] = $item;
+            $list[] = new OrderTbl($row);
         }
 
         return $list;
     }
 
-    public function one(int $orderId): null|Error|Order
+    public function one(int $orderId): null|Error|OrderTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE `order_id`=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
             $stmt->execute([$orderId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -39,33 +39,30 @@ final class ServiceOrders extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $order = new Order();
-        $order->parse($data);
-
-        return $order;
+        return new OrderTbl($data);
     }
 
-    public function createOrUpdate(Order $user): int|Error
+    public function createOrUpdate(OrderTbl $order): int|Error
     {
         $id = 0;
         $arData = [
-            $user->userId,
-            $user->contactPhone,
-            $user->contactName,
-            $user->comment,
-            $user->placeDelivery,
-            $user->ip,
-            $user->updatedAt,
-            $user->createdAt
+            $order->userId,
+            $order->contactPhone,
+            $order->contactName,
+            $order->comment,
+            $order->placeDelivery,
+            $order->ip,
+            $order->updatedAt,
+            $order->createdAt
         ];
 
         try {
-            if ($user->orderId > 0) {
+            if ($order->orderId > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE order_id=?");
-                $arData[] = $user->orderId;
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
+                $arData[] = $order->orderId;
                 $stmt->execute($arData);
-                $id = $user->orderId;
+                $id = $order->orderId;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 
@@ -88,7 +85,9 @@ final class ServiceOrders extends ServiceDB
     public function delete(int $orderId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE order_id=?")->execute([$orderId]);
+            return $this->db->
+            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
+            execute([$orderId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

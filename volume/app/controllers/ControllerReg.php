@@ -30,7 +30,7 @@ final class ControllerReg extends ControllerBase
 
             // проверим пользователя
             $result = $serviceUsers->oneByEmail($req->getEmail());
-            if ($result instanceof User) {
+            if ($result instanceof UserTbl) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ($result->emailHash !== "") ? ErrCheckYourEmail : ErrUserAlreadyHas;
                 return $resp;
@@ -41,7 +41,7 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $user = new User();
+            $user = new UserTbl([]);
             $user->email = $req->getEmail();
             $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT);
             $user->emailHash = randomString(32, true);

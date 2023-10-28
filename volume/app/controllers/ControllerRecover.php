@@ -37,15 +37,16 @@ final class ControllerRecover extends ControllerBase
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } elseif ($user instanceof User && $user->emailHash != "") {
+            } elseif ($user instanceof UserTbl && $user->emailHash != "") {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
             }
 
-            $recover = new Recover();
-            $recover->hash = randomString(32, true);
-            $recover->userId = $user->userId;
+            $recover = new RecoverTbl([
+                randomString(32, true),
+                $user->userId,
+            ]);
 
             $serviceRecover->db->beginTransaction();
 
@@ -100,7 +101,7 @@ final class ControllerRecover extends ControllerBase
                 $resp->data[FieldError] = ErrInternalServer;
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceRecover->one", $recover->getMessage()));
                 return $resp;
-            } elseif ($recover instanceof Recover) {
+            } elseif ($recover instanceof RecoverTbl) {
                 $user = $serviceUsers->one($recover->userId);
                 if ($user instanceof Error) {
                     $resp->setHttpCode(500);

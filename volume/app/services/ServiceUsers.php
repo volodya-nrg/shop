@@ -3,32 +3,33 @@
 final class ServiceUsers extends ServiceDB
 {
     protected string $table = "users";
-    protected array $fields = ["user_id", "email", "pass", "email_hash", "avatar", "birthday_day", "birthday_mon", "role", "updated_at", "created_at"];
+
+    public function __construct(UserTbl $item)
+    {
+        parent::__construct();
+        $this->fields = $item->fields;
+    }
 
     public function all(): array|Error
     {
-        $list = [];
-
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY user_id DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
+        $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $user = new User();
-            $user->parse($row);
-
-            $list[] = $user;
+            $list[] = new UserTbl($row);
         }
 
         return $list;
     }
 
-    public function one(int $userId): null|Error|User
+    public function one(int $userId): null|Error|UserTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE user_id=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
             $stmt->execute([$userId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -38,16 +39,13 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $user = new User();
-        $user->parse($data);
-
-        return $user;
+        return new UserTbl($data);
     }
 
-    public function oneByEmail(string $email): Error|null|User
+    public function oneByEmail(string $email): null|Error|UserTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE email=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[1]}=?");
             $stmt->execute([$email]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -57,15 +55,13 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $user = new User();
-        $user->parse($data);
-
-        return $user;
+        return new UserTbl($data);
     }
-    public function oneByEmailHash(string $hash): Error|null|User
+
+    public function oneByEmailHash(string $hash): null|Error|UserTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE email_hash=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[3]}=?");
             $stmt->execute([$hash]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -75,13 +71,10 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $user = new User();
-        $user->parse($data);
-
-        return $user;
+        return new UserTbl($data);
     }
 
-    public function createOrUpdate(User $user): int|Error
+    public function createOrUpdate(UserTbl $user): int|Error
     {
         $id = 0;
         $arData = [
@@ -99,7 +92,7 @@ final class ServiceUsers extends ServiceDB
         try {
             if ($user->userId > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE user_id=?");
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
                 $arData[] = $user->userId;
                 $stmt->execute($arData);
                 $id = $user->userId;
@@ -125,7 +118,9 @@ final class ServiceUsers extends ServiceDB
     public function delete(int $userId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE user_id=?")->execute([$userId]);
+            return $this->db->
+            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
+            execute([$userId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

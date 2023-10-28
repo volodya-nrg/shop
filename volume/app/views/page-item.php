@@ -1,5 +1,5 @@
 <?php
-$item = $__data[FieldItem] ?? new Item();
+$item = $__data[FieldItem] ?? new ItemTbl([]);
 ?>
 <div class="page-item">
     <div class="page-item__breadcrumbs">

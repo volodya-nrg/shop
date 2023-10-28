@@ -3,32 +3,33 @@
 final class ServiceProps extends ServiceDB
 {
     protected string $table = "props";
-    protected array $fields = ["prop_id", "name"];
+
+    public function __construct(PropTbl $item)
+    {
+        parent::__construct();
+        $this->fields = $item->fields;
+    }
 
     public function all(): array|Error
     {
-        $list = [];
-
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY prop_id DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
+        $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $item = new Prop();
-            $item->parse($row);
-
-            $list[] = $item;
+            $list[] = new PropTbl($row);
         }
 
         return $list;
     }
 
-    public function one(int $propId): null|Error|Prop
+    public function one(int $propId): null|Error|PropTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE prop_id=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
             $stmt->execute([$propId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -38,13 +39,10 @@ final class ServiceProps extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $prop = new Prop();
-        $prop->parse($data);
-
-        return $prop;
+        return new PropTbl($data);
     }
 
-    public function createOrUpdate(Prop $prop): int|Error
+    public function createOrUpdate(PropTbl $prop): int|Error
     {
         $id = 0;
         $arData = [
@@ -55,7 +53,7 @@ final class ServiceProps extends ServiceDB
         try {
             if ($prop->propId > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE prop_id=?");
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
                 $arData[] = $prop->propId;
                 $stmt->execute($arData);
                 $id = $prop->propId;
@@ -81,7 +79,9 @@ final class ServiceProps extends ServiceDB
     public function delete(int $propId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE prop_id=?")->execute([$propId]);
+            return $this->db->
+            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
+            execute([$propId]);
             // тут почистить все его значения
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

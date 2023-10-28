@@ -3,32 +3,33 @@
 final class ServiceItems extends ServiceDB
 {
     protected string $table = "items";
-    protected array $fields = ["item_id", "name", "slug", "cat_id", "description", "price", "is_disabled", "updated_at", "created_at"];
+
+    public function __construct(ItemTbl $item)
+    {
+        parent::__construct();
+        $this->fields = $item->fields;
+    }
 
     public function all(): array|Error
     {
-        $list = [];
-
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY item_id DESC");
+            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
+        $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $item = new Item();
-            $item->parse($row);
-
-            $list[] = $item;
+            $list[] = new ItemTbl($row);
         }
 
         return $list;
     }
 
-    public function one(int $itemId): null|Error|Item
+    public function one(int $itemId): null|Error|ItemTbl
     {
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE item_id=?");
+            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
             $stmt->execute([$itemId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -38,18 +39,14 @@ final class ServiceItems extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        $item = new Item();
-        $item->parse($data);
-
-        return $item;
+        return new ItemTbl($data);
     }
 
-    public function createOrUpdate(Item $item): int|Error
+    public function createOrUpdate(ItemTbl $item): int|Error
     {
         $id = 0;
         $arData = [
-            $item->itemId,
-            $item->name,
+            $item->title,
             $item->slug,
             $item->catId,
             $item->description,
@@ -62,7 +59,7 @@ final class ServiceItems extends ServiceDB
         try {
             if ($item->itemId > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE item_id=?");
+                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
                 $arData[] = $item->itemId;
                 $stmt->execute($arData);
                 $id = $item->itemId;
@@ -88,7 +85,9 @@ final class ServiceItems extends ServiceDB
     public function delete(int $itemId): bool|Error
     {
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE item_id=?")->execute([$itemId]);
+            return $this->db->
+            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
+            execute([$itemId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
