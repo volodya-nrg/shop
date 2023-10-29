@@ -8,22 +8,33 @@ final class RequestReg
     public bool $agreement = false;
     public bool $privatePolicy = false;
 
-    public function __construct(array $data)
+    public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($data[FieldEmail])) {
-            $this->email = trim($data[FieldEmail]);
+        if (isset($post[FieldEmail])) {
+            $this->email = $post[FieldEmail];
         }
-        if (isset($data[FieldPassword])) {
-            $this->pass = trim($data[FieldPassword]);
+        if (isset($post[FieldPassword])) {
+            $this->pass = $post[FieldPassword];
         }
-        if (isset($data[FieldPasswordConfirm])) {
-            $this->passConfirm = trim($data[FieldPasswordConfirm]);
+        if (isset($post[FieldPasswordConfirm])) {
+            $this->passConfirm = $post[FieldPasswordConfirm];
         }
-        if (isset($data[FieldAgreement])) {
-            $this->agreement = !empty($data[FieldAgreement]);
+        if (isset($post[FieldAgreement])) {
+            $this->agreement = $post[FieldAgreement];
         }
-        if (isset($data[FieldPrivacyPolicy])) {
-            $this->privatePolicy = !empty($data[FieldPrivacyPolicy]);
+        if (isset($post[FieldPrivacyPolicy])) {
+            $this->privatePolicy = $post[FieldPrivacyPolicy];
         }
+    }
+
+    public function toArray(): array
+    {
+        return [
+            FieldEmail => $this->email,
+            FieldPassword => $this->pass,
+            FieldPasswordConfirm => $this->passConfirm,
+            FieldAgreement => $this->agreement,
+            FieldPrivacyPolicy => $this->privatePolicy,
+        ];
     }
 }

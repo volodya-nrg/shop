@@ -66,6 +66,11 @@ const FieldPrice = "price";
 const FieldIsDisabled = "is_disabled";
 const FieldUpdatedAt = "updated_at";
 const FieldCreatedAt = "created_at";
+const FieldParentId = "parent_id";
+const FieldPos = "pos";
+const FieldLimit = "limit";
+const FieldOffset = "offset";
+const FieldUserId = "user_id";
 
 // viewNames
 const ViewModuleCounter = "module-counter.php";
@@ -78,6 +83,8 @@ const ViewModulePaginator = "module-paginator.php";
 const ViewPageAdm = "page-adm.php";
 const ViewPageAdmItems = "page-adm-items.php";
 const ViewPageAdmItem = "page-adm-item.php";
+const ViewPageAdmCats = "page-adm-cats.php";
+const ViewPageAdmCat = "page-adm-cat.php";
 const ViewPageAgreement = "page-agreement.php";
 const ViewPageCart = "page-cart.php";
 const ViewPageCat = "page-cat.php";

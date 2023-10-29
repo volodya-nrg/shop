@@ -4,9 +4,9 @@ final class ServiceSettings extends ServiceDB
 {
     protected string $table = "settings";
 
-    public function __construct(SettingTbl $item)
+    public function __construct(array $fields)
     {
         parent::__construct();
-        $this->fields = $item->fields;
+        $this->fields = $fields;
     }
 }

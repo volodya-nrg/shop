@@ -6,9 +6,11 @@ final class PropTbl implements InterfaceConstructData
     public int $propId = 0;
     public string $name = "";
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
-        $this->propId = $data[$this->fields[0]];
-        $this->name = $data[$this->fields[1]];
+        if (count($data)) {
+            $this->propId = $data[$this->fields[0]];
+            $this->name = $data[$this->fields[1]];
+        }
     }
 }

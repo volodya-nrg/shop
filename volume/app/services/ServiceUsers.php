@@ -4,10 +4,10 @@ final class ServiceUsers extends ServiceDB
 {
     protected string $table = "users";
 
-    public function __construct(UserTbl $item)
+    public function __construct(array $fields)
     {
         parent::__construct();
-        $this->fields = $item->fields;
+        $this->fields = $fields;
     }
 
     public function all(): array|Error
@@ -77,14 +77,36 @@ final class ServiceUsers extends ServiceDB
     public function createOrUpdate(UserTbl $user): int|Error
     {
         $id = 0;
+        $emailHash = null;
+        $avatar = null;
+        $birthdayDay = null;
+        $birthdayMon = null;
+        $role = null;
+
+        if (!empty($user->emailHash)) {
+            $emailHash = $user->emailHash;
+        }
+        if (!empty($user->avatar)) {
+            $avatar = $user->avatar;
+        }
+        if (!empty($user->birthdayDay)) {
+            $birthdayDay = $user->birthdayDay;
+        }
+        if (!empty($user->birthdayMon)) {
+            $birthdayMon = $user->birthdayMon;
+        }
+        if (!empty($user->role)) {
+            $role = $user->role;
+        }
+
         $arData = [
             $user->email,
             $user->pass,
-            $user->emailHash,
-            $user->avatar,
-            $user->birthdayMon,
-            $user->birthdayDay,
-            $user->role,
+            $emailHash,
+            $avatar,
+            $birthdayMon,
+            $birthdayDay,
+            $role,
             $user->updatedAt,
             $user->createdAt
         ];

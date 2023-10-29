@@ -24,113 +24,115 @@ final class ControllerRegTest extends TestCase
 
     public function testIndex(): void
     {
-        $req = new RequestReg();
-        $password = "12345";
-        $profile = getRandomUser($password);
-        $profile->emailHash = "x";
+        $reqForUser = new RequestReg();
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
 
         // открываем страницу
-        $this->client->reg(null, function (MyResponse $resp) use ($req) {
+        $this->client->reg(null, "", false, function (MyResponse $resp) use ($reqForUser) {
             checkBasicData($this, 200, $resp, 0, ViewPageReg);
 
-            $req->setEmail(randomString(10));
-            $req->setPass(randomString(PassMinLen - 1));
-            $req->setPassConfirm(randomString(PassMinLen));
-            $req->setAgreement(false);
-            $req->setPrivatePolicy(false);
+            $reqForUser->email = randomString(10);
+            $reqForUser->pass = randomString(PassMinLen - 1);
+            $reqForUser->passConfirm = randomString(PassMinLen);
+            $reqForUser->agreement = false;
+            $reqForUser->privatePolicy = false;
 
             // e-mail не правильный, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($req) {
+        })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $req->setEmail(randomEmail());
+            $reqForUser->email = randomEmail();
 
             // пароль не верный, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($req) {
+        })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $req->setPass(randomString(PassMinLen));
+            $reqForUser->pass = randomString(PassMinLen);
 
             // пароли не равны между собой, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($req) {
+        })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrPasswordsNotEqual, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $req->setPassConfirm($req->getPass());
+            $reqForUser->passConfirm = $reqForUser->pass;
 
             // не выбран agreement, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($req) {
+        })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrAcceptAgreement, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $req->setAgreement(true);
+            $reqForUser->agreement = true;
 
             // не выбран privatePolicy, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($req) {
+        })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrAcceptPrivatePolicy, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $req->setPrivatePolicy(true);
+            $reqForUser->privatePolicy = true;
 
-            // создадим профиль с не подтвержденным е-мэйлом
-        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($req, $profile) {
-            checkBasicData($this, 200, $resp, 0);
+            // успешная регистрация пользователя, е-мэйл не подтвержден
+        })->reg($reqForUser, "", false, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2, ViewPageReg);
+            $this->assertArrayHasKey(FieldHash, $resp->data);
+            $this->assertArrayHasKey(FieldUserId, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
+            $this->assertGreaterThan(0, $resp->data[FieldUserId]);
 
-            $req->setEmail($profile->email);
-
-            // пользователь с таким е-мэйлом уже есть, е-мэйл не подтвержден, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($profile) {
+            // еще раз попробуем зарегистрировать того же самого пользователя, будет ошибка
+        })->reg($reqForUser, "", false, function (MyResponse $resp) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrCheckYourEmail, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
 
-            $profile->emailHash = "";
+            // успешная регистрация админа
+        })->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2, ViewPageReg);
+            $this->assertArrayHasKey(FieldHash, $resp->data);
+            $this->assertArrayHasKey(FieldUserId, $resp->data);
+            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
+            $this->assertGreaterThan(0, $resp->data[FieldUserId]);
 
-            // обновим профиль (подтверждаем е-мэйл)
-        })->createOrUpdateProfile($profile, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0);
-
-            // пользователь с таким е-мэйлом уже есть, е-мэйл подтвержден, будет ошибка
-        })->reg($req, function (MyResponse $resp) use ($req) {
+            // еще раз зарегистрируем админа, будет ошибка - такой пользователь уже есть с подтвержденным е-мэйлом
+        })->reg($reqForAdmin, "", false, function (MyResponse $resp) {
             checkBasicData($this, 400, $resp, 4, ViewPageReg);
             $this->assertEquals(ErrUserAlreadyHas, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
             $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
             $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
-
-            $req->setEmail(randomEmail());
-
-            // успешная регистрация
-        })->reg($req, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageReg);
-            $this->assertArrayHasKey(FieldHash, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
         })->run();
     }
 
     public function testCheck(): void
     {
-        $pass = randomString(PassMinLen);
-        $req = new RequestReg(randomEmail(), $pass, $pass, true, true);
+        $req = new RequestReg();
+        $req->email = randomEmail();
+        $req->pass = $req->passConfirm = randomString(PassMinLen);
+        $req->agreement = true;
+        $req->privatePolicy = true;
 
         // открываем страницу
         $this->client->regCheck(function (MyResponse $resp) {
@@ -144,8 +146,8 @@ final class ControllerRegTest extends TestCase
             $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
 
             // зарегистрируем пользователя
-        })->reg($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 1, ViewPageReg);
+        })->reg($req, "", false, function (MyResponse $resp) use ($req) {
+            checkBasicData($this, 200, $resp, 2, ViewPageReg);
             $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
 
             $_GET[FieldHash] = $resp->data[FieldHash];

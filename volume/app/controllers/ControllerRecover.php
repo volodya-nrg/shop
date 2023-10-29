@@ -10,10 +10,8 @@ final class ControllerRecover extends ControllerBase
         $resp = new MyResponse(ViewPageRecover);
 
         if (isset($_POST) && count($_POST)) {
-            $req = new RequestRecover();
-            $req->parsePOST($_POST);
-
-            $resp->data[FieldRequestedEmail] = $req->getEmail();
+            $req = new RequestRecover($_POST);
+            $resp->data[FieldRequestedEmail] = $req->email;
 
             $err = $this->check_request_index($req);
             if ($err instanceof Error) {
@@ -22,31 +20,38 @@ final class ControllerRecover extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers();
-            $serviceRecover = new ServiceRecover();
-            $serviceEmail = new ServiceEmail(EMAIL_SMTP_SERVER, EMAIL_PORT, EMAIL_LOGIN, EMAIL_PASS, EMAIL_FROM, $_SERVER[FieldModeIsTest] === true);
+            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+            $serviceRecover = new ServiceRecovers((new RecoverTbl())->fields);
+            $serviceEmail = new ServiceEmail(
+                EMAIL_SMTP_SERVER,
+                EMAIL_PORT,
+                EMAIL_LOGIN,
+                EMAIL_PASS,
+                EMAIL_FROM,
+                $_SERVER[FieldModeIsTest] === true,
+            );
 
             // возьмем пользователя
-            $user = $serviceUsers->oneByEmail($req->getEmail());
-            if ($user instanceof Error) {
+            $result = $serviceUsers->oneByEmail($req->email);
+            if ($result instanceof Error) {
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->oneByEmail", $user->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->oneByEmail", $result->getMessage()));
                 return $resp;
-            } elseif ($user === null) {
+            } elseif ($result === null) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } elseif ($user instanceof UserTbl && $user->emailHash != "") {
+            } elseif ($result instanceof UserTbl && $result->emailHash !== null) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
             }
+            $user = $result;
 
-            $recover = new RecoverTbl([
-                randomString(32, true),
-                $user->userId,
-            ]);
+            $recover = new RecoverTbl();
+            $recover->hash = randomString(32, true);
+            $recover->userId = $user->userId;
 
             $serviceRecover->db->beginTransaction();
 
@@ -78,7 +83,7 @@ final class ControllerRecover extends ControllerBase
             $serviceRecover->db->commit();
 
             $resp->data = [];
-            $resp->data[FieldDataSendMsg] = sprintf(DicRecoverDataSendMsgTpl, $req->getEmail());
+            $resp->data[FieldDataSendMsg] = sprintf(DicRecoverDataSendMsgTpl, $req->email);
             $resp->data[FieldHash] = $recover->hash; // нужен для отладки в тестах
         }
 
@@ -91,9 +96,10 @@ final class ControllerRecover extends ControllerBase
         $resp = new MyResponse(ViewPageRecoverCheck);
         $hash = $_GET[FieldHash] ?? "";
         $user = null;
-        $serviceUsers = new ServiceUsers();
-        $serviceRecover = new ServiceRecover();
+        $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+        $serviceRecover = new ServiceRecovers((new RecoverTbl())->fields);
 
+        // если прислали хэш, то найдем строку
         if ($hash) {
             $recover = $serviceRecover->one($hash);
             if ($recover instanceof Error) {
@@ -102,25 +108,25 @@ final class ControllerRecover extends ControllerBase
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceRecover->one", $recover->getMessage()));
                 return $resp;
             } elseif ($recover instanceof RecoverTbl) {
-                $user = $serviceUsers->one($recover->userId);
-                if ($user instanceof Error) {
+                $result = $serviceUsers->one($recover->userId);
+                if ($result instanceof Error) {
                     $resp->setHttpCode(500);
                     $resp->data[FieldError] = ErrInternalServer;
-                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->one", $user->getMessage()));
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->one", $result->getMessage()));
                     return $resp;
-                } elseif ($user === null) {
+                } elseif ($result === null) {
                     $resp->setHttpCode(400);
                     $resp->data[FieldError] = ErrNotFoundUser;
                     return $resp;
                 }
 
-                $resp->data[FieldEmail] = $user->email; // чтоб показалась форма смены пароля, необходимо предоставить e-mail
+                $user = $result;
+                $resp->data[FieldEmail] = $user->email; // чтоб показалась форму смены пароля, необходимо предоставить e-mail
             }
         }
 
         if (($user !== null) && isset($_POST) && count($_POST)) {
-            $req = new RequestRecoverCheck();
-            $req->parsePOST($_POST);
+            $req = new RequestRecoverCheck($_POST);
 
             $err = $this->check_request_check($req);
             if ($err instanceof Error) {
@@ -130,8 +136,9 @@ final class ControllerRecover extends ControllerBase
             }
 
             $serviceUsers->db->beginTransaction();
-            $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT);
+            $user->pass = password_hash($req->pass, PASSWORD_DEFAULT);
 
+            // обновим пользователя с новым паролем
             $result = $serviceUsers->createOrUpdate($user);
             if ($result instanceof Error) {
                 $serviceUsers->db->rollBack();
@@ -142,6 +149,7 @@ final class ControllerRecover extends ControllerBase
                 return $resp;
             }
 
+            // удалим запись за ненадобностью
             $result = $serviceRecover->deleteByUserId($user->userId);
             if ($result instanceof Error) {
                 $serviceUsers->db->rollBack();
@@ -163,7 +171,7 @@ final class ControllerRecover extends ControllerBase
 
     private function check_request_index(RequestRecover $req): Error|null
     {
-        if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
             return new Error(ErrEmailNotCorrect);
         }
 
@@ -172,10 +180,10 @@ final class ControllerRecover extends ControllerBase
 
     private function check_request_check(RequestRecoverCheck $req): Error|null
     {
-        if (strlen($req->getPass()) < PassMinLen) {
+        if (strlen($req->pass) < PassMinLen) {
             return new Error(ErrPassIsShort);
         }
-        if ($req->getPass() !== $req->getPassConfirm()) {
+        if ($req->pass !== $req->passConfirm) {
             return new Error(ErrPasswordsNotEqual);
         }
 

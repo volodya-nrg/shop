@@ -5,6 +5,7 @@ const ErrNotConnectToDatabase = "нет соединения с БД";
 const ErrNotFoundClass = "не найден class";
 const ErrNotFoundMethod = "не найден method";
 const ErrNotFoundUser = "пользователь не найден";
+const ErrNotFoundKeyInArray = "не найден ключ в массиве";
 const ErrNotFoundNode = "не найдена запись";
 const ErrPassIsShort = "пароль слишком короткий (минимум " . PassMinLen . " символов)";
 const ErrPasswordsNotEqual = "пароли не совподают";

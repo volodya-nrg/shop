@@ -16,17 +16,19 @@ final class UserTbl implements InterfaceConstructData
     public string $updatedAt = "";
     public string $createdAt = "";
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
-        $this->userId = $data[$this->fields[0]];
-        $this->email = $data[$this->fields[1]];
-        $this->pass = $data[$this->fields[2]];
-        $this->emailHash = $data[$this->fields[3]];
-        $this->avatar = $data[$this->fields[4]];
-        $this->birthdayDay = $data[$this->fields[5]];
-        $this->birthdayMon = $data[$this->fields[6]];
-        $this->role = $data[$this->fields[7]];
-        $this->updatedAt = $data[$this->fields[8]];
-        $this->createdAt = $data[$this->fields[9]];
+        if (count($data)) {
+            $this->userId = $data[$this->fields[0]];
+            $this->email = $data[$this->fields[1]];
+            $this->pass = $data[$this->fields[2]];
+            $this->emailHash = $data[$this->fields[3]];
+            $this->avatar = $data[$this->fields[4]];
+            $this->birthdayDay = $data[$this->fields[5]];
+            $this->birthdayMon = $data[$this->fields[6]];
+            $this->role = $data[$this->fields[7]];
+            $this->updatedAt = $data[$this->fields[8]];
+            $this->createdAt = $data[$this->fields[9]];
+        }
     }
 }

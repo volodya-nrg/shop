@@ -13,16 +13,18 @@ final class OrderTbl implements InterfaceConstructData
     public string $updatedAt = "";
     public string $createdAt = "";
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
-        $this->orderId = $data[$this->fields[0]];
-        $this->userId = $data[$this->fields[1]];
-        $this->contactPhone = $data[$this->fields[2]];
-        $this->contactName = $data[$this->fields[3]];
-        $this->comment = $data[$this->fields[4]];
-        $this->placeDelivery = $data[$this->fields[5]];
-        $this->ip = $data[$this->fields[6]];
-        $this->updatedAt = $data[$this->fields[7]];
-        $this->createdAt = $data[$this->fields[8]];
+        if (count($data)) {
+            $this->orderId = $data[$this->fields[0]];
+            $this->userId = $data[$this->fields[1]];
+            $this->contactPhone = $data[$this->fields[2]];
+            $this->contactName = $data[$this->fields[3]];
+            $this->comment = $data[$this->fields[4]];
+            $this->placeDelivery = $data[$this->fields[5]];
+            $this->ip = $data[$this->fields[6]];
+            $this->updatedAt = $data[$this->fields[7]];
+            $this->createdAt = $data[$this->fields[8]];
+        }
     }
 }

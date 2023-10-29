@@ -38,6 +38,17 @@ function randomString(int $len = 32, bool $isAttachNumber = false): string
     return $result;
 }
 
+function lorem(int $words = 32): string
+{
+    $aWords = [];
+
+    for ($i = 0; $i < $words; $i++) {
+        $aWords[] = randomString(random_int(2, 10));
+    }
+
+    return implode(" ", $aWords);
+}
+
 function randomEmail(): string
 {
     return sprintf("%s@%s.%s", randomString(10), randomString(5), randomString(3));
@@ -46,6 +57,12 @@ function randomEmail(): string
 function finePrice(int $price): string
 {
     return sprintf("%d", $price);
+}
+
+function abort(string $msg): void
+{
+    error_log($msg);
+    exit(1);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

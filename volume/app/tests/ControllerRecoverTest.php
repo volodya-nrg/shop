@@ -25,93 +25,115 @@ final class ControllerRecoverTest extends TestCase
     public function testIndex(): void
     {
         $req = new RequestRecover();
-        $password = "12345";
-        $profile = getRandomUser($password);
 
-        // открываем страницу
+        $reqForUser = new RequestReg();
+        $reqForUser->email = randomEmail();
+        $reqForUser->pass = randomString(PassMinLen);
+        $reqForUser->passConfirm = $reqForUser->pass;
+        $reqForUser->agreement = true;
+        $reqForUser->privatePolicy = true;
+
+        // откроем страницу
         $this->client->recover(null, function (MyResponse $resp) use ($req) {
             checkBasicData($this, 200, $resp, 0, ViewPageRecover);
 
-            $req->setEmail(randomString(10));
+            $req->email = randomString(10);
 
-            // е-мэйл не правильный, будет ошибка
+            // пошлем не правильный е-мэйл, будет ошибка
         })->recover($req, function (MyResponse $resp) use ($req) {
             checkBasicData($this, 400, $resp, 2, ViewPageRecover);
             $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
             $this->assertTrue(isset($resp->data[FieldRequestedEmail]) && strlen($resp->data[FieldRequestedEmail]) > 0);
 
-            $req->setEmail(randomEmail());
+            $req->email = randomEmail();
 
             // пользователь не найден, будет ошибка
         })->recover($req, function (MyResponse $resp) {
             checkBasicData($this, 400, $resp, 2, ViewPageRecover);
             $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
-            $this->assertTrue(isset($resp->data[FieldRequestedEmail]) && strlen($resp->data[FieldRequestedEmail]) > 0);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
 
-            // ok
-        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($req, $profile) {
-            checkBasicData($this, 200, $resp, 0);
+            // зарегистрируем пользователя (е-мэйл не подтвержден)
+        })->reg($reqForUser, "", false, function (MyResponse $resp) use ($req, $reqForUser) {
+            checkBasicData($this, 200, $resp, 2, ViewPageReg);
 
-            $req->setEmail($profile->email);
+            $_GET[FieldHash] = $resp->data[FieldHash];
+            $req->email = $reqForUser->email;
 
-            // ok
-        })->recover($req, function (MyResponse $resp) use ($profile) {
+            // попробуем еще раз совершить запрос, будет ошибка, т.к. е-мэйл не подтвержден
+        })->recover($req, function (MyResponse $resp) {
+            checkBasicData($this, 400, $resp, 2, ViewPageRecover);
+            $this->assertEquals(ErrCheckYourEmail, $resp->data[FieldError]);
+            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+
+            // подтвердим ему е-мэйл
+        })->regCheck(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageRegCheck);
+
+            // пошлем корректные данные
+        })->recover($req, function (MyResponse $resp) use ($req) {
             checkBasicData($this, 200, $resp, 2, ViewPageRecover);
             $this->assertArrayHasKey(FieldDataSendMsg, $resp->data);
-            $this->assertEquals(sprintf(DicRecoverDataSendMsgTpl, $profile->email), $resp->data[FieldDataSendMsg]);
+            $this->assertEquals(sprintf(DicRecoverDataSendMsgTpl, $req->email), $resp->data[FieldDataSendMsg]);
             $this->assertArrayHasKey(FieldHash, $resp->data);
         })->run();
     }
 
     public function testCheck(): void
     {
-        $reqForRecover = new RequestRecover();
-        $req = new RequestRecoverCheck(randomString(PassMinLen - 1), randomString(10));
-        $password = "12345";
-        $profile = getRandomUser($password);
+        $reqForRecoverCheck = new RequestRecoverCheck();
+        $reqForRecoverCheck->pass = randomString(PassMinLen - 1);
+        $reqForRecoverCheck->passConfirm = randomString(10);
 
-        // открываем страницу
+        $reqForUser = new RequestReg();
+        $reqForUser->email = randomEmail();
+        $reqForUser->pass = randomString(PassMinLen);
+        $reqForUser->passConfirm = $reqForUser->pass;
+        $reqForUser->agreement = true;
+        $reqForUser->privatePolicy = true;
+
+        $reqForRecover = new RequestRecover();
+        $reqForRecover->email = $reqForUser->email;
+
+            // открываем страницу
         $this->client->recoverCheck(null, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0, ViewPageRecoverCheck);
 
             $_GET[FieldHash] = randomString();
 
-            // подкинем не валидный hash, откроется страница в обычном режиме
-        })->recoverCheck($req, function (MyResponse $resp) {
+            // подкинем не валидный hash, откроется страница в обычном режиме. Т.к. хеша такого нет.
+        })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0, ViewPageRecoverCheck);
 
-            // создадим профиль
-        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($reqForRecover, $profile) {
-            checkBasicData($this, 200, $resp, 0);
+            // зарегистриуем полностью пользователя
+        })->reg($reqForUser, "", true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2, ViewPageReg);
 
-            $reqForRecover->setEmail($profile->email);
-
-            // от профиля отправим данные для восстановления пароля
+            // от пользователя отправим данные для восстановления пароля
         })->recover($reqForRecover, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2, ViewPageRecover);
-            $this->assertArrayHasKey(FieldHash, $resp->data);
 
             $_GET[FieldHash] = $resp->data[FieldHash];
 
             // подкидываем валидный хеш, но пароль короткий, будет ошибка
-        })->recoverCheck($req, function (MyResponse $resp) use ($req, $profile) {
+        })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) use ($reqForUser, $reqForRecoverCheck) {
             checkBasicData($this, 400, $resp, 2, ViewPageRecoverCheck);
             $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
             $this->assertArrayHasKey(FieldEmail, $resp->data);
-            $this->assertEquals($profile->email, $resp->data[FieldEmail]);
+            $this->assertEquals($reqForUser->email, $resp->data[FieldEmail]);
 
-            $req->setPass(randomString(PassMinLen));
+            $reqForRecoverCheck->pass = randomString(PassMinLen);
 
             // пароли не верны между собой, будет ошибка
-        })->recoverCheck($req, function (MyResponse $resp) use ($req) {
+        })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) use ($reqForRecoverCheck) {
             checkBasicData($this, 400, $resp, 2, ViewPageRecoverCheck);
             $this->assertArrayHasKey(FieldEmail, $resp->data);
             $this->assertEquals(ErrPasswordsNotEqual, $resp->data[FieldError]);
 
-            $req->setPassConfirm($req->getPass());
+            $reqForRecoverCheck->passConfirm = $reqForRecoverCheck->pass;
 
             // ok
-        })->recoverCheck($req, function (MyResponse $resp) {
+        })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 1, ViewPageRecoverCheck);
             $this->assertArrayHasKey(FieldSuccess, $resp->data);
             $this->assertEquals(DicPasswordChangedSuccessfully, $resp->data[FieldSuccess]);

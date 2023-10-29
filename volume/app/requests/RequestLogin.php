@@ -1,17 +1,24 @@
 <?php
 
-final class RequestLogin implements InterfaceConstructData
+final class RequestLogin
 {
     public string $email = "";
     public string $pass = "";
 
-    public function __construct(array $data)
+    public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($data[FieldEmail])) {
-            $this->email = trim($data[FieldEmail]);
+        if (isset($post[FieldEmail])) {
+            $this->email = $post[FieldEmail];
         }
-        if (isset($data[FieldPassword])) {
-            $this->pass = trim($data[FieldPassword]);
+        if (isset($post[FieldPassword])) {
+            $this->pass = $post[FieldPassword];
         }
+    }
+    public function toArray(): array
+    {
+        return [
+            FieldEmail => $this->email,
+            FieldPassword => $this->pass,
+        ];
     }
 }

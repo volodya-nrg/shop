@@ -4,10 +4,10 @@ final class ServiceCats extends ServiceDB
 {
     protected string $table = "cats";
 
-    public function __construct(CatTbl $item)
+    public function __construct(array $fields)
     {
         parent::__construct();
-        $this->fields = $item->fields;
+        $this->fields = $fields;
     }
 
     public function all(): array|Error

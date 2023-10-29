@@ -1,17 +1,25 @@
 <?php
 
-final class RequestRecoverCheck implements InterfaceConstructData
+final class RequestRecoverCheck
 {
     public string $pass = "";
     public string $passConfirm = "";
 
-    public function __construct(array $data)
+    public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($data[FieldPassword])) {
-            $this->pass = trim($data[FieldPassword]);
+        if (isset($post[FieldPassword])) {
+            $this->pass = $post[FieldPassword];
         }
-        if (isset($data[FieldPasswordConfirm])) {
-            $this->passConfirm = trim($data[FieldPasswordConfirm]);
+        if (isset($post[FieldPasswordConfirm])) {
+            $this->passConfirm = $post[FieldPasswordConfirm];
         }
+    }
+
+    public function toArray(): array
+    {
+        return [
+            FieldPassword => $this->pass,
+            FieldPasswordConfirm => $this->passConfirm,
+        ];
     }
 }

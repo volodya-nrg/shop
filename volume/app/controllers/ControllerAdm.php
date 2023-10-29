@@ -41,12 +41,37 @@ final class ControllerAdm extends ControllerBase
 
             // тут надо картинки еще подхватить
 
-            $serviceItems = new ServiceItems($item);
+            $serviceItems = new ServiceItems($item->fields);
 
             $itemId = $serviceItems->createOrUpdate($item);
             if ($itemId instanceof Error) {
                 $resp->setHttpCode(500);
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
+                error_log($itemId);
+                //error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
+                return $resp;
+            }
+        }
+
+        return $resp;
+    }
+    public function cat(array $args): MyResponse
+    {
+        $resp = new MyResponse(ViewPageAdmItem);
+
+        $err = $this->checkRule();
+        if ($err instanceof Error) {
+            return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
+        }
+
+        if (isset($_POST) && count($_POST)) {
+            $item = new CatTbl($_POST);
+            $serviceCats = new ServiceCats($item->fields);
+
+            $itemId = $serviceCats->createOrUpdate($item);
+            if ($itemId instanceof Error) {
+                $resp->setHttpCode(500);
+                error_log($itemId);
+                //error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
                 return $resp;
             }
         }

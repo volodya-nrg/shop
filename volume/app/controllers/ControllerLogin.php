@@ -10,10 +10,8 @@ final class ControllerLogin extends ControllerBase
         $resp = new MyResponse(ViewPageLogin);
 
         if (isset($_POST) && count($_POST)) {
-            $req = new RequestLogin();
-            $req->parsePOST($_POST);
-
-            $resp->data[FieldRequestedEmail] = $req->getEmail();
+            $req = new RequestLogin($_POST);
+            $resp->data[FieldRequestedEmail] = $req->email;
 
             $err = $this->check_request($req);
             if ($err instanceof Error) {
@@ -22,10 +20,10 @@ final class ControllerLogin extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers();
+            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
 
             // достанем пользователя
-            $user = $serviceUsers->oneByEmail($req->getEmail());
+            $user = $serviceUsers->oneByEmail($req->email);
             if ($user instanceof Error) {
                 $resp->setHttpCode(500);
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $user->getMessage()));
@@ -34,14 +32,14 @@ final class ControllerLogin extends ControllerBase
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } else if ($user instanceof UserTbl && $user->emailHash != "") {
+            } else if ($user instanceof UserTbl && $user->emailHash !== null) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
             }
 
             // проверим по паролю
-            if (!password_verify($req->getPass(), $user->pass)) {
+            if (!password_verify($req->pass, $user->pass)) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrLoginOrPasswordNotCorrect;
                 return $resp;
@@ -64,10 +62,10 @@ final class ControllerLogin extends ControllerBase
 
     private function check_request(RequestLogin $req): Error|null
     {
-        if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
             return new Error(ErrEmailNotCorrect);
         }
-        if (strlen($req->getPass()) < PassMinLen) {
+        if (strlen($req->pass) < PassMinLen) {
             return new Error(ErrPassIsShort);
         }
 

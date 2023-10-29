@@ -1,13 +1,20 @@
 <?php
 
-final class RequestRecover implements InterfaceConstructData
+final class RequestRecover
 {
     public string $email = "";
 
-    public function __construct(array $data)
+    public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($data[FieldEmail])) {
-            $this->email = trim($data[FieldEmail]);
+        if (isset($post[FieldEmail])) {
+            $this->email = $post[FieldEmail];
         }
+    }
+
+    public function toArray(): array
+    {
+        return [
+            FieldEmail => $this->email,
+        ];
     }
 }

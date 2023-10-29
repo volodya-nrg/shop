@@ -6,9 +6,11 @@ final class RecoverTbl implements InterfaceConstructData
     public string $hash = "";
     public int $userId = 0;
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
-        $this->hash = $data[$this->fields[0]];
-        $this->userId = $data[$this->fields[1]];
+        if (count($data)) {
+            $this->hash = $data[$this->fields[0]];
+            $this->userId = $data[$this->fields[1]];
+        }
     }
 }

@@ -4,10 +4,10 @@ final class ServiceProps extends ServiceDB
 {
     protected string $table = "props";
 
-    public function __construct(PropTbl $item)
+    public function __construct(array $fields)
     {
         parent::__construct();
-        $this->fields = $item->fields;
+        $this->fields = $fields;
     }
 
     public function all(): array|Error

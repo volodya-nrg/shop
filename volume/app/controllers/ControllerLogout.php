@@ -10,7 +10,6 @@ final class ControllerLogout extends ControllerBase
         if (isset($_SESSION[FieldAdmin])) {
             unset($_SESSION[FieldAdmin]);
         }
-
         if (!$_SERVER[FieldModeIsTest]) {
             redirect("/");
         }

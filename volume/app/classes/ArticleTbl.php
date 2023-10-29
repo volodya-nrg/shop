@@ -12,14 +12,16 @@ final class ArticleTbl implements InterfaceConstructData
     public string $updatedAt = "";
     public string $createdAt = "";
 
-    public function __construct(array $data)
+    public function __construct(array $data = [])
     {
-        $this->articleId = $data[$this->fields[0]];
-        $this->title = $data[$this->fields[1]];
-        $this->slug = $data[$this->fields[2]];
-        $this->description = $data[$this->fields[3]];
-        $this->isDisabled = $data[$this->fields[4]];
-        $this->updatedAt = $data[$this->fields[5]];
-        $this->createdAt = $data[$this->fields[6]];
+        if (count($data)) {
+            $this->articleId = $data[$this->fields[0]];
+            $this->title = $data[$this->fields[1]];
+            $this->slug = $data[$this->fields[2]];
+            $this->description = $data[$this->fields[3]];
+            $this->isDisabled = $data[$this->fields[4]];
+            $this->updatedAt = $data[$this->fields[5]];
+            $this->createdAt = $data[$this->fields[6]];
+        }
     }
 }

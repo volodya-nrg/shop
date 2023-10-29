@@ -10,13 +10,12 @@ final class ControllerReg extends ControllerBase
         $resp = new MyResponse(ViewPageReg);
 
         if (isset($_POST) && count($_POST)) {
-            $req = new RequestReg();
-            $req->parsePOST($_POST);
+            $req = new RequestReg($_POST);
 
             // для сохранения значение, чтоб в случае ошибки выставить на фронте их еще раз
-            $resp->data[FieldRequestedEmail] = $req->getEmail();
-            $resp->data[FieldRequestedAgreement] = $req->getAgreement();
-            $resp->data[FieldRequestedPrivatePolicy] = $req->getPrivatePolicy();
+            $resp->data[FieldRequestedEmail] = $req->email;
+            $resp->data[FieldRequestedAgreement] = $req->agreement;
+            $resp->data[FieldRequestedPrivatePolicy] = $req->privatePolicy;
 
             $err = $this->check_request($req);
             if ($err instanceof Error) {
@@ -25,14 +24,21 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers();
-            $serviceEmail = new ServiceEmail(EMAIL_SMTP_SERVER, EMAIL_PORT, EMAIL_LOGIN, EMAIL_PASS, EMAIL_FROM, $_SERVER[FieldModeIsTest] === true);
+            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+            $serviceEmail = new ServiceEmail(
+                EMAIL_SMTP_SERVER,
+                EMAIL_PORT,
+                EMAIL_LOGIN,
+                EMAIL_PASS,
+                EMAIL_FROM,
+                $_SERVER[FieldModeIsTest] === true,
+            );
 
             // проверим пользователя
-            $result = $serviceUsers->oneByEmail($req->getEmail());
+            $result = $serviceUsers->oneByEmail($req->email);
             if ($result instanceof UserTbl) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = ($result->emailHash !== "") ? ErrCheckYourEmail : ErrUserAlreadyHas;
+                $resp->data[FieldError] = ($result->emailHash === null) ? ErrUserAlreadyHas : ErrCheckYourEmail;
                 return $resp;
             } elseif ($result instanceof Error) {
                 $resp->setHttpCode(500);
@@ -41,24 +47,27 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $user = new UserTbl([]);
-            $user->email = $req->getEmail();
-            $user->pass = password_hash($req->getPass(), PASSWORD_DEFAULT);
+            $now = date(DatePattern, time());
+            $user = new UserTbl();
+            $user->email = $req->email;
+            $user->pass = password_hash($req->pass, PASSWORD_DEFAULT);
             $user->emailHash = randomString(32, true);
-            $user->updatedAt = $user->createdAt = date(DatePattern, time());
+            $user->createdAt = $now;
+            $user->updatedAt = $now;
 
             // запишем в базу и отправим е-мэйл
             $serviceUsers->db->beginTransaction();
 
-            $result = $serviceUsers->createOrUpdate($user);
-            if ($result instanceof Error) {
+            $userId = $serviceUsers->createOrUpdate($user);
+            if ($userId instanceof Error) {
                 $serviceUsers->db->rollBack();
 
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->createOrUpdate", $result->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->createOrUpdate", $userId->getMessage()));
                 return $resp;
             }
+            $user->userId = $userId;
 
             $template = $this->view(DIR_VIEWS . "/" . ViewEmailMsgAndLink, [
                 FieldMsg => DicGoAheadForVerifyEmail,
@@ -71,7 +80,7 @@ final class ControllerReg extends ControllerBase
 
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "send email", $result->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceEmail->send", $err->getMessage()));
                 return $resp;
             }
 
@@ -79,6 +88,7 @@ final class ControllerReg extends ControllerBase
 
             $resp->data = []; // т.к. происходит далее редирект, то data нам не нужен
             $resp->data[FieldHash] = $user->emailHash; // нужен для теста
+            $resp->data[FieldUserId] = $user->userId; // нужен для теста
 
             if (!$_SERVER[FieldModeIsTest]) {
                 redirect("/reg/ok?" . FieldEmail . "={$user->email}");
@@ -101,7 +111,7 @@ final class ControllerReg extends ControllerBase
         $hash = $_GET[FieldHash] ?? "";
 
         if ($hash) {
-            $serviceUsers = new ServiceUsers();
+            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
 
             $user = $serviceUsers->oneByEmailHash($hash);
             if ($user instanceof Error) {
@@ -115,7 +125,7 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $user->emailHash = "";
+            $user->emailHash = null;
 
             $err = $serviceUsers->createOrUpdate($user);
             if ($err instanceof Error) {
@@ -134,19 +144,19 @@ final class ControllerReg extends ControllerBase
 
     private function check_request(RequestReg $req): Error|null
     {
-        if (!filter_var($req->getEmail(), FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
             return new Error(ErrEmailNotCorrect);
         }
-        if (strlen($req->getPass()) < PassMinLen) {
+        if (strlen($req->pass) < PassMinLen) {
             return new Error(ErrPassIsShort);
         }
-        if ($req->getPass() != $req->getPassConfirm()) {
+        if ($req->pass != $req->passConfirm) {
             return new Error(ErrPasswordsNotEqual);
         }
-        if (!$req->getAgreement()) {
+        if (!$req->agreement) {
             return new Error(ErrAcceptAgreement);
         }
-        if (!$req->getPrivatePolicy()) {
+        if (!$req->privatePolicy) {
             return new Error(ErrAcceptPrivatePolicy);
         }
 

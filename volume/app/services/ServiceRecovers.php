@@ -4,10 +4,10 @@ final class ServiceRecovers extends ServiceDB
 {
     protected string $table = "recovers";
 
-    public function __construct(RecoverTbl $item)
+    public function __construct(array $fields)
     {
         parent::__construct();
-        $this->fields = $item->fields;
+        $this->fields = $fields;
     }
 
     public function one(string $hash): null|Error|RecoverTbl

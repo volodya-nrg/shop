@@ -4,10 +4,10 @@ final class ServiceArticles extends ServiceDB
 {
     protected string $table = "articles";
 
-    public function __construct(ArticleTbl $item)
+    public function __construct(array $fields)
     {
         parent::__construct();
-        $this->fields = $item->fields;
+        $this->fields = $fields;
     }
 
     public function all(): array|Error
