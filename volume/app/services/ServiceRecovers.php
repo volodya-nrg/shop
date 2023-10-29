@@ -3,14 +3,9 @@
 final class ServiceRecovers extends ServiceDB
 {
     protected string $table = "recovers";
+    protected array $fields = ["hash", "user_id"];
 
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
-
-    public function one(string $hash): null|Error|RecoverTbl
+    public function one(string $hash): null|Error|RecoverRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -23,10 +18,10 @@ final class ServiceRecovers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new RecoverTbl($data);
+        return new RecoverRow($data);
     }
 
-    public function create(RecoverTbl $recover): null|Error
+    public function create(RecoverRow $recover): null|Error
     {
         try {
             $stmt = $this->db->prepare("
@@ -34,7 +29,7 @@ final class ServiceRecovers extends ServiceDB
                     VALUES ({$this->questionsAsString()})");
             $stmt->execute([
                 $recover->hash,
-                $recover->userId,
+                $recover->user_id,
             ]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

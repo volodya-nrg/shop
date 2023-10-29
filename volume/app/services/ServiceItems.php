@@ -3,12 +3,7 @@
 final class ServiceItems extends ServiceDB
 {
     protected string $table = "items";
-
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
+    protected array $fields = ["item_id", "title", "slug", "cat_id", "description", "price", "is_disabled", "updated_at", "created_at"];
 
     public function all(): array|Error
     {
@@ -20,13 +15,13 @@ final class ServiceItems extends ServiceDB
 
         $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $list[] = new ItemTbl($row);
+            $list[] = new ItemRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $itemId): null|Error|ItemTbl
+    public function one(int $itemId): null|Error|ItemRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -39,30 +34,30 @@ final class ServiceItems extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new ItemTbl($data);
+        return new ItemRow($data);
     }
 
-    public function createOrUpdate(ItemTbl $item): int|Error
+    public function createOrUpdate(ItemRow $item): int|Error
     {
         $id = 0;
         $arData = [
             $item->title,
             $item->slug,
-            $item->catId,
+            $item->cat_id,
             $item->description,
             $item->price,
-            $item->isDisabled,
-            $item->updatedAt,
-            $item->createdAt
+            $item->is_disabled,
+            $item->updated_at,
+            $item->created_at
         ];
 
         try {
-            if ($item->itemId > 0) {
+            if ($item->item_id > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
                 $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $item->itemId;
+                $arData[] = $item->item_id;
                 $stmt->execute($arData);
-                $id = $item->itemId;
+                $id = $item->item_id;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 

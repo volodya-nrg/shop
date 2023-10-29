@@ -24,7 +24,7 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+            $serviceUsers = new ServiceUsers();
             $serviceEmail = new ServiceEmail(
                 EMAIL_SMTP_SERVER,
                 EMAIL_PORT,
@@ -36,9 +36,9 @@ final class ControllerReg extends ControllerBase
 
             // проверим пользователя
             $result = $serviceUsers->oneByEmail($req->email);
-            if ($result instanceof UserTbl) {
+            if ($result instanceof UserRow) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = ($result->emailHash === null) ? ErrUserAlreadyHas : ErrCheckYourEmail;
+                $resp->data[FieldError] = ($result->email_hash === null) ? ErrUserAlreadyHas : ErrCheckYourEmail;
                 return $resp;
             } elseif ($result instanceof Error) {
                 $resp->setHttpCode(500);
@@ -48,12 +48,12 @@ final class ControllerReg extends ControllerBase
             }
 
             $now = date(DatePattern, time());
-            $user = new UserTbl();
+            $user = new UserRow();
             $user->email = $req->email;
             $user->pass = password_hash($req->pass, PASSWORD_DEFAULT);
-            $user->emailHash = randomString(32, true);
-            $user->createdAt = $now;
-            $user->updatedAt = $now;
+            $user->email_hash = randomString(32, true);
+            $user->created_at = $now;
+            $user->updated_at = $now;
 
             // запишем в базу и отправим е-мэйл
             $serviceUsers->db->beginTransaction();
@@ -67,11 +67,11 @@ final class ControllerReg extends ControllerBase
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->createOrUpdate", $userId->getMessage()));
                 return $resp;
             }
-            $user->userId = $userId;
+            $user->user_id = $userId;
 
             $template = $this->view(DIR_VIEWS . "/" . ViewEmailMsgAndLink, [
                 FieldMsg => DicGoAheadForVerifyEmail,
-                FieldAddress => ADDRESS . "/reg/check?" . FieldHash . "={$user->emailHash}",
+                FieldAddress => ADDRESS . "/reg/check?" . FieldHash . "={$user->email_hash}",
             ]);
 
             $err = $serviceEmail->send($user->email, DicVerifyEmail, $template);
@@ -87,8 +87,8 @@ final class ControllerReg extends ControllerBase
             $serviceUsers->db->commit();
 
             $resp->data = []; // т.к. происходит далее редирект, то data нам не нужен
-            $resp->data[FieldHash] = $user->emailHash; // нужен для теста
-            $resp->data[FieldUserId] = $user->userId; // нужен для теста
+            $resp->data[FieldHash] = $user->email_hash; // нужен для теста
+            $resp->data[FieldUserId] = $user->user_id; // нужен для теста
 
             if (!$_SERVER[FieldModeIsTest]) {
                 redirect("/reg/ok?" . FieldEmail . "={$user->email}");
@@ -111,7 +111,7 @@ final class ControllerReg extends ControllerBase
         $hash = $_GET[FieldHash] ?? "";
 
         if ($hash) {
-            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+            $serviceUsers = new ServiceUsers();
 
             $user = $serviceUsers->oneByEmailHash($hash);
             if ($user instanceof Error) {
@@ -125,7 +125,7 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $user->emailHash = null;
+            $user->email_hash = null;
 
             $err = $serviceUsers->createOrUpdate($user);
             if ($err instanceof Error) {

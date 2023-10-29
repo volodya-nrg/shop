@@ -7,7 +7,7 @@ final class TestApiClient
 //    public function createOrUpdateProfile(RequestUser $req, bool $isFull, callable $cb): TestApiClient
 //    {
 //        $this->tasks[] = function () use ($req, $cb) {
-//            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+//            $serviceUsers = new ServiceUsers((new UserRow())->fields);
 //            $errCode = 200;
 //            $data = [];
 //
@@ -32,7 +32,6 @@ final class TestApiClient
             }
 
             $cb((new ControllerLogin())->index([]));
-            $_POST = [];
         };
 
         return $this;
@@ -60,7 +59,7 @@ final class TestApiClient
                 isset($resp->data[FieldUserId]) &&
                 ($role !== "" || $isEmailConfirmed)) {
 
-                $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+                $serviceUsers = new ServiceUsers();
                 $userId = $resp->data[FieldUserId];
 
                 $result = $serviceUsers->one($userId);
@@ -75,7 +74,7 @@ final class TestApiClient
                     $user->role = $role;
                 }
                 if ($isEmailConfirmed) {
-                    $user->emailHash = null;
+                    $user->email_hash = null;
                 }
 
                 $result = $serviceUsers->createOrUpdate($user);
@@ -190,7 +189,7 @@ final class TestApiClient
     {
         foreach ($this->tasks as $task) {
             $task();
-            $_POST = [];
+            $_POST = []; // с каждой выполненой задачей явно убираем пост-запросы
         }
     }
 }

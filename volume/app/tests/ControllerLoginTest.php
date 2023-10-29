@@ -98,7 +98,7 @@ final class ControllerLoginTest extends TestCase
             checkBasicData($this, 200, $resp, 0);
 
             // создадим админа
-        })->reg($reqForAdmin, "admin", true, function (MyResponse $resp) use ($req, $reqForAdmin) {
+        })->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) use ($req, $reqForAdmin) {
             checkBasicData($this, 200, $resp, 2);
 
             $req->email = $reqForAdmin->email;

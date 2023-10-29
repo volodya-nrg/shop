@@ -3,12 +3,7 @@
 final class ServiceOrders extends ServiceDB
 {
     protected string $table = "orders";
-
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
+    protected array $fields = ["order_id", "user_id", "contact_phone", "contact_name", "comment", "place_delivery", "ip", "updated_at", "created_at"];
 
     public function all(): array|Error
     {
@@ -20,13 +15,13 @@ final class ServiceOrders extends ServiceDB
 
         $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $list[] = new OrderTbl($row);
+            $list[] = new OrderRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $orderId): null|Error|OrderTbl
+    public function one(int $orderId): null|Error|OrderRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -39,30 +34,30 @@ final class ServiceOrders extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new OrderTbl($data);
+        return new OrderRow($data);
     }
 
-    public function createOrUpdate(OrderTbl $order): int|Error
+    public function createOrUpdate(OrderRow $order): int|Error
     {
         $id = 0;
         $arData = [
-            $order->userId,
-            $order->contactPhone,
-            $order->contactName,
+            $order->user_id,
+            $order->contact_phone,
+            $order->contact_name,
             $order->comment,
-            $order->placeDelivery,
+            $order->place_delivery,
             $order->ip,
-            $order->updatedAt,
-            $order->createdAt
+            $order->updated_at,
+            $order->created_at
         ];
 
         try {
-            if ($order->orderId > 0) {
+            if ($order->order_id > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
                 $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $order->orderId;
+                $arData[] = $order->order_id;
                 $stmt->execute($arData);
-                $id = $order->orderId;
+                $id = $order->order_id;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 

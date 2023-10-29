@@ -3,12 +3,7 @@
 final class ServiceCats extends ServiceDB
 {
     protected string $table = "cats";
-
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
+    protected array $fields = ["cat_id", "name", "slug", "parent_id", "pos", "is_disabled"];
 
     public function all(): array|Error
     {
@@ -20,13 +15,13 @@ final class ServiceCats extends ServiceDB
 
         $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $list[] = new CatTbl($row);
+            $list[] = new CatRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $itemId): null|Error|CatTbl
+    public function one(int $itemId): null|Error|CatRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -39,33 +34,37 @@ final class ServiceCats extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new CatTbl($data);
+        return new CatRow($data);
     }
 
-    public function createOrUpdate(CatTbl $item): int|Error
+    public function createOrUpdate(CatRow $item): int|Error
     {
         $id = 0;
         $arData = [
             $item->name,
             $item->slug,
-            $item->parentId,
+            $item->parent_id,
             $item->pos,
-            $item->isDisabled,
+            (int)$item->is_disabled,
         ];
 
         try {
-            if ($item->catId > 0) {
+            if ($item->cat_id > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
                 $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $item->catId;
+                $arData[] = $item->cat_id;
                 $stmt->execute($arData);
-                $id = $item->catId;
+                $id = $item->cat_id;
             } else {
-                $stmt = $this->db->prepare("
-                    INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 
-                    VALUES ({$this->questionsAsString(true)})");
+                $stmt = $this->db->prepare("INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) VALUES ({$this->questionsAsString(true)})");
+                if ($stmt === false) {
+                    return new Error(ErrStmtIsFalse);
+                }
 
-                $stmt->execute($arData);
+                $result = $stmt->execute($arData);
+                if ($result === false) {
+                    return new Error(ErrSqlQueryIsFalse);
+                }
 
                 $tmp = $this->db->lastInsertId();
                 if ($tmp) {

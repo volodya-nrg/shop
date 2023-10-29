@@ -22,54 +22,60 @@ final class ControllerAdmTest extends TestCase
         $_SESSION = [];
     }
 
+    // проверим могут ли заходить пользователи и админ на гл. страницу админки
     public function testIndex(): void
     {
-        $this->assertTrue(true);
-//        $req = new RequestLogin();
-//        $password = "12345";
-//        $profile = randomUser($password);
-//        $admin = randomUser($password, "admin");
-//
-//        // открываем страницу под гостем
-//        $this->client->adm(function (MyResponse $resp) {
-//            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-//            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
-//
-//            // создадим админа
-//        })->createOrUpdateProfile($admin, function (MyResponse $resp) use ($req, $admin, $password) {
-//            checkBasicData($this, 200, $resp, 0);
-//
-//            $req->email = $admin->email;
-//            $req->pass = $password;
-//
-//            // аунтентифицируемся под админом
-//        })->login($req, function (MyResponse $resp) use ($req) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-//
-//            // зайдем еще раз на страницу
-//        })->adm(function (MyResponse $resp) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageAdm);
-//
-//            // выйдем
-//        })->logout(function (MyResponse $resp) {
-//            checkBasicData($this, 200, $resp, 0);
-//
-//            // создадим профиль
-//        })->createOrUpdateProfile($profile, function (MyResponse $resp) use ($req, $profile, $password) {
-//            checkBasicData($this, 200, $resp, 0);
-//
-//            $req->email = $profile->email;
-//            $req->pass = $password;
-//
-//            // аунтентифицируемся под профилем
-//        })->login($req, function (MyResponse $resp) use ($req) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-//
-//            // зайдем еще раз на страницу, будет ошибка
-//        })->adm(function (MyResponse $resp) {
-//            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-//            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
-//        })->run();
+        $reqForUser = new RequestReg();
+        $reqForUser->email = randomEmail();
+        $reqForUser->pass = randomString(PassMinLen);
+        $reqForUser->passConfirm = $reqForUser->pass;
+        $reqForUser->agreement = true;
+        $reqForUser->privatePolicy = true;
+
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
+
+        $reqForLoginUser = new RequestLogin();
+        $reqForLoginUser->email = $reqForUser->email;
+        $reqForLoginUser->pass = $reqForUser->pass;
+
+        $reqForLoginAdmin = new RequestLogin();
+        $reqForLoginAdmin->email = $reqForAdmin->email;
+        $reqForLoginAdmin->pass = $reqForAdmin->pass;
+
+        // зарегистрируем юзера
+        $this->client->reg($reqForUser, "", true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под юзером и запросим админку
+        })->login($reqForLoginUser, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+        })->adm(function (MyResponse $resp) {
+            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
+            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+
+            // зарегистрируем админа
+        })->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под админом и запросим админку
+        })->login($reqForLoginAdmin, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+        })->adm(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageAdm);
+
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+        })->run();
     }
 
     public function testItems(): void
@@ -152,38 +158,57 @@ final class ControllerAdmTest extends TestCase
 
     public function testCat(): void
     {
-        $this->assertTrue(true);
-//        $reqLogin = new RequestLogin();
-//        $password = "12345";
-//        $admin = randomUser($password, "admin");
-//        $item = randomItem(0);
-//
-//        $reqCat = new RequestCat();
-//        $reqCat->name = randomString(10);
-//
-//        // открываем страницу под гостем
-//        $this->client->createOrUpdateProfile($admin, function (MyResponse $resp) use ($reqLogin, $admin, $password) {
-//            checkBasicData($this, 200, $resp, 0);
-//
-//            $reqLogin->email = $admin->email;
-//            $reqLogin->pass = $password;
-//
-//            // аунтентифицируемся под админом
-//        })->login($reqLogin, function (MyResponse $resp) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-//
-//            // тут надо создать категорию
-//        })->admCreateOrUpdateCat($reqCat, function (MyResponse $resp) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-//
-//            // тут надо создать продукт
-//        })->createOrUpdateItem($reqLogin, function (MyResponse $resp) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-//
-//            // получить список и проверить
-//        })->items($reqLogin, function (MyResponse $resp) {
-//            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-//
-//        })->run();
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
+
+        $reqForLoginAdmin = new RequestLogin();
+        $reqForLoginAdmin->email = $reqForAdmin->email;
+        $reqForLoginAdmin->pass = $reqForAdmin->pass;
+
+        $reqForCat = new RequestCat();
+        $reqForCat->catId = 0;
+        $reqForCat->name = randomString(10);
+        $reqForCat->parentId = 0;
+        $reqForCat->pos = 0;
+        $reqForCat->isDisabled = false;
+
+        // зарегистрируем админа
+        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под админом и запросим админку
+        })->login($reqForLoginAdmin, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+            // запросим чистую форму для создания категории
+        })->admCat(null, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageAdmCat);
+
+            // создадим категорию
+        })->admCat($reqForCat, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
+            $this->assertArrayHasKey(FieldCatId, $resp->data);
+
+            $_GET[FieldCatId] = $resp->data[FieldCatId];
+            // получим категорию, данные вставятся в форму
+        })->admCat(null, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
+            $isHasCat = isset($resp->data[FieldItem]);
+
+            $this->assertTrue($isHasCat);
+
+            if ($isHasCat) {
+                $cat = new CatRow($resp->data[FieldItem]);
+                // TODO тут надо проверить св-ва категории
+                ==========
+            }
+
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+        })->run();
     }
 }

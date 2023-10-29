@@ -3,12 +3,7 @@
 final class ServiceArticles extends ServiceDB
 {
     protected string $table = "articles";
-
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
+    protected array $fields = ["article_id", "title", "slug", "description", "is_disabled", "created_at", "updated_at"];
 
     public function all(): array|Error
     {
@@ -20,13 +15,13 @@ final class ServiceArticles extends ServiceDB
 
         $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $list[] = new ArticleTbl($row);
+            $list[] = new ArticleRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $articleId): null|Error|ArticleTbl
+    public function one(int $articleId): null|Error|ArticleRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -39,28 +34,28 @@ final class ServiceArticles extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new ArticleTbl($data);
+        return new ArticleRow($data);
     }
 
-    public function createOrUpdate(ArticleTbl $article): int|Error
+    public function createOrUpdate(ArticleRow $article): int|Error
     {
         $id = 0;
         $arData = [
             $article->title,
             $article->slug,
             $article->description,
-            $article->isDisabled,
-            $article->updatedAt,
-            $article->createdAt,
+            $article->is_disabled,
+            $article->created_at,
+            $article->updated_at,
         ];
 
         try {
-            if ($article->articleId > 0) {
+            if ($article->article_id > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
                 $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $article->articleId;
+                $arData[] = $article->article_id;
                 $stmt->execute($arData);
-                $id = $article->articleId;
+                $id = $article->article_id;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 

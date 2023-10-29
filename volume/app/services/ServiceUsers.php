@@ -3,12 +3,7 @@
 final class ServiceUsers extends ServiceDB
 {
     protected string $table = "users";
-
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
+    protected array $fields = ["user_id", "email", "pass", "email_hash", "avatar", "birthday_day", "birthday_mon", "role", "created_at", "updated_at"];
 
     public function all(): array|Error
     {
@@ -20,13 +15,13 @@ final class ServiceUsers extends ServiceDB
 
         $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $list[] = new UserTbl($row);
+            $list[] = new UserRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $userId): null|Error|UserTbl
+    public function one(int $userId): null|Error|UserRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -39,10 +34,10 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new UserTbl($data);
+        return new UserRow($data);
     }
 
-    public function oneByEmail(string $email): null|Error|UserTbl
+    public function oneByEmail(string $email): null|Error|UserRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[1]}=?");
@@ -55,10 +50,10 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new UserTbl($data);
+        return new UserRow($data);
     }
 
-    public function oneByEmailHash(string $hash): null|Error|UserTbl
+    public function oneByEmailHash(string $hash): null|Error|UserRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[3]}=?");
@@ -71,10 +66,10 @@ final class ServiceUsers extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new UserTbl($data);
+        return new UserRow($data);
     }
 
-    public function createOrUpdate(UserTbl $user): int|Error
+    public function createOrUpdate(UserRow $user): int|Error
     {
         $id = 0;
         $emailHash = null;
@@ -83,17 +78,17 @@ final class ServiceUsers extends ServiceDB
         $birthdayMon = null;
         $role = null;
 
-        if (!empty($user->emailHash)) {
-            $emailHash = $user->emailHash;
+        if (!empty($user->email_hash)) {
+            $emailHash = $user->email_hash;
         }
         if (!empty($user->avatar)) {
             $avatar = $user->avatar;
         }
-        if (!empty($user->birthdayDay)) {
-            $birthdayDay = $user->birthdayDay;
+        if (!empty($user->birthday_day)) {
+            $birthdayDay = $user->birthday_day;
         }
-        if (!empty($user->birthdayMon)) {
-            $birthdayMon = $user->birthdayMon;
+        if (!empty($user->birthday_mon)) {
+            $birthdayMon = $user->birthday_mon;
         }
         if (!empty($user->role)) {
             $role = $user->role;
@@ -107,17 +102,17 @@ final class ServiceUsers extends ServiceDB
             $birthdayMon,
             $birthdayDay,
             $role,
-            $user->updatedAt,
-            $user->createdAt
+            $user->created_at,
+            $user->updated_at,
         ];
 
         try {
-            if ($user->userId > 0) {
+            if ($user->user_id > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
                 $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $user->userId;
+                $arData[] = $user->user_id;
                 $stmt->execute($arData);
-                $id = $user->userId;
+                $id = $user->user_id;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 

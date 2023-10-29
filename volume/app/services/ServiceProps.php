@@ -3,12 +3,7 @@
 final class ServiceProps extends ServiceDB
 {
     protected string $table = "props";
-
-    public function __construct(array $fields)
-    {
-        parent::__construct();
-        $this->fields = $fields;
-    }
+    protected array $fields = ["prop_id", "name"];
 
     public function all(): array|Error
     {
@@ -20,13 +15,13 @@ final class ServiceProps extends ServiceDB
 
         $list = [];
         foreach ($stmt->fetchAll() as $row) {
-            $list[] = new PropTbl($row);
+            $list[] = new PropRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $propId): null|Error|PropTbl
+    public function one(int $propId): null|Error|PropRow
     {
         try {
             $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
@@ -39,24 +34,24 @@ final class ServiceProps extends ServiceDB
             return new Error($e->getMessage());
         }
 
-        return new PropTbl($data);
+        return new PropRow($data);
     }
 
-    public function createOrUpdate(PropTbl $prop): int|Error
+    public function createOrUpdate(PropRow $prop): int|Error
     {
         $id = 0;
         $arData = [
-            $prop->propId,
+            $prop->prop_id,
             $prop->name,
         ];
 
         try {
-            if ($prop->propId > 0) {
+            if ($prop->prop_id > 0) {
                 $fields = $this->fieldsAsString(true, "=?,") . "=?";
                 $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $prop->propId;
+                $arData[] = $prop->prop_id;
                 $stmt->execute($arData);
-                $id = $prop->propId;
+                $id = $prop->prop_id;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 

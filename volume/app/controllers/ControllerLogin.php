@@ -20,7 +20,7 @@ final class ControllerLogin extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
+            $serviceUsers = new ServiceUsers();
 
             // достанем пользователя
             $user = $serviceUsers->oneByEmail($req->email);
@@ -32,7 +32,7 @@ final class ControllerLogin extends ControllerBase
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } else if ($user instanceof UserTbl && $user->emailHash !== null) {
+            } else if ($user instanceof UserRow && $user->email_hash !== null) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
@@ -48,7 +48,7 @@ final class ControllerLogin extends ControllerBase
             $_SESSION[FieldProfile] = $user;
             $resp->data = [];
 
-            if ($user->role === "admin") {
+            if ($user->role === FieldAdmin) {
                 $_SESSION[FieldAdmin] = true;
             }
 

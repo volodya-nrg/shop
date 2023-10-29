@@ -37,43 +37,75 @@ final class ControllerAdm extends ControllerBase
         }
 
         if (isset($_POST) && count($_POST)) {
-            $item = new ItemTbl($_POST);
+            $item = new ItemRow($_POST);
 
             // тут надо картинки еще подхватить
 
-            $serviceItems = new ServiceItems($item->fields);
+            $serviceItems = new ServiceItems();
 
             $itemId = $serviceItems->createOrUpdate($item);
             if ($itemId instanceof Error) {
                 $resp->setHttpCode(500);
-                error_log($itemId);
-                //error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
                 return $resp;
             }
         }
 
         return $resp;
     }
+
     public function cat(array $args): MyResponse
     {
-        $resp = new MyResponse(ViewPageAdmItem);
+        $resp = new MyResponse(ViewPageAdmCat);
 
         $err = $this->checkRule();
         if ($err instanceof Error) {
             return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
         }
 
-        if (isset($_POST) && count($_POST)) {
-            $item = new CatTbl($_POST);
-            $serviceCats = new ServiceCats($item->fields);
+        $serviceCats = new ServiceCats();
 
-            $itemId = $serviceCats->createOrUpdate($item);
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestCat($_POST);
+
+            $cat = new CatRow();
+            $cat->cat_id = $req->catId;
+            $cat->name = $req->name;
+            $cat->slug = translit($cat->name);
+            $cat->parent_id = $req->parentId;
+            $cat->pos = $req->pos;
+            $cat->is_disabled = $req->isDisabled;
+
+            $itemId = $serviceCats->createOrUpdate($cat);
             if ($itemId instanceof Error) {
                 $resp->setHttpCode(500);
-                error_log($itemId);
-                //error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
                 return $resp;
             }
+
+            $cat->cat_id = $itemId;
+
+            $resp->data = []; // т.к. происходит далее редирект, то data нам не нужен
+            $resp->data[FieldCatId] = $cat->cat_id; // нужен для теста
+        }
+
+        // если запрашивают конкретную запись, то получим ее
+        if (!empty($_GET[FieldCatId])) {
+            $catId = $_GET[FieldCatId];
+
+            $result = $serviceCats->one($catId);
+            if ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceCats->one", $result->getMessage()));
+                return $resp;
+            } else if ($result === null) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrNotFoundRow;
+                return $resp;
+            }
+
+            $cat = $result;
+            $resp->data[FieldItem] = get_object_vars($cat); // явно в массив для передачи
         }
 
         return $resp;

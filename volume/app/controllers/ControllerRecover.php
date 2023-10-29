@@ -20,8 +20,8 @@ final class ControllerRecover extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers((new UserTbl())->fields);
-            $serviceRecover = new ServiceRecovers((new RecoverTbl())->fields);
+            $serviceUsers = new ServiceUsers();
+            $serviceRecover = new ServiceRecovers();
             $serviceEmail = new ServiceEmail(
                 EMAIL_SMTP_SERVER,
                 EMAIL_PORT,
@@ -42,16 +42,16 @@ final class ControllerRecover extends ControllerBase
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrNotFoundUser;
                 return $resp;
-            } elseif ($result instanceof UserTbl && $result->emailHash !== null) {
+            } elseif ($result instanceof UserRow && $result->email_hash !== null) {
                 $resp->setHttpCode(400);
                 $resp->data[FieldError] = ErrCheckYourEmail;
                 return $resp;
             }
             $user = $result;
 
-            $recover = new RecoverTbl();
+            $recover = new RecoverRow();
             $recover->hash = randomString(32, true);
-            $recover->userId = $user->userId;
+            $recover->user_id = $user->user_id;
 
             $serviceRecover->db->beginTransaction();
 
@@ -96,8 +96,8 @@ final class ControllerRecover extends ControllerBase
         $resp = new MyResponse(ViewPageRecoverCheck);
         $hash = $_GET[FieldHash] ?? "";
         $user = null;
-        $serviceUsers = new ServiceUsers((new UserTbl())->fields);
-        $serviceRecover = new ServiceRecovers((new RecoverTbl())->fields);
+        $serviceUsers = new ServiceUsers();
+        $serviceRecover = new ServiceRecovers();
 
         // если прислали хэш, то найдем строку
         if ($hash) {
@@ -107,8 +107,8 @@ final class ControllerRecover extends ControllerBase
                 $resp->data[FieldError] = ErrInternalServer;
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceRecover->one", $recover->getMessage()));
                 return $resp;
-            } elseif ($recover instanceof RecoverTbl) {
-                $result = $serviceUsers->one($recover->userId);
+            } elseif ($recover instanceof RecoverRow) {
+                $result = $serviceUsers->one($recover->user_id);
                 if ($result instanceof Error) {
                     $resp->setHttpCode(500);
                     $resp->data[FieldError] = ErrInternalServer;
@@ -150,7 +150,7 @@ final class ControllerRecover extends ControllerBase
             }
 
             // удалим запись за ненадобностью
-            $result = $serviceRecover->deleteByUserId($user->userId);
+            $result = $serviceRecover->deleteByUserId($user->user_id);
             if ($result instanceof Error) {
                 $serviceUsers->db->rollBack();
 
