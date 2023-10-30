@@ -54,16 +54,54 @@ final class ControllerAdm extends ControllerBase
         return $resp;
     }
 
+    public function cats(array $args): MyResponse
+    {
+        $err = $this->checkRule();
+        if ($err instanceof Error) {
+            return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
+        }
+
+        $limit = DefaultLimit;
+        $offset = 0;
+
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestPaginator($_POST);
+
+            if ($req->limit > 0 && $req->limit < DefaultLimit) {
+                $limit = $req->limit;
+            }
+            if ($req->offset > 0) {
+                $offset = $req->offset;
+            }
+        }
+
+        $serviceCats = new ServiceCats();
+        $resp = new MyResponse(ViewPageAdmCats);
+
+        $result = $serviceCats->all($limit, $offset);
+        if ($result instanceof Error) {
+            $resp->setHttpCode(500);
+            error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceCats->all", $result->getMessage()));
+            return $resp;
+        }
+
+        $resp->data[FieldItems] = [];
+        foreach ($result as $value) {
+            $resp->data[FieldItems][] = get_object_vars($value);
+        }
+
+        return $resp;
+    }
+
     public function cat(array $args): MyResponse
     {
-        $resp = new MyResponse(ViewPageAdmCat);
-
         $err = $this->checkRule();
         if ($err instanceof Error) {
             return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
         }
 
         $serviceCats = new ServiceCats();
+        $resp = new MyResponse(ViewPageAdmCat);
 
         if (isset($_POST) && count($_POST)) {
             $req = new RequestCat($_POST);

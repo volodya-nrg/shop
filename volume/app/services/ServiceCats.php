@@ -5,10 +5,24 @@ final class ServiceCats extends ServiceDB
     protected string $table = "cats";
     protected array $fields = ["cat_id", "name", "slug", "parent_id", "pos", "is_disabled"];
 
-    public function all(): array|Error
+    public function all($limit = -1, $offset = -1): array|Error
     {
+        $limitAndOffset = "";
+
+        if ($limit > 0) {
+            $limitAndOffset .= "LIMIT {$limit}";
+
+            if ($offset > -1) {
+                $limitAndOffset .= " OFFSET {$offset}";
+            }
+        }
+
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
+            $stmt = $this->db->query("
+                SELECT {$this->fieldsAsString()} 
+                FROM {$this->table} 
+                ORDER BY {$this->fields[0]} DESC 
+                {$limitAndOffset}");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

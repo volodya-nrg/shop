@@ -26,6 +26,7 @@ const DIR_INTERFACES = DIR_APP . "/interfaces";
 // other
 const PassMinLen = 5;
 const DatePattern = "Y-m-d H:i:s";
+const DefaultLimit = 20;
 
 // notice
 const NoticeStyleClassDanger = "sx-danger";
@@ -49,6 +50,7 @@ const FieldDataSendMsg = "data_is_send";
 const FieldSuccess = "success";
 const FieldHash = "hash";
 const FieldStyles = "styles";
+const FieldItems = "items";
 const FieldItem = "item";
 const FieldPhoneNumber = "phone_number";
 const FieldFIO = "fio";
