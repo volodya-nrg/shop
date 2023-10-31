@@ -61,7 +61,6 @@ const FieldAdmin = "admin";
 const FieldModeIsTest = "MODE_IS_TEST";
 const FieldItemId = "item_id";
 const FieldName = "name";
-const FieldSlug = "slug";
 const FieldCatId = "cat_id";
 const FieldDescription = "description";
 const FieldPrice = "price";
@@ -73,6 +72,7 @@ const FieldPos = "pos";
 const FieldLimit = "limit";
 const FieldOffset = "offset";
 const FieldUserId = "user_id";
+const FieldTitle = "title";
 
 // viewNames
 const ViewModuleCounter = "module-counter.php";

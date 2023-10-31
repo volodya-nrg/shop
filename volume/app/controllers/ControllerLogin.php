@@ -26,6 +26,7 @@ final class ControllerLogin extends ControllerBase
             $user = $serviceUsers->oneByEmail($req->email);
             if ($user instanceof Error) {
                 $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "oneByEmail", $user->getMessage()));
                 return $resp;
             } else if ($user === null) {

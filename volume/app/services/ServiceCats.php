@@ -17,12 +17,10 @@ final class ServiceCats extends ServiceDB
             }
         }
 
+        $fieldsString = implode(",", $this->fields);
+
         try {
-            $stmt = $this->db->query("
-                SELECT {$this->fieldsAsString()} 
-                FROM {$this->table} 
-                ORDER BY {$this->fields[0]} DESC 
-                {$limitAndOffset}");
+            $stmt = $this->db->query("SELECT {$fieldsString} FROM {$this->table} ORDER BY cat_id DESC {$limitAndOffset}");
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
@@ -37,8 +35,10 @@ final class ServiceCats extends ServiceDB
 
     public function one(int $itemId): null|Error|CatRow
     {
+        $fieldsString = implode(",", $this->fields);
+
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
+            $stmt = $this->db->prepare("SELECT {$fieldsString} FROM {$this->table} WHERE cat_id=?");
             $stmt->execute([$itemId]);
             $data = $stmt->fetch();
             if ($data === false) {
@@ -51,7 +51,7 @@ final class ServiceCats extends ServiceDB
         return new CatRow($data);
     }
 
-    public function createOrUpdate(CatRow $item): int|Error
+    public function create(CatRow $item): int|Error
     {
         $id = 0;
         $arData = [
@@ -63,33 +63,59 @@ final class ServiceCats extends ServiceDB
         ];
 
         try {
-            if ($item->cat_id > 0) {
-                $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $item->cat_id;
-                $stmt->execute($arData);
-                $id = $item->cat_id;
-            } else {
-                $stmt = $this->db->prepare("INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) VALUES ({$this->questionsAsString(true)})");
-                if ($stmt === false) {
-                    return new Error(ErrStmtIsFalse);
-                }
+            $stmt = $this->db->prepare("
+                INSERT INTO {$this->table} (name, slug, parent_id, pos, is_disabled) 
+                VALUES (?,?,?,?,?)");
+            if ($stmt === false) {
+                return new Error(ErrStmtIsFalse);
+            }
 
-                $result = $stmt->execute($arData);
-                if ($result === false) {
-                    return new Error(ErrSqlQueryIsFalse);
-                }
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                return new Error(ErrSqlQueryIsFalse);
+            }
 
-                $tmp = $this->db->lastInsertId();
-                if ($tmp) {
-                    $id = (int)$this->db->lastInsertId();
-                }
+            $tmp = $this->db->lastInsertId();
+            if ($tmp) {
+                $id = (int)$this->db->lastInsertId();
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
         return $id;
+    }
+
+    public function update(CatRow $item): Error|null
+    {
+        $arData = [
+            $item->name,
+            $item->slug,
+            $item->parent_id,
+            $item->pos,
+            (int)$item->is_disabled,
+        ];
+
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE {$this->table} 
+                    SET name=?, slug=?, parent_id=?, pos=?, is_disabled=? 
+                    WHERE cat_id=?");
+            if ($stmt === false) {
+                return new Error(ErrStmtIsFalse);
+            }
+
+            $arData[] = $item->cat_id;
+
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                return new Error(ErrSqlQueryIsFalse);
+            }
+        } catch (\PDOException $e) {
+            return new Error($e->getMessage());
+        }
+
+        return null;
     }
 
     public function delete(int $catId): bool|Error

@@ -21,34 +21,102 @@ final class ControllerAdm extends ControllerBase
             return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
         }
 
-        // вытащить из базы список
+        $limit = DefaultLimit;
+        $offset = 0;
 
-        // тут список
-        return new MyResponse(ViewPageAdmItems);
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestPaginator($_POST);
+
+            if ($req->limit > 0 && $req->limit < DefaultLimit) {
+                $limit = $req->limit;
+            }
+            if ($req->offset > 0) {
+                $offset = $req->offset;
+            }
+        }
+
+        $serviceItems = new ServiceItems();
+        $resp = new MyResponse(ViewPageAdmItems);
+
+        $result = $serviceItems->all($limit, $offset);
+        if ($result instanceof Error) {
+            $resp->setHttpCode(500);
+            $resp->data[FieldError] = ErrInternalServer;
+            error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceItems->all", $result->getMessage()));
+            return $resp;
+        }
+
+        $resp->data[FieldItems] = [];
+        foreach ($result as $value) {
+            $resp->data[FieldItems][] = get_object_vars($value);
+        }
+
+        return $resp;
     }
 
     public function item(array $args): MyResponse
     {
-        $resp = new MyResponse(ViewPageAdmItem);
-
         $err = $this->checkRule();
         if ($err instanceof Error) {
             return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
         }
 
+        $serviceItems = new ServiceItems();
+        $resp = new MyResponse(ViewPageAdmItem);
+
         if (isset($_POST) && count($_POST)) {
-            $item = new ItemRow($_POST);
+            $req = new RequestItem($_POST);
 
-            // тут надо картинки еще подхватить
+            $item = new ItemRow();
+            $item->item_id = $req->itemId;
+            $item->title = $req->title;
+            $item->slug = translit($item->title);
+            $item->cat_id = $req->catId;
+            $item->description = $req->description;
+            $item->price = $req->price;
+            $item->is_disabled = $req->isDisabled;
 
-            $serviceItems = new ServiceItems();
+            if ($item->item_id == 0) {
+                $result = $serviceItems->create($item);
+                if ($result instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceItems->create", $result->getMessage()));
+                    return $resp;
+                }
+                $item->item_id = $result;
+            } else {
+                $err = $serviceItems->update($item);
+                if ($err instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceItems->update", $err->getMessage()));
+                    return $resp;
+                }
+            }
 
-            $itemId = $serviceItems->createOrUpdate($item);
-            if ($itemId instanceof Error) {
+            $resp->data = [];
+            $resp->data[FieldItemId] = $item->item_id; // нужен для теста
+        }
+
+        // если запрашивают конкретную запись, то получим ее
+        if (!empty($_GET[FieldItemId])) {
+            $result = $_GET[FieldItemId];
+
+            $result = $serviceItems->one($result);
+            if ($result instanceof Error) {
                 $resp->setHttpCode(500);
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceItems->one", $result->getMessage()));
+                return $resp;
+            } else if ($result === null) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrNotFoundRow;
                 return $resp;
             }
+
+            $item = $result;
+            $resp->data[FieldItem] = get_object_vars($item); // явно в массив для передачи
         }
 
         return $resp;
@@ -81,6 +149,7 @@ final class ControllerAdm extends ControllerBase
         $result = $serviceCats->all($limit, $offset);
         if ($result instanceof Error) {
             $resp->setHttpCode(500);
+            $resp->data[FieldError] = ErrInternalServer;
             error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceCats->all", $result->getMessage()));
             return $resp;
         }
@@ -114,16 +183,26 @@ final class ControllerAdm extends ControllerBase
             $cat->pos = $req->pos;
             $cat->is_disabled = $req->isDisabled;
 
-            $itemId = $serviceCats->createOrUpdate($cat);
-            if ($itemId instanceof Error) {
-                $resp->setHttpCode(500);
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "createOrUpdate", $itemId->getMessage()));
-                return $resp;
+            if ($cat->cat_id == 0) {
+                $result = $serviceCats->create($cat);
+                if ($result instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceItems->create", $result->getMessage()));
+                    return $resp;
+                }
+                $cat->cat_id = $result;
+            } else {
+                $err = $serviceCats->update($cat);
+                if ($err instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceItems->update", $err->getMessage()));
+                    return $resp;
+                }
             }
 
-            $cat->cat_id = $itemId;
-
-            $resp->data = []; // т.к. происходит далее редирект, то data нам не нужен
+            $resp->data = [];
             $resp->data[FieldCatId] = $cat->cat_id; // нужен для теста
         }
 
@@ -134,6 +213,7 @@ final class ControllerAdm extends ControllerBase
             $result = $serviceCats->one($catId);
             if ($result instanceof Error) {
                 $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
                 error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceCats->one", $result->getMessage()));
                 return $resp;
             } else if ($result === null) {
