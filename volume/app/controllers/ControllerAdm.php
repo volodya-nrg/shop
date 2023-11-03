@@ -229,6 +229,119 @@ final class ControllerAdm extends ControllerBase
         return $resp;
     }
 
+    public function users(array $args): MyResponse
+    {
+        $err = $this->checkRule();
+        if ($err instanceof Error) {
+            return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
+        }
+
+        $limit = DefaultLimit;
+        $offset = 0;
+
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestPaginator($_POST);
+
+            if ($req->limit > 0 && $req->limit < DefaultLimit) {
+                $limit = $req->limit;
+            }
+            if ($req->offset > 0) {
+                $offset = $req->offset;
+            }
+        }
+
+        $serviceUsers = new ServiceUsers();
+        $resp = new MyResponse(ViewPageAdmUsers);
+
+        $result = $serviceUsers->all($limit, $offset);
+        if ($result instanceof Error) {
+            $resp->setHttpCode(500);
+            $resp->data[FieldError] = ErrInternalServer;
+            error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->all", $result->getMessage()));
+            return $resp;
+        }
+
+        $users = $result;
+        $resp->data[FieldUsers] = [];
+        foreach ($users as $user) {
+            $user->pass = ""; // скроем явно
+            $resp->data[FieldUsers][] = get_object_vars($user);
+        }
+
+        return $resp;
+    }
+
+    public function user(array $args): MyResponse
+    {
+        $err = $this->checkRule();
+        if ($err instanceof Error) {
+            return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
+        }
+
+        $serviceUsers = new ServiceUsers();
+        $resp = new MyResponse(ViewPageAdmUser);
+
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestUser($_POST);
+
+            $item = new UserRow();
+            $item->user_id = $req->userId;
+            $item->email = $req->email;
+            $item->pass = password_hash($req->pass, PASSWORD_DEFAULT);
+            $item->email_hash = $req->emailHash;
+            $item->avatar = $req->avatar;
+            $item->birthday_day = $req->birthdayDay;
+            $item->birthday_mon = $req->birthdayMon;
+            $item->role = $req->role;
+
+            if ($item->user_id == 0) {
+                $result = $serviceUsers->create($item);
+                if ($result instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->create", $result->getMessage()));
+                    return $resp;
+                }
+                $item->user_id = $result;
+            } else {
+                $err = $serviceUsers->update($item);
+                if ($err instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->update", $err->getMessage()));
+                    return $resp;
+                }
+            }
+
+            $resp->data = [];
+            $resp->data[FieldUserId] = $item->user_id; // нужен для теста
+        }
+
+        // если запрашивают конкретную запись, то получим ее
+        if (!empty($_GET[FieldUserId])) {
+            $result = $_GET[FieldUserId];
+
+            $result = $serviceUsers->one($result);
+            if ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->one", $result->getMessage()));
+                return $resp;
+            } else if ($result === null) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrNotFoundRow;
+                return $resp;
+            }
+
+            $user = $result;
+            $user->pass = ""; // скроем явно
+
+            $resp->data[FieldUser] = get_object_vars($user); // явно в массив для передачи
+        }
+
+        return $resp;
+    }
+
     private function checkRule(): Error|null
     {
         if (empty($_SESSION[FieldAdmin])) {

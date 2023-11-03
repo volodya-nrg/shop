@@ -139,7 +139,7 @@ final class ControllerRecover extends ControllerBase
             $user->pass = password_hash($req->pass, PASSWORD_DEFAULT);
 
             // обновим пользователя с новым паролем
-            $result = $serviceUsers->createOrUpdate($user);
+            $result = $serviceUsers->update($user);
             if ($result instanceof Error) {
                 $serviceUsers->db->rollBack();
 

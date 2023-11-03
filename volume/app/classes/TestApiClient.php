@@ -4,26 +4,6 @@ final class TestApiClient
 {
     private array $tasks = [];
 
-//    public function createOrUpdateProfile(RequestUser $req, bool $isFull, callable $cb): TestApiClient
-//    {
-//        $this->tasks[] = function () use ($req, $cb) {
-//            $serviceUsers = new ServiceUsers((new UserRow())->fields);
-//            $errCode = 200;
-//            $data = [];
-//
-//            $result = $serviceUsers->createOrUpdate($req);
-//            if ($result instanceof Error) {
-//                $errCode = 500;
-//                $data[FieldError] = $result->getMessage();
-//            } else {
-//                $user->userId = $result;
-//            }
-//
-//            $cb(new MyResponse("", $errCode, $data));
-//        };
-//        return $this;
-//    }
-
     public function login(?RequestLogin $req, callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($req, $cb) {
@@ -77,7 +57,7 @@ final class TestApiClient
                     $user->email_hash = null;
                 }
 
-                $result = $serviceUsers->createOrUpdate($user);
+                $result = $serviceUsers->update($user);
                 if ($result instanceof Error) {
                     abort($result->getMessage());
                 }
@@ -180,6 +160,32 @@ final class TestApiClient
             }
 
             $cb((new ControllerAdm())->item([]));
+        };
+
+        return $this;
+    }
+
+    public function admUsers(?RequestPaginator $req, callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($req, $cb) {
+            if ($req !== null) {
+                $_POST = $req->toArray();
+            }
+
+            $cb((new ControllerAdm())->users([]));
+        };
+
+        return $this;
+    }
+
+    public function admUser(?RequestUser $req, callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($req, $cb) {
+            if ($req !== null) {
+                $_POST = $req->toArray();
+            }
+
+            $cb((new ControllerAdm())->user([]));
         };
 
         return $this;

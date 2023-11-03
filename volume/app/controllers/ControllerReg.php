@@ -58,7 +58,7 @@ final class ControllerReg extends ControllerBase
             // запишем в базу и отправим е-мэйл
             $serviceUsers->db->beginTransaction();
 
-            $userId = $serviceUsers->createOrUpdate($user);
+            $userId = $serviceUsers->create($user);
             if ($userId instanceof Error) {
                 $serviceUsers->db->rollBack();
 
@@ -127,7 +127,7 @@ final class ControllerReg extends ControllerBase
 
             $user->email_hash = null;
 
-            $err = $serviceUsers->createOrUpdate($user);
+            $err = $serviceUsers->update($user);
             if ($err instanceof Error) {
                 $resp->setHttpCode(500);
                 $resp->data[FieldError] = ErrInternalServer;

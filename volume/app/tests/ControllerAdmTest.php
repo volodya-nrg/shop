@@ -461,4 +461,195 @@ final class ControllerAdmTest extends TestCase
             $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
         })->run();
     }
+
+    public function testUsers(): void
+    {
+        $reqPaginator = new RequestPaginator();
+
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
+
+        $reqForLoginAdmin = new RequestLogin();
+        $reqForLoginAdmin->email = $reqForAdmin->email;
+        $reqForLoginAdmin->pass = $reqForAdmin->pass;
+
+        $reqForUser1 = new RequestUser();
+        $reqForUser1->userId = 0;
+        $reqForUser1->email = randomEmail();
+        $reqForUser1->pass = randomString(10);
+        $reqForUser1->emailHash = randomString(10);
+        $reqForUser1->birthdayDay = random_int(1, 31);
+        $reqForUser1->birthdayMon = random_int(1, 12);
+        $reqForUser1->role = "";
+
+        $reqForUser2 = new RequestUser();
+        $reqForUser2->userId = 0;
+        $reqForUser2->email = randomEmail();
+        $reqForUser2->pass = randomString(10);
+        $reqForUser2->emailHash = randomString(10);
+        $reqForUser2->birthdayDay = random_int(1, 31);
+        $reqForUser2->birthdayMon = random_int(1, 12);
+        $reqForUser2->role = "";
+
+        // зарегистрируем админа
+        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под админом
+        })->login($reqForLoginAdmin, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+            // запросим список
+        })->admUsers(null, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
+            $this->assertArrayHasKey(FieldUsers, $resp->data);
+
+            // создадим item1
+        })->admUser($reqForUser1, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+
+            // создадим item2
+        })->admUser($reqForUser2, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+
+            // получим список
+        })->admUsers(null, function (MyResponse $resp) use ($reqPaginator) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
+
+            $this->assertArrayHasKey(FieldUsers, $resp->data);
+            $this->assertGreaterThanOrEqual(1, $resp->data[FieldUsers]);
+
+            $reqPaginator->limit = 1;
+
+            // получим список
+        })->admUsers($reqPaginator, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
+            $this->assertArrayHasKey(FieldUsers, $resp->data);
+            $this->assertCount(1, $resp->data[FieldUsers]);
+
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+
+        })->admUser(null, function (MyResponse $resp) {
+            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
+            $this->assertArrayHasKey(FieldError, $resp->data);
+            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+        })->run();
+    }
+
+    public function testUser(): void
+    {
+        $dt = date_create();
+
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
+
+        $reqForLoginAdmin = new RequestLogin();
+        $reqForLoginAdmin->email = $reqForAdmin->email;
+        $reqForLoginAdmin->pass = $reqForAdmin->pass;
+
+        $reqForUser = new RequestUser();
+        $reqForUser->userId = 0;
+        $reqForUser->email = randomEmail();
+        $reqForUser->pass = randomString(10);
+        $reqForUser->emailHash = randomString(10);
+        $reqForUser->birthdayDay = random_int(1, 31);
+        $reqForUser->birthdayMon = random_int(1, 12);
+        $reqForUser->role = "";
+
+        // зарегистрируем админа
+        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под админом
+        })->login($reqForLoginAdmin, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+            // запросим чистую форму
+        })->admUser(null, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageAdmUser);
+            sleep(2);
+
+            // создадим
+        })->admUser($reqForUser, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+            $this->assertArrayHasKey(FieldUserId, $resp->data);
+
+            $_GET[FieldUserId] = $resp->data[FieldUserId];
+
+            // получим item, для вставки данных в форму
+        })->admUser(null, function (MyResponse $resp) use ($reqForUser, $dt) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+            $isHasItem = isset($resp->data[FieldUser]);
+
+            $this->assertTrue($isHasItem);
+
+            if ($isHasItem) {
+                $item = new UserRow($resp->data[FieldUser]);
+                $this->assertTrue($item->user_id > 0);
+                $this->assertEquals($reqForUser->email, $item->email);
+                $this->assertEquals("", $item->pass);
+                $this->assertNull($item->email_hash);
+                $this->assertEquals($reqForUser->avatar, $item->avatar);
+                $this->assertEquals($reqForUser->birthdayDay, $item->birthday_day);
+                $this->assertEquals($reqForUser->birthdayMon, $item->birthday_mon);
+                $this->assertEquals($reqForUser->role, $item->role);
+                $this->assertTrue(strlen($item->created_at) > 0);
+                $this->assertEquals($item->created_at, $item->updated_at);
+                $this->assertGreaterThan($dt->format(DatePattern), $item->created_at);
+
+                $reqForUser->userId = $item->user_id;
+                $reqForUser->email = randomEmail();
+                $reqForUser->pass = randomString(10);
+                $reqForUser->emailHash = randomString(10);
+                $reqForUser->birthdayDay = random_int(1, 31);
+                $reqForUser->birthdayMon = random_int(1, 12);
+                $reqForUser->role = randomString(10);
+
+                sleep(2);
+            }
+
+            // изменим
+        })->admUser($reqForUser, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2, ViewPageAdmUser);
+            $this->assertArrayHasKey(FieldUserId, $resp->data);
+
+            // получим
+        })->admUser(null, function (MyResponse $resp) use ($reqForUser) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+            $isHasItem = isset($resp->data[FieldUser]);
+
+            $this->assertTrue($isHasItem);
+
+            if ($isHasItem) {
+                $item = new UserRow($resp->data[FieldUser]);
+                $this->assertEquals($reqForUser->userId, $item->user_id);
+                $this->assertEquals($reqForUser->email, $item->email);
+                $this->assertEquals("", $item->pass);
+                $this->assertNull($item->email_hash);
+                $this->assertEquals($reqForUser->avatar, $item->avatar);
+                $this->assertEquals($reqForUser->birthdayDay, $item->birthday_day);
+                $this->assertEquals($reqForUser->birthdayMon, $item->birthday_mon);
+                $this->assertEquals($reqForUser->role, $item->role);
+                $this->assertTrue(strlen($item->created_at) > 0);
+                $this->assertTrue(strlen($item->updated_at) > 0);
+                $this->assertNotEquals($item->created_at, $item->updated_at);
+                $this->assertGreaterThan($item->created_at, $item->updated_at);
+            }
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+        })->admUser(null, function (MyResponse $resp) {
+            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
+            $this->assertArrayHasKey(FieldError, $resp->data);
+            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+        })->run();
+    }
 }
