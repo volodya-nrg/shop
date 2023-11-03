@@ -508,11 +508,11 @@ final class ControllerAdmTest extends TestCase
             checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
             $this->assertArrayHasKey(FieldUsers, $resp->data);
 
-            // создадим item1
+            // создадим user1
         })->admUser($reqForUser1, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
 
-            // создадим item2
+            // создадим user2
         })->admUser($reqForUser2, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
 
@@ -556,6 +556,8 @@ final class ControllerAdmTest extends TestCase
         $reqForLoginAdmin->email = $reqForAdmin->email;
         $reqForLoginAdmin->pass = $reqForAdmin->pass;
 
+        $reqForLoginUser = new RequestLogin();
+
         $reqForUser = new RequestUser();
         $reqForUser->userId = 0;
         $reqForUser->email = randomEmail();
@@ -585,8 +587,8 @@ final class ControllerAdmTest extends TestCase
 
             $_GET[FieldUserId] = $resp->data[FieldUserId];
 
-            // получим item, для вставки данных в форму
-        })->admUser(null, function (MyResponse $resp) use ($reqForUser, $dt) {
+            // получим, для вставки данных в форму
+        })->admUser(null, function (MyResponse $resp) use ($reqForUser, $dt, $reqForLoginUser) {
             checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
             $isHasItem = isset($resp->data[FieldUser]);
 
@@ -613,6 +615,9 @@ final class ControllerAdmTest extends TestCase
                 $reqForUser->birthdayDay = random_int(1, 31);
                 $reqForUser->birthdayMon = random_int(1, 12);
                 $reqForUser->role = randomString(10);
+
+                $reqForLoginUser->email = $reqForUser->email;
+                $reqForLoginUser->pass = $reqForUser->pass;
 
                 sleep(2);
             }
@@ -650,6 +655,10 @@ final class ControllerAdmTest extends TestCase
             checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
             $this->assertArrayHasKey(FieldError, $resp->data);
             $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+
+            // аунтентифицируемся под user-ом
+        })->login($reqForLoginUser, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
         })->run();
     }
 }
