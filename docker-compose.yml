@@ -3,7 +3,7 @@ services:
   service_remtochkacom:
     image: volodyanrg/debian_nginx_php
     ports: # dev-mode
-      - "80:80" # 127... для локальной-dev разработки
+      - "80:80"
     volumes:
       - ./volume:/var/www
     deploy:

@@ -17,3 +17,13 @@ function checkBasicData(TestCase $t, int $expectedCode, MyResponse $resp, int $c
         $t->assertArrayHasKey(FieldError, $resp->data);
     }
 }
+
+function randomIP(): string
+{
+    $result = long2ip(rand(0, 4294967295));
+    if ($result === false) {
+        return "127.0.0.1";
+    }
+
+    return $result;
+}

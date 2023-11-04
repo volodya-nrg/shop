@@ -342,6 +342,117 @@ final class ControllerAdm extends ControllerBase
         return $resp;
     }
 
+    public function orders(array $args): MyResponse
+    {
+        $err = $this->checkRule();
+        if ($err instanceof Error) {
+            return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
+        }
+
+        $limit = DefaultLimit;
+        $offset = 0;
+
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestPaginator($_POST);
+
+            if ($req->limit > 0 && $req->limit < DefaultLimit) {
+                $limit = $req->limit;
+            }
+            if ($req->offset > 0) {
+                $offset = $req->offset;
+            }
+        }
+
+        $serviceOrders = new ServiceOrders();
+        $resp = new MyResponse(ViewPageAdmOrders);
+
+        $result = $serviceOrders->all($limit, $offset);
+        if ($result instanceof Error) {
+            $resp->setHttpCode(500);
+            $resp->data[FieldError] = ErrInternalServer;
+            error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceOrders->all", $result->getMessage()));
+            return $resp;
+        }
+
+        $orders = $result;
+        $resp->data[FieldOrders] = [];
+        foreach ($orders as $order) {
+            $resp->data[FieldOrders][] = get_object_vars($order);
+        }
+
+        return $resp;
+    }
+
+    public function order(array $args): MyResponse
+    {
+        $err = $this->checkRule();
+        if ($err instanceof Error) {
+            return new MyResponse(ViewPageAccessDined, 401, [FieldError => $err->getMessage()]);
+        }
+
+        $serviceOrders = new ServiceOrders();
+        $resp = new MyResponse(ViewPageAdmOrder);
+
+        if (isset($_POST) && count($_POST)) {
+            $req = new RequestOrder($_POST);
+
+            $item = new OrderRow();
+            $item->order_id = $req->orderId;
+            $item->user_id = $req->userId;
+            $item->contact_phone = $req->contactPhone;
+            $item->contact_name = $req->contactName;
+            $item->comment = $req->comment;
+            $item->place_delivery = $req->placeDelivery;
+            $item->ip = $req->ip;
+
+            if ($item->order_id == 0) {
+                $item->ip = $_SERVER["REMOTE_ADDR"] ?? "127.0.0.1"; // TODO тут надо будет еще проверить
+
+                $result = $serviceOrders->create($item);
+                if ($result instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceOrders->create", $result->getMessage()));
+                    return $resp;
+                }
+                $item->order_id = $result;
+            } else {
+                $err = $serviceOrders->update($item);
+                if ($err instanceof Error) {
+                    $resp->setHttpCode(500);
+                    $resp->data[FieldError] = ErrInternalServer;
+                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceOrders->update", $err->getMessage()));
+                    return $resp;
+                }
+            }
+
+            $resp->data = [];
+            $resp->data[FieldOrderId] = $item->order_id; // нужен для теста
+        }
+
+        // если запрашивают конкретную запись, то получим ее
+        if (!empty($_GET[FieldOrderId])) {
+            $result = $_GET[FieldOrderId];
+
+            $result = $serviceOrders->one($result);
+            if ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[FieldError] = ErrInternalServer;
+                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceOrders->one", $result->getMessage()));
+                return $resp;
+            } else if ($result === null) {
+                $resp->setHttpCode(400);
+                $resp->data[FieldError] = ErrNotFoundRow;
+                return $resp;
+            }
+
+            $order = $result;
+            $resp->data[FieldOrder] = get_object_vars($order); // явно в массив для передачи
+        }
+
+        return $resp;
+    }
+
     private function checkRule(): Error|null
     {
         if (empty($_SESSION[FieldAdmin])) {

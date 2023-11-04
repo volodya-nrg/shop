@@ -13,6 +13,7 @@ final class ControllerAdmTest extends TestCase
     {
         $this->client = new TestApiClient();
         $_SERVER[FieldModeIsTest] = true;
+        $_SERVER["REMOTE_ADDR"] = $_SERVER["REMOTE_ADDR"] ?? "127.0.0.1"; // HTTP_X_FORWARDED_FOR, REMOTE_ADDR
     }
 
     protected function tearDown(): void
@@ -20,6 +21,7 @@ final class ControllerAdmTest extends TestCase
         $_GET = [];
         $_POST = [];
         $_SESSION = [];
+        unset($_SERVER["REMOTE_ADDR"]);
     }
 
     // проверим могут ли заходить пользователи и админ на гл. страницу админки
@@ -659,6 +661,192 @@ final class ControllerAdmTest extends TestCase
             // аунтентифицируемся под user-ом
         })->login($reqForLoginUser, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+        })->run();
+    }
+
+    public function testOrders(): void
+    {
+        $reqPaginator = new RequestPaginator();
+
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
+
+        $reqForLoginAdmin = new RequestLogin();
+        $reqForLoginAdmin->email = $reqForAdmin->email;
+        $reqForLoginAdmin->pass = $reqForAdmin->pass;
+
+        $reqForOrder1 = new RequestOrder();
+        $reqForOrder1->orderId = 0;
+        $reqForOrder1->userId = random_int(1, 100);
+        $reqForOrder1->contactPhone = randomString(10);
+        $reqForOrder1->contactName = randomString(10);
+        $reqForOrder1->comment = randomString(10);
+        $reqForOrder1->placeDelivery = randomString(10);
+
+        $reqForOrder2 = new RequestOrder();
+        $reqForOrder2->orderId = 0;
+        $reqForOrder2->userId = random_int(1, 100);
+        $reqForOrder2->contactPhone = randomString(10);
+        $reqForOrder2->contactName = randomString(10);
+        $reqForOrder2->comment = randomString(10);
+        $reqForOrder2->placeDelivery = randomString(10);
+
+        // зарегистрируем админа
+        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под админом
+        })->login($reqForLoginAdmin, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+            // запросим список
+        })->admOrders(null, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrders);
+            $this->assertArrayHasKey(FieldOrders, $resp->data);
+
+            // создадим order1
+        })->admOrder($reqForOrder1, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+
+            // создадим order2
+        })->admOrder($reqForOrder2, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+
+            // получим список
+        })->admOrders(null, function (MyResponse $resp) use ($reqPaginator) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrders);
+
+            $this->assertArrayHasKey(FieldOrders, $resp->data);
+            $this->assertGreaterThanOrEqual(1, $resp->data[FieldOrders]);
+
+            $reqPaginator->limit = 1;
+
+            // получим список
+        })->admOrders($reqPaginator, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrders);
+            $this->assertArrayHasKey(FieldOrders, $resp->data);
+            $this->assertCount(1, $resp->data[FieldOrders]);
+
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+
+        })->admOrder(null, function (MyResponse $resp) {
+            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
+            $this->assertArrayHasKey(FieldError, $resp->data);
+            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+        })->run();
+    }
+
+    public function testOrder(): void
+    {
+        $dt = date_create();
+
+        $reqForAdmin = new RequestReg();
+        $reqForAdmin->email = randomEmail();
+        $reqForAdmin->pass = randomString(PassMinLen);
+        $reqForAdmin->passConfirm = $reqForAdmin->pass;
+        $reqForAdmin->agreement = true;
+        $reqForAdmin->privatePolicy = true;
+
+        $reqForLoginAdmin = new RequestLogin();
+        $reqForLoginAdmin->email = $reqForAdmin->email;
+        $reqForLoginAdmin->pass = $reqForAdmin->pass;
+
+        $reqForOrder = new RequestOrder();
+        $reqForOrder->orderId = 0;
+        $reqForOrder->userId = random_int(1, 100);
+        $reqForOrder->contactPhone = randomString(10);
+        $reqForOrder->contactName = randomString(10);
+        $reqForOrder->comment = randomString(10);
+        $reqForOrder->placeDelivery = randomString(10);
+
+        // зарегистрируем админа
+        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2);
+
+            // аунтентифицируемся под админом
+        })->login($reqForLoginAdmin, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+
+            // запросим чистую форму
+        })->admOrder(null, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0, ViewPageAdmOrder);
+            sleep(2);
+
+            // создадим
+        })->admOrder($reqForOrder, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+            $this->assertArrayHasKey(FieldOrderId, $resp->data);
+
+            $_GET[FieldOrderId] = $resp->data[FieldOrderId];
+
+            // получим, для вставки данных в форму
+        })->admOrder(null, function (MyResponse $resp) use ($reqForOrder, $dt) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+            $isHasItem = isset($resp->data[FieldOrder]);
+
+            $this->assertTrue($isHasItem);
+
+            if ($isHasItem) {
+                $item = new OrderRow($resp->data[FieldOrder]);
+                $this->assertTrue($item->order_id > 0);
+                $this->assertTrue($item->user_id > 0);
+                $this->assertEquals($reqForOrder->contactPhone, $item->contact_phone);
+                $this->assertEquals($reqForOrder->contactName, $item->contact_name);
+                $this->assertEquals($reqForOrder->comment, $item->comment);
+                $this->assertEquals($reqForOrder->placeDelivery, $item->place_delivery);
+                $this->assertEquals($_SERVER["REMOTE_ADDR"], $item->ip);
+                $this->assertTrue(strlen($item->created_at) > 0);
+                $this->assertEquals($item->created_at, $item->updated_at);
+                $this->assertGreaterThan($dt->format(DatePattern), $item->created_at);
+
+                $reqForOrder->orderId = $item->order_id;
+                $reqForOrder->userId = null;
+                $reqForOrder->contactPhone = randomString(10);
+                $reqForOrder->contactName = null;
+                $reqForOrder->comment = null;
+                $reqForOrder->placeDelivery = null;
+                $reqForOrder->ip = randomIP();
+
+                sleep(2);
+            }
+
+            // изменим
+        })->admOrder($reqForOrder, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2, ViewPageAdmOrder);
+            $this->assertArrayHasKey(FieldOrderId, $resp->data);
+
+            // получим
+        })->admOrder(null, function (MyResponse $resp) use ($reqForOrder) {
+            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+            $isHasItem = isset($resp->data[FieldOrder]);
+
+            $this->assertTrue($isHasItem);
+
+            if ($isHasItem) {
+                $item = new OrderRow($resp->data[FieldOrder]);
+                $this->assertEquals($reqForOrder->orderId, $item->order_id);
+                $this->assertNull($item->user_id);
+                $this->assertEquals($reqForOrder->contactPhone, $item->contact_phone);
+                $this->assertNull($item->contact_name);
+                $this->assertNull($item->comment);
+                $this->assertNull($item->place_delivery);
+                $this->assertEquals($reqForOrder->ip, $item->ip);
+                $this->assertTrue(strlen($item->created_at) > 0);
+                $this->assertTrue(strlen($item->updated_at) > 0);
+                $this->assertNotEquals($item->created_at, $item->updated_at);
+                $this->assertGreaterThan($item->created_at, $item->updated_at);
+            }
+        })->logout(function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 0);
+        })->admOrder(null, function (MyResponse $resp) {
+            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
+            $this->assertArrayHasKey(FieldError, $resp->data);
+            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
         })->run();
     }
 }

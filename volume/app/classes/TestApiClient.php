@@ -191,6 +191,32 @@ final class TestApiClient
         return $this;
     }
 
+    public function admOrders(?RequestPaginator $req, callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($req, $cb) {
+            if ($req !== null) {
+                $_POST = $req->toArray();
+            }
+
+            $cb((new ControllerAdm())->orders([]));
+        };
+
+        return $this;
+    }
+
+    public function admOrder(?RequestOrder $req, callable $cb): TestApiClient
+    {
+        $this->tasks[] = function () use ($req, $cb) {
+            if ($req !== null) {
+                $_POST = $req->toArray();
+            }
+
+            $cb((new ControllerAdm())->order([]));
+        };
+
+        return $this;
+    }
+
     public function run(): void
     {
         foreach ($this->tasks as $task) {
