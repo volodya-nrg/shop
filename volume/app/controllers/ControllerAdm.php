@@ -404,9 +404,11 @@ final class ControllerAdm extends ControllerBase
             $item->comment = $req->comment;
             $item->place_delivery = $req->placeDelivery;
             $item->ip = $req->ip;
+            $item->status = $req->status;
 
             if ($item->order_id == 0) {
-                $item->ip = $_SERVER["REMOTE_ADDR"] ?? "127.0.0.1"; // TODO тут надо будет еще проверить
+                $item->ip = $_SERVER["REMOTE_ADDR"]; // HTTP_X_FORWARDED_FOR
+                $item->status = StatusOrderCreated;
 
                 $result = $serviceOrders->create($item);
                 if ($result instanceof Error) {

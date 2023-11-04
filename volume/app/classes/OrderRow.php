@@ -9,6 +9,7 @@ final class OrderRow implements InterfaceConstructData
     public ?string $comment = null;
     public ?string $place_delivery = null;
     public string $ip = ""; // на всякий случай и ip
+    public string $status = "";
     public string $created_at = "";
     public string $updated_at = "";
 

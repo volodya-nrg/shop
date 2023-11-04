@@ -800,6 +800,7 @@ final class ControllerAdmTest extends TestCase
                 $this->assertEquals($reqForOrder->comment, $item->comment);
                 $this->assertEquals($reqForOrder->placeDelivery, $item->place_delivery);
                 $this->assertEquals($_SERVER["REMOTE_ADDR"], $item->ip);
+                $this->assertEquals(StatusOrderCreated, $item->status);
                 $this->assertTrue(strlen($item->created_at) > 0);
                 $this->assertEquals($item->created_at, $item->updated_at);
                 $this->assertGreaterThan($dt->format(DatePattern), $item->created_at);
@@ -811,6 +812,7 @@ final class ControllerAdmTest extends TestCase
                 $reqForOrder->comment = null;
                 $reqForOrder->placeDelivery = null;
                 $reqForOrder->ip = randomIP();
+                $reqForOrder->status = StatusOrderFinished;
 
                 sleep(2);
             }
@@ -836,11 +838,20 @@ final class ControllerAdmTest extends TestCase
                 $this->assertNull($item->comment);
                 $this->assertNull($item->place_delivery);
                 $this->assertEquals($reqForOrder->ip, $item->ip);
+                $this->assertEquals(StatusOrderFinished, $item->status);
                 $this->assertTrue(strlen($item->created_at) > 0);
                 $this->assertTrue(strlen($item->updated_at) > 0);
                 $this->assertNotEquals($item->created_at, $item->updated_at);
                 $this->assertGreaterThan($item->created_at, $item->updated_at);
+
+                $reqForOrder->status = "x";
             }
+
+            // изменим с неправильным статусом, будет ошибка
+        })->admOrder($reqForOrder, function (MyResponse $resp) {
+            checkBasicData($this, 500, $resp, 1, ViewPageAdmOrder);
+            $this->assertArrayHasKey(FieldError, $resp->data);
+            $this->assertEquals(ErrInternalServer, $resp->data[FieldError]);
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
         })->admOrder(null, function (MyResponse $resp) {

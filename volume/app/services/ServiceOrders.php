@@ -3,7 +3,7 @@
 final class ServiceOrders extends ServiceDB
 {
     protected string $table = "orders";
-    protected array $fields = ["order_id", "user_id", "contact_phone", "contact_name", "comment", "place_delivery", "ip", "created_at", "updated_at"];
+    protected array $fields = ["order_id", "user_id", "contact_phone", "contact_name", "comment", "place_delivery", "ip", "status", "created_at", "updated_at"];
 
     public function all($limit = -1, $offset = -1): array|Error
     {
@@ -98,12 +98,13 @@ final class ServiceOrders extends ServiceDB
             $comment,
             $placeDelivery,
             $order->ip,
+            $order->status,
         ];
 
         try {
             $result = $this->db->prepare("
-                    INSERT INTO {$this->table} (user_id, contact_phone, contact_name, comment, place_delivery, ip) 
-                    VALUES (?,?,?,?,?,?)")->execute($arData);
+                    INSERT INTO {$this->table} (user_id, contact_phone, contact_name, comment, place_delivery, ip, status) 
+                    VALUES (?,?,?,?,?,?,?)")->execute($arData);
             if ($result === false) {
                 return new Error(ErrSqlQueryIsFalse);
             }
@@ -146,13 +147,14 @@ final class ServiceOrders extends ServiceDB
             $comment,
             $placeDelivery,
             $order->ip,
+            $order->status,
             $order->order_id,
         ];
 
         try {
             $result = $this->db->prepare("
                     UPDATE {$this->table} 
-                    SET user_id=?, contact_phone=?, contact_name=?, comment=?, place_delivery=?, ip=? 
+                    SET user_id=?, contact_phone=?, contact_name=?, comment=?, place_delivery=?, ip=?, status=?
                     WHERE order_id=?")->execute($arData);
             if ($result === false) {
                 return new Error(ErrSqlQueryIsFalse);

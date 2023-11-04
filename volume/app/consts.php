@@ -87,6 +87,7 @@ const FieldContactPhone = "contact_phone";
 const FieldComment = "comment";
 const FieldPlaceDelivery = "place_delivery";
 const FieldIP = "ip";
+const FieldStatus = "status";
 
 // viewNames
 const ViewModuleCounter = "module-counter.php";
@@ -127,3 +128,9 @@ const ViewPageSearch = "page-search.php";
 const ViewPageOrder = "page-order.php";
 const ViewPageOrderOk = "page-order_ok.php";
 const ViewEmailMsgAndLink = "email-msg-and-link.php";
+
+// ------
+const StatusOrderCreated = "created";
+const StatusOrderCollected = "collected";
+const StatusOrderFinished = "finished";
+

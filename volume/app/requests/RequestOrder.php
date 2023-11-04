@@ -9,6 +9,7 @@ final class RequestOrder
     public ?string $comment = "";
     public ?string $placeDelivery = "";
     public string $ip = "";
+    public string $status = "";
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
@@ -34,6 +35,9 @@ final class RequestOrder
             if (isset($post[FieldIP])) {
                 $this->ip = $post[FieldIP];
             }
+            if (isset($post[FieldStatus])) {
+                $this->status = $post[FieldStatus];
+            }
         }
     }
 
@@ -47,6 +51,7 @@ final class RequestOrder
             FieldComment => $this->comment,
             FieldPlaceDelivery => $this->placeDelivery,
             FieldIP => $this->ip,
+            FieldStatus => $this->status,
         ];
     }
 }
