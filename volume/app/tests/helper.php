@@ -2,19 +2,19 @@
 
 use PHPUnit\Framework\TestCase;
 
-function checkBasicData(TestCase $t, int $expectedCode, MyResponse $resp, int $countData, string $viewName = null): void
+function checkBasicData(TestCase $t, int $expectedCode, MyResponse $resp, int $countData, EnumViewFile $view = null): void
 {
     $t->assertEquals($expectedCode, $resp->getHttpCode());
     $t->assertCount($countData, $resp->data);
 
-    if ($viewName !== null) {
-        $t->assertEquals($viewName, $resp->getViewName());
+    if ($view !== null) {
+        $t->assertEquals($view, $resp->getView());
     }
 
     if ($expectedCode >= 200 && $expectedCode < 300) {
-        $t->assertArrayNotHasKey(FieldError, $resp->data);
+        $t->assertArrayNotHasKey(EnumField::Error->value, $resp->data);
     } else {
-        $t->assertArrayHasKey(FieldError, $resp->data);
+        $t->assertArrayHasKey(EnumField::Error->value, $resp->data);
     }
 }
 

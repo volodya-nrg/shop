@@ -7,19 +7,19 @@ final class RequestRecoverCheck
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($post[FieldPassword])) {
-            $this->pass = $post[FieldPassword];
+        if (isset($post[EnumField::Password->value])) {
+            $this->pass = $post[EnumField::Password->value];
         }
-        if (isset($post[FieldPasswordConfirm])) {
-            $this->passConfirm = $post[FieldPasswordConfirm];
+        if (isset($post[EnumField::PasswordConfirm->value])) {
+            $this->passConfirm = $post[EnumField::PasswordConfirm->value];
         }
     }
 
     public function toArray(): array
     {
         return [
-            FieldPassword => $this->pass,
-            FieldPasswordConfirm => $this->passConfirm,
+            EnumField::Password->value => $this->pass,
+            EnumField::PasswordConfirm->value => $this->passConfirm,
         ];
     }
 }

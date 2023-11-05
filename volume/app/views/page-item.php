@@ -1,10 +1,10 @@
 <?php
-$item = $__data[FieldItem] ?? new ItemRow([]);
+$item = $__data[EnumField::Item->value] ?? new ItemRow([]);
 ?>
 <div class="page-item">
     <div class="page-item__breadcrumbs">
         <?php
-        echo template(DIR_VIEWS . "/" . ViewModuleBreakCrumbs, []);
+        echo template(EnumViewFile::ModuleBreakCrumbs);
         ?>
     </div>
     <div class="page-item__main">
@@ -28,9 +28,9 @@ $item = $__data[FieldItem] ?? new ItemRow([]);
             <?php endif; ?>
             <div class="text-nowrap">
                 Цена: <span class="h3"><?php echo finePrice($item->price) ?></span> ₽
-                <?php echo template(DIR_VIEWS . "/" . ViewModuleCounter, [
-                    FieldStyles => "sx-lg",
-                    FieldItem => $item,
+                <?php echo template(EnumViewFile::ModuleCounter, [
+                    EnumField::Styles->value => "sx-lg",
+                    EnumField::Item->value => $item,
                 ]) ?>
             </div>
         </div>

@@ -4,16 +4,16 @@ final class ControllerLogout extends ControllerBase
 {
     public function index(array $args): MyResponse
     {
-        if (isset($_SESSION[FieldProfile])) {
-            unset($_SESSION[FieldProfile]);
+        if (isset($_SESSION[EnumField::Profile->value])) {
+            unset($_SESSION[EnumField::Profile->value]);
         }
-        if (isset($_SESSION[FieldAdmin])) {
-            unset($_SESSION[FieldAdmin]);
+        if (isset($_SESSION[EnumField::Admin->value])) {
+            unset($_SESSION[EnumField::Admin->value]);
         }
-        if (!$_SERVER[FieldModeIsTest]) {
+        if (!$_SERVER[EnumField::ModeIsTest->value]) {
             redirect("/");
         }
 
-        return new MyResponse("");
+        return new MyResponse(EnumViewFile::Default);
     }
 }

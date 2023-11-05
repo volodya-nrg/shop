@@ -1,7 +1,7 @@
 <?php
-$error = $__data[FieldError] ?? "";
-$successMsg = $__data[FieldSuccess] ?? "";
-$email = $__data[FieldEmail] ?? "";
+$error = $__data[EnumField::Error->value] ?? "";
+$successMsg = $__data[EnumField::Success->value] ?? "";
+$email = $__data[EnumField::Email->value] ?? "";
 ?>
 <div class="block_center_and_slim">
     <h1 class="align-center">Смена пароля</h1>
@@ -9,9 +9,9 @@ $email = $__data[FieldEmail] ?? "";
     <?php if ($error != ""): ?>
         <div>
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
-                FieldMsg => $error,
-                FieldType => NoticeStyleClassDanger,
+            echo template(EnumViewFile::ModuleNotice, [
+                EnumField::Msg->value => $error,
+                EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
             ]);
             ?>
         </div>
@@ -19,9 +19,9 @@ $email = $__data[FieldEmail] ?? "";
     <?php elseif ($successMsg != ""): ?>
         <div>
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
-                FieldMsg => $successMsg,
-                FieldType => NoticeStyleClassSuccess,
+            echo template(EnumViewFile::ModuleNotice, [
+                EnumField::Msg->value => $successMsg,
+                EnumField::Type->value => EnumNoticeStyleClass::Success->value,
             ]);
             ?>
         </div>
@@ -32,11 +32,11 @@ $email = $__data[FieldEmail] ?? "";
         <form method="post" class="form" action="">
             <div class="form__row">
                 <div class="form__title">Пароль</div>
-                <input type="password" name="<?php echo FieldPassword ?>" value="" required="required"/>
+                <input type="password" name="<?php echo EnumField::Password->value ?>" value="" required="required"/>
             </div>
             <div class="form__row">
                 <div class="form__title">Пароль (павтор)</div>
-                <input type="password" name="<?php echo FieldPasswordConfirm ?>" value="" required="required"/>
+                <input type="password" name="<?php echo EnumField::PasswordConfirm->value ?>" value="" required="required"/>
             </div>
             <div class="form__row align-right">
                 <input class="btn" type="submit" value="Отправить"/>

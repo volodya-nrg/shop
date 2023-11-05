@@ -7,18 +7,18 @@ final class RequestLogin
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($post[FieldEmail])) {
-            $this->email = $post[FieldEmail];
+        if (isset($post[EnumField::Email->value])) {
+            $this->email = $post[EnumField::Email->value];
         }
-        if (isset($post[FieldPassword])) {
-            $this->pass = $post[FieldPassword];
+        if (isset($post[EnumField::Password->value])) {
+            $this->pass = $post[EnumField::Password->value];
         }
     }
     public function toArray(): array
     {
         return [
-            FieldEmail => $this->email,
-            FieldPassword => $this->pass,
+            EnumField::Email->value => $this->email,
+            EnumField::Password->value => $this->pass,
         ];
     }
 }

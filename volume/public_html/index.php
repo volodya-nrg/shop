@@ -11,23 +11,23 @@ $aArgs = count($aURLPath) > 2 ? array_slice($aURLPath, 2) : [];
 
 try {
     if (!class_exists($class)) {
-        throw new Exception(ErrNotFoundClass);
+        throw new Exception(EnumErr::NotFoundClass->value);
     }
 
     if ($class === "ControllerItem") {
         if ($method === "index" || count($aArgs)) {
-            throw new Exception(ErrNotFoundMethod);
+            throw new Exception(EnumErr::NotFoundMethod->value);
         }
         $aArgs = [$method];
         $method = "index";
     } elseif (!method_exists($class, $method)) {
-        throw new Exception(ErrNotFoundMethod);
+        throw new Exception(EnumErr::NotFoundMethod->value);
     }
 
     $oPage = new $class();
 
     if (!is_callable([$oPage, $method])) { // проверим можно ли вызывать (public, protected). Если private, то не получится вызвать.
-        throw new Exception(ErrMethodNotAllowed);
+        throw new Exception(EnumErr::MethodNotAllowed->value);
     }
 
     $resp = call_user_func([$oPage, $method], $aArgs);
@@ -41,7 +41,7 @@ try {
 } catch (Exception $e) {
     $oPage = new ControllerNotFound();
     $resp = $oPage->index($aArgs);
-    error_log(sprintf(ErrInWhenTpl, "index.php", "call class-method", $e->getMessage()));
+    error_log(sprintf(EnumErr::InWhenTpl->value, "index.php", "call class-method", $e->getMessage()));
 }
 
 http_response_code($resp->getHttpCode());
@@ -83,7 +83,7 @@ http_response_code($resp->getHttpCode());
 </header>
 <main class="main">
     <div class="layer-center">
-        <?php echo template(DIR_VIEWS . "/{$resp->getViewName()}", $resp->data); ?>
+        <?php echo template($resp->getView(), $resp->data); ?>
     </div>
 </main>
 <footer class="footer">

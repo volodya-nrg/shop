@@ -29,108 +29,116 @@ const DatePattern = "Y-m-d H:i:s";
 const DefaultLimit = 20;
 
 // notice
-const NoticeStyleClassDanger = "sx-danger";
-const NoticeStyleClassWarning = "sx-warning";
-const NoticeStyleClassInfo = "sx-info";
-const NoticeStyleClassSuccess = "sx-success";
+enum EnumNoticeStyleClass: string
+{
+    case Danger = "sx-danger";
+    case Warning = "sx-warning";
+    case Info = "sx-info";
+    case Success = "sx-success";
+}
 
-// request, response, params fields
-const FieldEmail = "email";
-const FieldPassword = "password";
-const FieldAvatar = "avatar";
-const FieldBirthdayDay = "birthday_day";
-const FieldBirthdayMon = "birthday_mon";
-const FieldRole = "role";
-const FieldPasswordConfirm = "password_confirm";
-const FieldAgreement = "agreement";
-const FieldPrivacyPolicy = "privacy_policy";
-const FieldError = "error";
-const FieldRequestedEmail = "requested_email";
-const FieldRequestedAgreement = "requested_agreement";
-const FieldRequestedPrivatePolicy = "requested_private_policy";
-const FieldMsg = "msg";
-const FieldType = "type";
-const FieldDataSendMsg = "data_is_send";
-const FieldSuccess = "success";
-const FieldHash = "hash";
-const FieldStyles = "styles";
-const FieldItems = "items";
-const FieldItem = "item";
-const FieldUsers = "users";
-const FieldUser = "user";
-const FieldOrders = "orders";
-const FieldOrder = "order";
-const FieldPhoneNumber = "phone_number";
-const FieldFIO = "fio";
-const FieldDeliveryTo = "delivery_to";
-const FieldAddress = "address";
-const FieldProfile = "profile";
-const FieldAdmin = "admin";
-const FieldModeIsTest = "MODE_IS_TEST";
-const FieldItemId = "item_id";
-const FieldName = "name";
-const FieldCatId = "cat_id";
-const FieldDescription = "description";
-const FieldPrice = "price";
-const FieldIsDisabled = "is_disabled";
-const FieldUpdatedAt = "updated_at";
-const FieldCreatedAt = "created_at";
-const FieldParentId = "parent_id";
-const FieldPos = "pos";
-const FieldLimit = "limit";
-const FieldOffset = "offset";
-const FieldUserId = "user_id";
-const FieldTitle = "title";
-const FieldOrderId = "order_id";
-const FieldContactName = "contact_name";
-const FieldContactPhone = "contact_phone";
-const FieldComment = "comment";
-const FieldPlaceDelivery = "place_delivery";
-const FieldIP = "ip";
-const FieldStatus = "status";
+enum EnumField: string
+{
+    case Address = "address";
+    case Admin = "admin";
+    case Agreement = "agreement";
+    case Avatar = "avatar";
+    case BirthdayDay = "birthday_day";
+    case BirthdayMon = "birthday_mon";
+    case CatId = "cat_id";
+    case Comment = "comment";
+    case ContactName = "contact_name";
+    case ContactPhone = "contact_phone";
+    case DataSendMsg = "data_is_send";
+    case DeliveryTo = "delivery_to";
+    case Description = "description";
+    case Email = "email";
+    case Error = "error";
+    case FIO = "fio";
+    case Hash = "hash";
+    case IP = "ip";
+    case IsDisabled = "is_disabled";
+    case Item = "item";
+    case ItemId = "item_id";
+    case Items = "items";
+    case Limit = "limit";
+    case ModeIsTest = "MODE_IS_TEST";
+    case Msg = "msg";
+    case Name = "name";
+    case Offset = "offset";
+    case Order = "order";
+    case OrderId = "order_id";
+    case Orders = "orders";
+    case ParentId = "parent_id";
+    case Password = "password";
+    case PasswordConfirm = "password_confirm";
+    case PhoneNumber = "phone_number";
+    case PlaceDelivery = "place_delivery";
+    case Pos = "pos";
+    case Price = "price";
+    case PrivacyPolicy = "privacy_policy";
+    case Profile = "profile";
+    case RequestedAgreement = "requested_agreement";
+    case RequestedEmail = "requested_email";
+    case RequestedPrivatePolicy = "requested_private_policy";
+    case Role = "role";
+    case Status = "status";
+    case Styles = "styles";
+    case Success = "success";
+    case Title = "title";
+    case Type = "type";
+    case User = "user";
+    case UserId = "user_id";
+    case Users = "users";
+}
 
 // viewNames
-const ViewModuleCounter = "module-counter.php";
-const ViewModuleItem = "module-item.php";
-const ViewModuleCartItem = "module-cart-item.php";
-const ViewModuleNotice = "module-notice.php";
-const ViewModuleBreakCrumbs = "module-breakcrumbs.php";
-const ViewModuleCatalogMenu = "module-catalog-menu.php";
-const ViewModulePaginator = "module-paginator.php";
-const ViewPageAdm = "page-adm.php";
-const ViewPageAdmItems = "page-adm-items.php";
-const ViewPageAdmItem = "page-adm-item.php";
-const ViewPageAdmUsers = "page-adm-users.php";
-const ViewPageAdmUser = "page-adm-user.php";
-const ViewPageAdmOrders = "page-adm-orders.php";
-const ViewPageAdmOrder = "page-adm-order.php";
-const ViewPageAdmCats = "page-adm-cats.php";
-const ViewPageAdmCat = "page-adm-cat.php";
-const ViewPageAgreement = "page-agreement.php";
-const ViewPageCart = "page-cart.php";
-const ViewPageCat = "page-cat.php";
-const ViewPageCheckout = "page-checkout.php";
-const ViewPageContacts = "page-contacts.php";
-const ViewPageInfo = "page-info.php";
-const ViewPageItem = "page-item.php";
-const ViewPageLogin = "page-login.php";
-const ViewPageMain = "page-main.php";
-const ViewPageNotFound = "page-notfound.php";
-const ViewPageAccessDined = "page-access-dined.php";
-const ViewPagePrivacyPolicy = "page-privacy-policy.php";
-const ViewPageProfile = "page-profile.php";
-const ViewPageRecover = "page-recover.php";
-const ViewPageRecoverCheck = "page-recover_check.php";
-const ViewPageReg = "page-reg.php";
-const ViewPageRegOK = "page-reg_ok.php";
-const ViewPageRegCheck = "page-reg_check.php";
-const ViewPageSearch = "page-search.php";
-const ViewPageOrder = "page-order.php";
-const ViewPageOrderOk = "page-order_ok.php";
-const ViewEmailMsgAndLink = "email-msg-and-link.php";
+enum EnumViewFile: string
+{
+    case Default = "";
+    case ModuleBreakCrumbs = "module-breakcrumbs.php";
+    case ModuleCartItem = "module-cart-item.php";
+    case ModuleCatalogMenu = "module-catalog-menu.php";
+    case ModuleCounter = "module-counter.php";
+    case ModuleItem = "module-item.php";
+    case ModuleNotice = "module-notice.php";
+    case ModulePaginator = "module-paginator.php";
+    case EmailMsgAndLink = "email-msg-and-link.php";
+    case PageAccessDined = "page-access-dined.php";
+    case PageAdm = "page-adm.php";
+    case PageAdmCat = "page-adm-cat.php";
+    case PageAdmCats = "page-adm-cats.php";
+    case PageAdmItem = "page-adm-item.php";
+    case PageAdmItems = "page-adm-items.php";
+    case PageAdmOrder = "page-adm-order.php";
+    case PageAdmOrders = "page-adm-orders.php";
+    case PageAdmUser = "page-adm-user.php";
+    case PageAdmUsers = "page-adm-users.php";
+    case PageAgreement = "page-agreement.php";
+    case PageCart = "page-cart.php";
+    case PageCat = "page-cat.php";
+    case PageCheckout = "page-checkout.php";
+    case PageContacts = "page-contacts.php";
+    case PageInfo = "page-info.php";
+    case PageItem = "page-item.php";
+    case PageLogin = "page-login.php";
+    case PageMain = "page-main.php";
+    case PageNotFound = "page-notfound.php";
+    case PageOrder = "page-order.php";
+    case PageOrderOk = "page-order_ok.php";
+    case PagePrivacyPolicy = "page-privacy-policy.php";
+    case PageProfile = "page-profile.php";
+    case PageRecover = "page-recover.php";
+    case PageRecoverCheck = "page-recover_check.php";
+    case PageReg = "page-reg.php";
+    case PageRegCheck = "page-reg_check.php";
+    case PageRegOK = "page-reg_ok.php";
+    case PageSearch = "page-search.php";
+}
 
-// ------
-const StatusOrderCreated = "created";
-const StatusOrderCollected = "collected";
-const StatusOrderFinished = "finished";
-
+enum EnumStatusOrder: string
+{
+    case Created = "created";
+    case Collected = "collected";
+    case Finished = "finished";
+}

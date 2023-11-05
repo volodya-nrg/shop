@@ -67,12 +67,12 @@ final class ServiceCats extends ServiceDB
                 INSERT INTO {$this->table} (name, slug, parent_id, pos, is_disabled) 
                 VALUES (?,?,?,?,?)");
             if ($stmt === false) {
-                return new Error(ErrStmtIsFalse);
+                return new Error(EnumErr::StmtIsFalse->value);
             }
 
             $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
 
             $tmp = $this->db->lastInsertId();
@@ -102,14 +102,14 @@ final class ServiceCats extends ServiceDB
                     SET name=?, slug=?, parent_id=?, pos=?, is_disabled=? 
                     WHERE cat_id=?");
             if ($stmt === false) {
-                return new Error(ErrStmtIsFalse);
+                return new Error(EnumErr::StmtIsFalse->value);
             }
 
             $arData[] = $item->cat_id;
 
             $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
@@ -121,9 +121,7 @@ final class ServiceCats extends ServiceDB
     public function delete(int $catId): bool|Error
     {
         try {
-            return $this->db->
-            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
-            execute([$catId]);
+            return $this->db->prepare("DELETE FROM {$this->table} WHERE cat_id=?")->execute([$catId]);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

@@ -1,6 +1,6 @@
 <?php
-$error = $__data[FieldError] ?? "";
-$requestedEmail = $__data[FieldRequestedEmail] ?? "";
+$error = $__data[EnumField::Error->value] ?? "";
+$requestedEmail = $__data[EnumField::RequestedEmail->value] ?? "";
 ?>
 <div class="block_center_and_slim">
     <h1 class="align-center">Вход</h1>
@@ -8,9 +8,9 @@ $requestedEmail = $__data[FieldRequestedEmail] ?? "";
     <?php if ($error !== ""): ?>
         <div>
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
-                FieldMsg => $error,
-                FieldType => NoticeStyleClassDanger,
+            echo template(EnumViewFile::ModuleNotice, [
+                EnumField::Msg->value => $error,
+                EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
             ]);
             ?>
         </div>
@@ -20,12 +20,12 @@ $requestedEmail = $__data[FieldRequestedEmail] ?? "";
     <form method="post" class="form" action="">
         <div class="form__row">
             <div class="form__title">Е-мэйл</div>
-            <input type="email" name="<?php echo FieldEmail ?>" value="<?php echo $requestedEmail ?>"
+            <input type="email" name="<?php echo EnumField::Email->value ?>" value="<?php echo $requestedEmail ?>"
                    required="required"/>
         </div>
         <div class="form__row">
             <div class="form__title">Пароль</div>
-            <input type="password" name="<?php echo FieldPassword ?>" value="" required="required"/>
+            <input type="password" name="<?php echo EnumField::Password->value ?>" value="" required="required"/>
         </div>
         <div class="form__row align-right">
             <a href="/recover">Забыли пароль?</a>

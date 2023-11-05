@@ -1,6 +1,6 @@
 <?php
-$styles = $__data[FieldStyles] ?? "";
-$item = $__data[FieldItem] ?? new ItemRow([]);
+$styles = $__data[EnumField::Styles->value] ?? "";
+$item = $__data[EnumField::Item->value] ?? new ItemRow([]);
 ?>
 <form class="module-counter<?php if ($styles != "") echo " {$styles}"; ?>" onsubmit="return false;">
     <button class="module-counter__plus">-</button>

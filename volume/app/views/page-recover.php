@@ -1,6 +1,6 @@
 <?php
-$error = $__data[FieldError] ?? "";
-$dataSendMsg = $__data[FieldDataSendMsg] ?? "";
+$error = $__data[EnumField::Error->value] ?? "";
+$dataSendMsg = $__data[EnumField::DataSendMsg->value] ?? "";
 ?>
 <div class="block_center_and_slim">
     <h1 class="align-center">Восстановление доступа</h1>
@@ -8,9 +8,9 @@ $dataSendMsg = $__data[FieldDataSendMsg] ?? "";
     <?php if ($error != ""): ?>
         <div>
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
-                FieldMsg => $error,
-                FieldType => NoticeStyleClassDanger,
+            echo template(EnumViewFile::ModuleNotice, [
+                EnumField::Msg->value => $error,
+                EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
             ]);
             ?>
         </div>
@@ -18,9 +18,9 @@ $dataSendMsg = $__data[FieldDataSendMsg] ?? "";
     <?php elseif ($dataSendMsg != ""): ?>
         <div>
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
-                FieldMsg => $dataSendMsg,
-                FieldType => NoticeStyleClassSuccess,
+            echo template(EnumViewFile::ModuleNotice, [
+                EnumField::Msg->value => $dataSendMsg,
+                EnumField::Type->value => EnumNoticeStyleClass::Success->value,
             ]);
             ?>
         </div>
@@ -30,7 +30,7 @@ $dataSendMsg = $__data[FieldDataSendMsg] ?? "";
     <form method="post" class="form" action="">
         <div class="form__row">
             <div class="form__title">Е-мэйл</div>
-            <input type="email" name="<?php echo FieldEmail ?>" value="" required="required"/>
+            <input type="email" name="<?php echo EnumField::Email->value ?>" value="" required="required"/>
         </div>
         <div class="form__row align-right">
             <input class="btn" type="submit" value="Отправить"/>

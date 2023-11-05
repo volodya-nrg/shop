@@ -10,31 +10,31 @@ final class RequestCat
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($post[FieldCatId])) {
-            $this->catId = $post[FieldCatId];
+        if (isset($post[EnumField::CatId->value])) {
+            $this->catId = $post[EnumField::CatId->value];
         }
-        if (isset($post[FieldName])) {
-            $this->name = $post[FieldName];
+        if (isset($post[EnumField::Name->value])) {
+            $this->name = $post[EnumField::Name->value];
         }
-        if (isset($post[FieldParentId])) {
-            $this->parentId = $post[FieldParentId];
+        if (isset($post[EnumField::ParentId->value])) {
+            $this->parentId = $post[EnumField::ParentId->value];
         }
-        if (isset($post[FieldPos])) {
-            $this->pos = $post[FieldPos];
+        if (isset($post[EnumField::Pos->value])) {
+            $this->pos = $post[EnumField::Pos->value];
         }
-        if (isset($post[FieldIsDisabled])) {
-            $this->isDisabled = $post[FieldIsDisabled];
+        if (isset($post[EnumField::IsDisabled->value])) {
+            $this->isDisabled = $post[EnumField::IsDisabled->value];
         }
     }
 
     public function toArray(): array
     {
         return [
-            FieldCatId => $this->catId,
-            FieldName => $this->name,
-            FieldParentId => $this->parentId,
-            FieldPos => $this->pos,
-            FieldIsDisabled => $this->isDisabled,
+            EnumField::CatId->value => $this->catId,
+            EnumField::Name->value => $this->name,
+            EnumField::ParentId->value => $this->parentId,
+            EnumField::Pos->value => $this->pos,
+            EnumField::IsDisabled->value => $this->isDisabled,
         ];
     }
 }

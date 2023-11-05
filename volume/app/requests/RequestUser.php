@@ -14,26 +14,26 @@ final class RequestUser
     public function __construct(array $post = []) // необходимо во время приема данных
     {
         if (count($post)) {
-            if (isset($post[FieldUserId])) {
-                $this->userId = $post[FieldUserId];
+            if (isset($post[EnumField::UserId->value])) {
+                $this->userId = $post[EnumField::UserId->value];
             }
-            if (isset($post[FieldEmail])) {
-                $this->email = $post[FieldEmail];
+            if (isset($post[EnumField::Email->value])) {
+                $this->email = $post[EnumField::Email->value];
             }
-            if (isset($post[FieldPassword])) {
-                $this->pass = $post[FieldPassword];
+            if (isset($post[EnumField::Password->value])) {
+                $this->pass = $post[EnumField::Password->value];
             }
-            if (isset($post[FieldAvatar])) {
-                $this->avatar = $post[FieldAvatar];
+            if (isset($post[EnumField::Avatar->value])) {
+                $this->avatar = $post[EnumField::Avatar->value];
             }
-            if (isset($post[FieldBirthdayDay])) {
-                $this->birthdayDay = $post[FieldBirthdayDay];
+            if (isset($post[EnumField::BirthdayDay->value])) {
+                $this->birthdayDay = $post[EnumField::BirthdayDay->value];
             }
-            if (isset($post[FieldBirthdayMon])) {
-                $this->birthdayMon = $post[FieldBirthdayMon];
+            if (isset($post[EnumField::BirthdayMon->value])) {
+                $this->birthdayMon = $post[EnumField::BirthdayMon->value];
             }
-            if (isset($post[FieldRole])) {
-                $this->role = $post[FieldRole];
+            if (isset($post[EnumField::Role->value])) {
+                $this->role = $post[EnumField::Role->value];
             }
         }
     }
@@ -41,13 +41,13 @@ final class RequestUser
     public function toArray(): array
     {
         return [
-            FieldUserId => $this->userId,
-            FieldEmail => $this->email,
-            FieldPassword => $this->pass,
-            FieldAvatar => $this->avatar,
-            FieldBirthdayDay => $this->birthdayDay,
-            FieldBirthdayMon => $this->birthdayMon,
-            FieldRole => $this->role,
+            EnumField::UserId->value => $this->userId,
+            EnumField::Email->value => $this->email,
+            EnumField::Password->value => $this->pass,
+            EnumField::Avatar->value => $this->avatar,
+            EnumField::BirthdayDay->value => $this->birthdayDay,
+            EnumField::BirthdayMon->value => $this->birthdayMon,
+            EnumField::Role->value => $this->role,
         ];
     }
 }

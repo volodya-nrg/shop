@@ -10,31 +10,31 @@ final class RequestReg
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($post[FieldEmail])) {
-            $this->email = $post[FieldEmail];
+        if (isset($post[EnumField::Email->value])) {
+            $this->email = $post[EnumField::Email->value];
         }
-        if (isset($post[FieldPassword])) {
-            $this->pass = $post[FieldPassword];
+        if (isset($post[EnumField::Password->value])) {
+            $this->pass = $post[EnumField::Password->value];
         }
-        if (isset($post[FieldPasswordConfirm])) {
-            $this->passConfirm = $post[FieldPasswordConfirm];
+        if (isset($post[EnumField::PasswordConfirm->value])) {
+            $this->passConfirm = $post[EnumField::PasswordConfirm->value];
         }
-        if (isset($post[FieldAgreement])) {
-            $this->agreement = $post[FieldAgreement];
+        if (isset($post[EnumField::Agreement->value])) {
+            $this->agreement = $post[EnumField::Agreement->value];
         }
-        if (isset($post[FieldPrivacyPolicy])) {
-            $this->privatePolicy = $post[FieldPrivacyPolicy];
+        if (isset($post[EnumField::PrivacyPolicy->value])) {
+            $this->privatePolicy = $post[EnumField::PrivacyPolicy->value];
         }
     }
 
     public function toArray(): array
     {
         return [
-            FieldEmail => $this->email,
-            FieldPassword => $this->pass,
-            FieldPasswordConfirm => $this->passConfirm,
-            FieldAgreement => $this->agreement,
-            FieldPrivacyPolicy => $this->privatePolicy,
+            EnumField::Email->value => $this->email,
+            EnumField::Password->value => $this->pass,
+            EnumField::PasswordConfirm->value => $this->passConfirm,
+            EnumField::Agreement->value => $this->agreement,
+            EnumField::PrivacyPolicy->value => $this->privatePolicy,
         ];
     }
 }

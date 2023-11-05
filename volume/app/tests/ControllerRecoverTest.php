@@ -12,7 +12,7 @@ final class ControllerRecoverTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[FieldModeIsTest] = true;
+        $_SERVER[EnumField::ModeIsTest->value] = true;
     }
 
     protected function tearDown(): void
@@ -35,47 +35,47 @@ final class ControllerRecoverTest extends TestCase
 
         // откроем страницу
         $this->client->recover(null, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 0, ViewPageRecover);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageRecover);
 
             $req->email = randomString(10);
 
             // пошлем не правильный е-мэйл, будет ошибка
         })->recover($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 400, $resp, 2, ViewPageRecover);
-            $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
-            $this->assertTrue(isset($resp->data[FieldRequestedEmail]) && strlen($resp->data[FieldRequestedEmail]) > 0);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageRecover);
+            $this->assertEquals(EnumErr::EmailNotCorrect->value, $resp->data[EnumField::Error->value]);
+            $this->assertTrue(isset($resp->data[EnumField::RequestedEmail->value]) && strlen($resp->data[EnumField::RequestedEmail->value]) > 0);
 
             $req->email = randomEmail();
 
             // пользователь не найден, будет ошибка
         })->recover($req, function (MyResponse $resp) {
-            checkBasicData($this, 400, $resp, 2, ViewPageRecover);
-            $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageRecover);
+            $this->assertEquals(EnumErr::NotFoundUser->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
 
             // зарегистрируем пользователя (е-мэйл не подтвержден)
         })->reg($reqForUser, "", false, function (MyResponse $resp) use ($req, $reqForUser) {
-            checkBasicData($this, 200, $resp, 2, ViewPageReg);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageReg);
 
-            $_GET[FieldHash] = $resp->data[FieldHash];
+            $_GET[EnumField::Hash->value] = $resp->data[EnumField::Hash->value];
             $req->email = $reqForUser->email;
 
             // попробуем еще раз совершить запрос, будет ошибка, т.к. е-мэйл не подтвержден
         })->recover($req, function (MyResponse $resp) {
-            checkBasicData($this, 400, $resp, 2, ViewPageRecover);
-            $this->assertEquals(ErrCheckYourEmail, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageRecover);
+            $this->assertEquals(EnumErr::CheckYourEmail->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
 
             // подтвердим ему е-мэйл
         })->regCheck(function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageRegCheck);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageRegCheck);
 
             // пошлем корректные данные
         })->recover($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 2, ViewPageRecover);
-            $this->assertArrayHasKey(FieldDataSendMsg, $resp->data);
-            $this->assertEquals(sprintf(DicRecoverDataSendMsgTpl, $req->email), $resp->data[FieldDataSendMsg]);
-            $this->assertArrayHasKey(FieldHash, $resp->data);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageRecover);
+            $this->assertArrayHasKey(EnumField::DataSendMsg->value, $resp->data);
+            $this->assertEquals(sprintf(EnumDic::RecoverDataSendMsgTpl->value, $req->email), $resp->data[EnumField::DataSendMsg->value]);
+            $this->assertArrayHasKey(EnumField::Hash->value, $resp->data);
         })->run();
     }
 
@@ -97,46 +97,46 @@ final class ControllerRecoverTest extends TestCase
 
             // открываем страницу
         $this->client->recoverCheck(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageRecoverCheck);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageRecoverCheck);
 
-            $_GET[FieldHash] = randomString();
+            $_GET[EnumField::Hash->value] = randomString();
 
             // подкинем не валидный hash, откроется страница в обычном режиме. Т.к. хеша такого нет.
         })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageRecoverCheck);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageRecoverCheck);
 
             // зарегистриуем полностью пользователя
         })->reg($reqForUser, "", true, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageReg);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageReg);
 
             // от пользователя отправим данные для восстановления пароля
         })->recover($reqForRecover, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageRecover);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageRecover);
 
-            $_GET[FieldHash] = $resp->data[FieldHash];
+            $_GET[EnumField::Hash->value] = $resp->data[EnumField::Hash->value];
 
             // подкидываем валидный хеш, но пароль короткий, будет ошибка
         })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) use ($reqForUser, $reqForRecoverCheck) {
-            checkBasicData($this, 400, $resp, 2, ViewPageRecoverCheck);
-            $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldEmail, $resp->data);
-            $this->assertEquals($reqForUser->email, $resp->data[FieldEmail]);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageRecoverCheck);
+            $this->assertEquals(sprintf(EnumErr::PassIsShortTpl->value, PassMinLen), $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::Email->value, $resp->data);
+            $this->assertEquals($reqForUser->email, $resp->data[EnumField::Email->value]);
 
             $reqForRecoverCheck->pass = randomString(PassMinLen);
 
             // пароли не верны между собой, будет ошибка
         })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) use ($reqForRecoverCheck) {
-            checkBasicData($this, 400, $resp, 2, ViewPageRecoverCheck);
-            $this->assertArrayHasKey(FieldEmail, $resp->data);
-            $this->assertEquals(ErrPasswordsNotEqual, $resp->data[FieldError]);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageRecoverCheck);
+            $this->assertArrayHasKey(EnumField::Email->value, $resp->data);
+            $this->assertEquals(EnumErr::PasswordsNotEqual->value, $resp->data[EnumField::Error->value]);
 
             $reqForRecoverCheck->passConfirm = $reqForRecoverCheck->pass;
 
             // ok
         })->recoverCheck($reqForRecoverCheck, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageRecoverCheck);
-            $this->assertArrayHasKey(FieldSuccess, $resp->data);
-            $this->assertEquals(DicPasswordChangedSuccessfully, $resp->data[FieldSuccess]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageRecoverCheck);
+            $this->assertArrayHasKey(EnumField::Success->value, $resp->data);
+            $this->assertEquals(EnumDic::PasswordChangedSuccessfully->value, $resp->data[EnumField::Success->value]);
         })->run();
     }
 }

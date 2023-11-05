@@ -14,29 +14,29 @@ final class RequestOrder
     public function __construct(array $post = []) // необходимо во время приема данных
     {
         if (count($post)) {
-            if (isset($post[FieldOrderId])) {
-                $this->orderId = $post[FieldOrderId];
+            if (isset($post[EnumField::OrderId->value])) {
+                $this->orderId = $post[EnumField::OrderId->value];
             }
-            if (isset($post[FieldUserId])) {
-                $this->userId = $post[FieldUserId];
+            if (isset($post[EnumField::UserId->value])) {
+                $this->userId = $post[EnumField::UserId->value];
             }
-            if (isset($post[FieldContactPhone])) {
-                $this->contactPhone = $post[FieldContactPhone];
+            if (isset($post[EnumField::ContactPhone->value])) {
+                $this->contactPhone = $post[EnumField::ContactPhone->value];
             }
-            if (isset($post[FieldContactName])) {
-                $this->contactName = $post[FieldContactName];
+            if (isset($post[EnumField::ContactName->value])) {
+                $this->contactName = $post[EnumField::ContactName->value];
             }
-            if (isset($post[FieldComment])) {
-                $this->comment = $post[FieldComment];
+            if (isset($post[EnumField::Comment->value])) {
+                $this->comment = $post[EnumField::Comment->value];
             }
-            if (isset($post[FieldPlaceDelivery])) {
-                $this->placeDelivery = $post[FieldPlaceDelivery];
+            if (isset($post[EnumField::PlaceDelivery->value])) {
+                $this->placeDelivery = $post[EnumField::PlaceDelivery->value];
             }
-            if (isset($post[FieldIP])) {
-                $this->ip = $post[FieldIP];
+            if (isset($post[EnumField::IP->value])) {
+                $this->ip = $post[EnumField::IP->value];
             }
-            if (isset($post[FieldStatus])) {
-                $this->status = $post[FieldStatus];
+            if (isset($post[EnumField::Status->value])) {
+                $this->status = $post[EnumField::Status->value];
             }
         }
     }
@@ -44,14 +44,14 @@ final class RequestOrder
     public function toArray(): array
     {
         return [
-            FieldOrderId => $this->orderId,
-            FieldUserId => $this->userId,
-            FieldContactPhone => $this->contactPhone,
-            FieldContactName => $this->contactName,
-            FieldComment => $this->comment,
-            FieldPlaceDelivery => $this->placeDelivery,
-            FieldIP => $this->ip,
-            FieldStatus => $this->status,
+            EnumField::OrderId->value => $this->orderId,
+            EnumField::UserId->value => $this->userId,
+            EnumField::ContactPhone->value => $this->contactPhone,
+            EnumField::ContactName->value => $this->contactName,
+            EnumField::Comment->value => $this->comment,
+            EnumField::PlaceDelivery->value => $this->placeDelivery,
+            EnumField::IP->value => $this->ip,
+            EnumField::Status->value => $this->status,
         ];
     }
 }

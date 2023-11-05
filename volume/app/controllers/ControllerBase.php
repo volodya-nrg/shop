@@ -7,12 +7,12 @@ class ControllerBase
 
     protected function index(array $args): MyResponse
     {
-        return new MyResponse("");
+        return new MyResponse(EnumViewFile::Default);
     }
 
-    protected function view(string $tplPath, array $aData = []): string
+    protected function view(EnumViewFile $viewFile, array $aData = []): string
     {
-        return template($tplPath, $aData);
+        return template($viewFile, $aData);
     }
 
     protected function json(array $aData, $code = 0): string

@@ -12,7 +12,7 @@ final class ControllerRegTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[FieldModeIsTest] = true;
+        $_SERVER[EnumField::ModeIsTest->value] = true;
     }
 
     protected function tearDown(): void
@@ -34,7 +34,7 @@ final class ControllerRegTest extends TestCase
 
         // открываем страницу
         $this->client->reg(null, "", false, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 200, $resp, 0, ViewPageReg);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageReg);
 
             $reqForUser->email = randomString(10);
             $reqForUser->pass = randomString(PassMinLen - 1);
@@ -44,85 +44,85 @@ final class ControllerRegTest extends TestCase
 
             // e-mail не правильный, будет ошибка
         })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(EnumErr::EmailNotCorrect->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
 
             $reqForUser->email = randomEmail();
 
             // пароль не верный, будет ошибка
         })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(sprintf(EnumErr::PassIsShortTpl->value, PassMinLen), $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
 
             $reqForUser->pass = randomString(PassMinLen);
 
             // пароли не равны между собой, будет ошибка
         })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrPasswordsNotEqual, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(EnumErr::PasswordsNotEqual->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
 
             $reqForUser->passConfirm = $reqForUser->pass;
 
             // не выбран agreement, будет ошибка
         })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrAcceptAgreement, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(EnumErr::AcceptAgreement->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
 
             $reqForUser->agreement = true;
 
             // не выбран privatePolicy, будет ошибка
         })->reg($reqForUser, "", false, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrAcceptPrivatePolicy, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(EnumErr::AcceptPrivatePolicy->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
 
             $reqForUser->privatePolicy = true;
 
             // успешная регистрация пользователя, е-мэйл не подтвержден
         })->reg($reqForUser, "", false, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageReg);
-            $this->assertArrayHasKey(FieldHash, $resp->data);
-            $this->assertArrayHasKey(FieldUserId, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
-            $this->assertGreaterThan(0, $resp->data[FieldUserId]);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageReg);
+            $this->assertArrayHasKey(EnumField::Hash->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::UserId->value, $resp->data);
+            $this->assertTrue(strlen($resp->data[EnumField::Hash->value]) > 0);
+            $this->assertGreaterThan(0, $resp->data[EnumField::UserId->value]);
 
             // еще раз попробуем зарегистрировать того же самого пользователя, будет ошибка
         })->reg($reqForUser, "", false, function (MyResponse $resp) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrCheckYourEmail, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(EnumErr::CheckYourEmail->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
 
             // успешная регистрация админа
-        })->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageReg);
-            $this->assertArrayHasKey(FieldHash, $resp->data);
-            $this->assertArrayHasKey(FieldUserId, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
-            $this->assertGreaterThan(0, $resp->data[FieldUserId]);
+        })->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageReg);
+            $this->assertArrayHasKey(EnumField::Hash->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::UserId->value, $resp->data);
+            $this->assertTrue(strlen($resp->data[EnumField::Hash->value]) > 0);
+            $this->assertGreaterThan(0, $resp->data[EnumField::UserId->value]);
 
             // еще раз зарегистрируем админа, будет ошибка - такой пользователь уже есть с подтвержденным е-мэйлом
         })->reg($reqForAdmin, "", false, function (MyResponse $resp) {
-            checkBasicData($this, 400, $resp, 4, ViewPageReg);
-            $this->assertEquals(ErrUserAlreadyHas, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedAgreement, $resp->data);
-            $this->assertArrayHasKey(FieldRequestedPrivatePolicy, $resp->data);
+            checkBasicData($this, 400, $resp, 4, EnumViewFile::PageReg);
+            $this->assertEquals(EnumErr::UserAlreadyHas->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedAgreement->value, $resp->data);
+            $this->assertArrayHasKey(EnumField::RequestedPrivatePolicy->value, $resp->data);
         })->run();
     }
 
@@ -136,27 +136,27 @@ final class ControllerRegTest extends TestCase
 
         // открываем страницу
         $this->client->regCheck(function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageRegCheck);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageRegCheck);
 
-            $_GET[FieldHash] = "x";
+            $_GET[EnumField::Hash->value] = "x";
 
             // подкинем не верный хеш, будет ошибка
         })->regCheck(function (MyResponse $resp) {
-            checkBasicData($this, 400, $resp, 1, ViewPageRegCheck);
-            $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
+            checkBasicData($this, 400, $resp, 1, EnumViewFile::PageRegCheck);
+            $this->assertEquals(EnumErr::NotFoundUser->value, $resp->data[EnumField::Error->value]);
 
             // зарегистрируем пользователя
         })->reg($req, "", false, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 2, ViewPageReg);
-            $this->assertTrue(strlen($resp->data[FieldHash]) > 0);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageReg);
+            $this->assertTrue(strlen($resp->data[EnumField::Hash->value]) > 0);
 
-            $_GET[FieldHash] = $resp->data[FieldHash];
+            $_GET[EnumField::Hash->value] = $resp->data[EnumField::Hash->value];
 
             // проверим хеш, ok
         })->regCheck(function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageRegCheck);
-            $this->assertArrayHasKey(FieldMsg, $resp->data);
-            $this->assertEquals(DicEmailSuccessfullyConfirmed, $resp->data[FieldMsg]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageRegCheck);
+            $this->assertArrayHasKey(EnumField::Msg->value, $resp->data);
+            $this->assertEquals(EnumDic::EmailSuccessfullyConfirmed->value, $resp->data[EnumField::Msg->value]);
         })->run();
     }
 }

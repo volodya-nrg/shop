@@ -2,21 +2,21 @@
 
 final class ControllerRecover extends ControllerBase
 {
-    public string $title = DicRecoverAccess;
+    public string $title = EnumDic::RecoverAccess->value;
     public string $description = "";
 
     public function index(array $args): MyResponse
     {
-        $resp = new MyResponse(ViewPageRecover);
+        $resp = new MyResponse(EnumViewFile::PageRecover);
 
         if (isset($_POST) && count($_POST)) {
             $req = new RequestRecover($_POST);
-            $resp->data[FieldRequestedEmail] = $req->email;
+            $resp->data[EnumField::RequestedEmail->value] = $req->email;
 
             $err = $this->check_request_index($req);
             if ($err instanceof Error) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = $err->getMessage();
+                $resp->data[EnumField::Error->value] = $err->getMessage();
                 return $resp;
             }
 
@@ -28,23 +28,23 @@ final class ControllerRecover extends ControllerBase
                 EMAIL_LOGIN,
                 EMAIL_PASS,
                 EMAIL_FROM,
-                $_SERVER[FieldModeIsTest] === true,
+                $_SERVER[EnumField::ModeIsTest->value] === true,
             );
 
             // возьмем пользователя
             $result = $serviceUsers->oneByEmail($req->email);
             if ($result instanceof Error) {
                 $resp->setHttpCode(500);
-                $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->oneByEmail", $result->getMessage()));
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->oneByEmail", $result->getMessage()));
                 return $resp;
             } elseif ($result === null) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = ErrNotFoundUser;
+                $resp->data[EnumField::Error->value] = EnumErr::NotFoundUser->value;
                 return $resp;
             } elseif ($result instanceof UserRow && $result->email_hash !== null) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = ErrCheckYourEmail;
+                $resp->data[EnumField::Error->value] = EnumErr::CheckYourEmail->value;
                 return $resp;
             }
             $user = $result;
@@ -60,31 +60,31 @@ final class ControllerRecover extends ControllerBase
                 $serviceRecover->db->rollBack();
 
                 $resp->setHttpCode(500);
-                $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceRecover->create", $err->getMessage()));
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceRecover->create", $err->getMessage()));
                 return $resp;
             }
 
-            $template = $this->view(DIR_VIEWS . "/" . ViewEmailMsgAndLink, [
-                FieldMsg => DicGoAheadForRecoverPass,
-                FieldAddress => ADDRESS . "/recover/check?" . FieldHash . "={$recover->hash}",
+            $template = $this->view(EnumViewFile::EmailMsgAndLink, [
+                EnumField::Msg->value => EnumDic::GoAheadForRecoverPass->value,
+                EnumField::Address->value => ADDRESS . "/recover/check?" . EnumField::Hash->value . "={$recover->hash}",
             ]);
 
-            $err = $serviceEmail->send($user->email, DicRecoverAccess, $template);
+            $err = $serviceEmail->send($user->email, EnumDic::RecoverAccess->value, $template);
             if ($err instanceof Error) {
                 $serviceRecover->db->rollBack();
 
                 $resp->setHttpCode(500);
-                $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "send email", $err->getMessage()));
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "send email", $err->getMessage()));
                 return $resp;
             }
 
             $serviceRecover->db->commit();
 
             $resp->data = [];
-            $resp->data[FieldDataSendMsg] = sprintf(DicRecoverDataSendMsgTpl, $req->email);
-            $resp->data[FieldHash] = $recover->hash; // нужен для отладки в тестах
+            $resp->data[EnumField::DataSendMsg->value] = sprintf(EnumDic::RecoverDataSendMsgTpl->value, $req->email);
+            $resp->data[EnumField::Hash->value] = $recover->hash; // нужен для отладки в тестах
         }
 
         return $resp;
@@ -92,9 +92,9 @@ final class ControllerRecover extends ControllerBase
 
     public function check(array $args): MyResponse
     {
-        $this->title = DicChangePassword;
-        $resp = new MyResponse(ViewPageRecoverCheck);
-        $hash = $_GET[FieldHash] ?? "";
+        $this->title = EnumDic::ChangePassword->value;
+        $resp = new MyResponse(EnumViewFile::PageRecoverCheck);
+        $hash = $_GET[EnumField::Hash->value] ?? "";
         $user = null;
         $serviceUsers = new ServiceUsers();
         $serviceRecover = new ServiceRecovers();
@@ -104,24 +104,24 @@ final class ControllerRecover extends ControllerBase
             $recover = $serviceRecover->one($hash);
             if ($recover instanceof Error) {
                 $resp->setHttpCode(500);
-                $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceRecover->one", $recover->getMessage()));
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceRecover->one", $recover->getMessage()));
                 return $resp;
             } elseif ($recover instanceof RecoverRow) {
                 $result = $serviceUsers->one($recover->user_id);
                 if ($result instanceof Error) {
                     $resp->setHttpCode(500);
-                    $resp->data[FieldError] = ErrInternalServer;
-                    error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->one", $result->getMessage()));
+                    $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                    error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->one", $result->getMessage()));
                     return $resp;
                 } elseif ($result === null) {
                     $resp->setHttpCode(400);
-                    $resp->data[FieldError] = ErrNotFoundUser;
+                    $resp->data[EnumField::Error->value] = EnumErr::NotFoundUser->value;
                     return $resp;
                 }
 
                 $user = $result;
-                $resp->data[FieldEmail] = $user->email; // чтоб показалась форму смены пароля, необходимо предоставить e-mail
+                $resp->data[EnumField::Email->value] = $user->email; // чтоб показалась форму смены пароля, необходимо предоставить e-mail
             }
         }
 
@@ -131,7 +131,7 @@ final class ControllerRecover extends ControllerBase
             $err = $this->check_request_check($req);
             if ($err instanceof Error) {
                 $resp->setHttpCode(400);
-                $resp->data[FieldError] = $err->getMessage();
+                $resp->data[EnumField::Error->value] = $err->getMessage();
                 return $resp;
             }
 
@@ -144,8 +144,8 @@ final class ControllerRecover extends ControllerBase
                 $serviceUsers->db->rollBack();
 
                 $resp->setHttpCode(500);
-                $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceUsers->createOrUpdate", $result->getMessage()));
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->createOrUpdate", $result->getMessage()));
                 return $resp;
             }
 
@@ -155,15 +155,15 @@ final class ControllerRecover extends ControllerBase
                 $serviceUsers->db->rollBack();
 
                 $resp->setHttpCode(500);
-                $resp->data[FieldError] = ErrInternalServer;
-                error_log(sprintf(ErrInWhenTpl, __METHOD__, "serviceRecover->deleteByUserId", $result->getMessage()));
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceRecover->deleteByUserId", $result->getMessage()));
                 return $resp;
             }
 
             $serviceUsers->db->commit();
 
             $resp->data = [];
-            $resp->data[FieldSuccess] = DicPasswordChangedSuccessfully;
+            $resp->data[EnumField::Success->value] = EnumDic::PasswordChangedSuccessfully->value;
         }
 
         return $resp;
@@ -172,7 +172,7 @@ final class ControllerRecover extends ControllerBase
     private function check_request_index(RequestRecover $req): Error|null
     {
         if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
-            return new Error(ErrEmailNotCorrect);
+            return new Error(EnumErr::EmailNotCorrect->value);
         }
 
         return null;
@@ -181,10 +181,10 @@ final class ControllerRecover extends ControllerBase
     private function check_request_check(RequestRecoverCheck $req): Error|null
     {
         if (strlen($req->pass) < PassMinLen) {
-            return new Error(ErrPassIsShort);
+            return new Error(sprintf(EnumErr::PassIsShortTpl->value, PassMinLen));
         }
         if ($req->pass !== $req->passConfirm) {
-            return new Error(ErrPasswordsNotEqual);
+            return new Error(EnumErr::PasswordsNotEqual->value);
         }
 
         return null;

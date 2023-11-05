@@ -70,12 +70,12 @@ final class ServiceItems extends ServiceDB
                     INSERT INTO {$this->table} (title, slug, cat_id, description, price, is_disabled) 
                     VALUES (?,?,?,?,?,?)");
             if ($stmt === false) {
-                return new Error(ErrStmtIsFalse);
+                return new Error(EnumErr::StmtIsFalse->value);
             }
 
             $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
 
             $tmp = $this->db->lastInsertId();
@@ -106,14 +106,14 @@ final class ServiceItems extends ServiceDB
                 SET title=?, slug=?, cat_id=?, description=?, price=?, is_disabled=? 
                 WHERE item_id=?");
             if ($stmt === false) {
-                return new Error(ErrStmtIsFalse);
+                return new Error(EnumErr::StmtIsFalse->value);
             }
 
             $arData[] = $item->item_id;
 
             $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
 
         } catch (\PDOException $e) {

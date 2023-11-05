@@ -9,7 +9,7 @@
                 0 <span class="text-small">₽</span>
             </div>
             <div class="module-item__counter">
-                <?php echo template(DIR_VIEWS . "/" . ViewModuleCounter, []) ?>
+                <?php echo template(EnumViewFile::ModuleCounter) ?>
             </div>
         </div>
     </div>

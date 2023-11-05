@@ -26,7 +26,7 @@ final class ServiceOrders extends ServiceDB
                 ORDER BY order_id DESC 
                 {$limitAndOffset}");
             if ($stmt === false) {
-                return new Error(ErrStmtIsFalse);
+                return new Error(EnumErr::StmtIsFalse->value);
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
@@ -51,12 +51,12 @@ final class ServiceOrders extends ServiceDB
                 FROM {$this->table} 
                 WHERE order_id=?");
             if ($stmt === false) {
-                return new Error(ErrStmtIsFalse);
+                return new Error(EnumErr::StmtIsFalse->value);
             }
 
             $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
 
             $data = $stmt->fetch();
@@ -106,7 +106,7 @@ final class ServiceOrders extends ServiceDB
                     INSERT INTO {$this->table} (user_id, contact_phone, contact_name, comment, place_delivery, ip, status) 
                     VALUES (?,?,?,?,?,?,?)")->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
 
             $tmp = $this->db->lastInsertId();
@@ -157,7 +157,7 @@ final class ServiceOrders extends ServiceDB
                     SET user_id=?, contact_phone=?, contact_name=?, comment=?, place_delivery=?, ip=?, status=?
                     WHERE order_id=?")->execute($arData);
             if ($result === false) {
-                return new Error(ErrSqlQueryIsFalse);
+                return new Error(EnumErr::SqlQueryIsFalse->value);
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());

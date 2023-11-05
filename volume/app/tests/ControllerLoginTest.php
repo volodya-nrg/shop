@@ -12,7 +12,7 @@ final class ControllerLoginTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[FieldModeIsTest] = true;
+        $_SERVER[EnumField::ModeIsTest->value] = true;
     }
 
     protected function tearDown(): void
@@ -42,35 +42,35 @@ final class ControllerLoginTest extends TestCase
 
         // открываем страницу
         $this->client->login(null, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             $req->email = randomString(10);
             $req->pass = randomString(PassMinLen - 1);
 
             // е-мэйл не верен, будет ошибка
         })->login($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 400, $resp, 2, ViewPageLogin);
-            $this->assertEquals(ErrEmailNotCorrect, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageLogin);
+            $this->assertEquals(EnumErr::EmailNotCorrect->value, $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertTrue(strlen($resp->data[EnumField::RequestedEmail->value]) > 0);
 
             $req->email = randomEmail();
 
             // пароль не верен, будет ошибка
         })->login($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 400, $resp, 2, ViewPageLogin);
-            $this->assertEquals(ErrPassIsShort, $resp->data[FieldError]);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageLogin);
+            $this->assertEquals(sprintf(EnumErr::PassIsShortTpl->value, PassMinLen), $resp->data[EnumField::Error->value]);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertTrue(strlen($resp->data[EnumField::RequestedEmail->value]) > 0);
 
             $req->pass = randomString(PassMinLen);
 
             // пользователь не найден, будет ошибка
         })->login($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 400, $resp, 2, ViewPageLogin);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertTrue(strlen($resp->data[FieldRequestedEmail]) > 0);
-            $this->assertEquals(ErrNotFoundUser, $resp->data[FieldError]);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageLogin);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertTrue(strlen($resp->data[EnumField::RequestedEmail->value]) > 0);
+            $this->assertEquals(EnumErr::NotFoundUser->value, $resp->data[EnumField::Error->value]);
 
             // создадим пользователя
         })->reg($reqForUser, "", true, function (MyResponse $resp) use ($req, $reqForUser) {
@@ -81,24 +81,24 @@ final class ControllerLoginTest extends TestCase
 
             // аунтентификация под профилем с не верным паролем, будет ошибка
         })->login($req, function (MyResponse $resp) use ($req, $reqForUser) {
-            checkBasicData($this, 400, $resp, 2, ViewPageLogin);
-            $this->assertArrayHasKey(FieldRequestedEmail, $resp->data);
-            $this->assertEquals(ErrLoginOrPasswordNotCorrect, $resp->data[FieldError]);
+            checkBasicData($this, 400, $resp, 2, EnumViewFile::PageLogin);
+            $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
+            $this->assertEquals(EnumErr::LoginOrPasswordNotCorrect->value, $resp->data[EnumField::Error->value]);
 
             $req->pass = $reqForUser->pass;
 
             // аунтентификация под профилем с верным паролем, ok
         })->login($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-            $this->assertArrayHasKey(FieldProfile, $_SESSION);
-            $this->assertArrayNotHasKey(FieldAdmin, $_SESSION);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
+            $this->assertArrayHasKey(EnumField::Profile->value, $_SESSION);
+            $this->assertArrayNotHasKey(EnumField::Admin->value, $_SESSION);
 
             // выйдем
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
 
             // создадим админа
-        })->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) use ($req, $reqForAdmin) {
+        })->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) use ($req, $reqForAdmin) {
             checkBasicData($this, 200, $resp, 2);
 
             $req->email = $reqForAdmin->email;
@@ -106,9 +106,9 @@ final class ControllerLoginTest extends TestCase
 
             // аунтентификация под админом
         })->login($req, function (MyResponse $resp) use ($req) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
-            $this->assertArrayHasKey(FieldProfile, $_SESSION);
-            $this->assertArrayHasKey(FieldAdmin, $_SESSION);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
+            $this->assertArrayHasKey(EnumField::Profile->value, $_SESSION);
+            $this->assertArrayHasKey(EnumField::Admin->value, $_SESSION);
 
             // выйдем
         })->logout(function (MyResponse $resp) {

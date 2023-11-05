@@ -4,7 +4,7 @@
         <div class="page-cart__items">
             <?php
             for ($i=0; $i < 6; $i++) {
-                echo template(DIR_VIEWS . "/" . ViewModuleCartItem, []);
+                echo template(EnumViewFile::ModuleCartItem);
             }
             ?>
         </div>

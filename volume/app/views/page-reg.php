@@ -1,8 +1,8 @@
 <?php
-$error = $__data[FieldError] ?? "";
-$requestedEmail = $__data[FieldRequestedEmail] ?? "";
-$requestedAgreement = $__data[FieldRequestedAgreement] ?? false;
-$requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
+$error = $__data[EnumField::Error->value] ?? "";
+$requestedEmail = $__data[EnumField::RequestedEmail->value] ?? "";
+$requestedAgreement = $__data[EnumField::RequestedAgreement->value] ?? false;
+$requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? false;
 ?>
 <div class="block_center_and_slim">
     <h1 class="align-center">Регистрация</h1>
@@ -10,9 +10,9 @@ $requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
     <?php if ($error != ""): ?>
         <div>
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleNotice, [
-                FieldMsg => $error,
-                FieldType => NoticeStyleClassDanger,
+            echo template(EnumViewFile::ModuleNotice, [
+                EnumField::Msg->value => $error,
+                EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
             ]);
             ?>
         </div>
@@ -22,21 +22,21 @@ $requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
     <form method="post" class="form" action="">
         <div class="form__row">
             <div class="form__title">Е-мэйл</div>
-            <input type="email" name="<?php echo FieldEmail ?>" value="<?php echo $requestedEmail ?>"
+            <input type="email" name="<?php echo EnumField::Email->value ?>" value="<?php echo $requestedEmail ?>"
                    required="required"/>
         </div>
         <div class="form__row">
             <div class="form__title">Пароль</div>
-            <input type="password" name="<?php echo FieldPassword ?>" value="" required="required"/>
+            <input type="password" name="<?php echo EnumField::Password->value ?>" value="" required="required"/>
         </div>
         <div class="form__row">
             <div class="form__title">Пароль (павтор)</div>
-            <input type="password" name="<?php echo FieldPasswordConfirm ?>" value="" required="required"/>
+            <input type="password" name="<?php echo EnumField::PasswordConfirm->value ?>" value="" required="required"/>
         </div>
         <div class="form__row">
             <label for="page-reg-checkbox-agreement">
                 <input id="page-reg-checkbox-agreement"
-                       name="<?php echo FieldAgreement ?>"
+                       name="<?php echo EnumField::Agreement->value ?>"
                        <?php if ($requestedAgreement): ?>checked="checked"<?php endif; ?>
                        type="checkbox"
                        required="required"
@@ -46,7 +46,7 @@ $requestedPrivatePolicy = $__data[FieldRequestedPrivatePolicy] ?? false;
         <div class="form__row">
             <label for="page-reg-checkbox-privacy-policy">
                 <input id="page-reg-checkbox-privacy-policy"
-                       name="<?php echo FieldPrivacyPolicy ?>"
+                       name="<?php echo EnumField::PrivacyPolicy->value ?>"
                        <?php if ($requestedPrivatePolicy): ?>checked="checked"<?php endif; ?>
                        type="checkbox"
                        required="required"

@@ -1,12 +1,12 @@
 <?php
 
-function template(string $__view, array $__data = []): string
+function template(EnumViewFile $__view, array $__data = []): string
 {
     $output = "";
 
     if (ob_start()) {
         //extract($__data);
-        require($__view);
+        require(DIR_VIEWS . "/{$__view->value}");
         $output = ob_get_contents();
         ob_end_clean(); // очистить, но не вывести в браузер
     }

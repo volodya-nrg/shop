@@ -1,28 +1,28 @@
 <?php
-$error = $__data[FieldError] ?? "";
+$error = $__data[EnumField::Error->value] ?? "";
 ?>
 <div class="page-cat">
     <div class="page-cat__menu">
         <?php
-        echo template(DIR_VIEWS . "/" . ViewModuleCatalogMenu, []);
+        echo template(EnumViewFile::ModuleCatalogMenu);
         ?>
     </div>
     <div class="page-cat__main">
         <div class="page-cat__breakcrumbs">
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModuleBreakCrumbs, []);
+            echo template(EnumViewFile::ModuleBreakCrumbs);
             ?>
         </div>
         <div class="page-cat__items">
             <?php
             for ($i = 0; $i < 3; $i++) {
-                echo template(DIR_VIEWS . "/" . ViewModuleItem, []);
+                echo template(EnumViewFile::ModuleItem);
             }
             ?>
         </div>
         <div class="page-cat__paginator">
             <?php
-            echo template(DIR_VIEWS . "/" . ViewModulePaginator, []);
+            echo template(EnumViewFile::ModulePaginator);
             ?>
         </div>
     </div>

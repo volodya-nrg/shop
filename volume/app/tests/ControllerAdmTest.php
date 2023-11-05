@@ -12,7 +12,7 @@ final class ControllerAdmTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[FieldModeIsTest] = true;
+        $_SERVER[EnumField::ModeIsTest->value] = true;
         $_SERVER["REMOTE_ADDR"] = $_SERVER["REMOTE_ADDR"] ?? "127.0.0.1"; // HTTP_X_FORWARDED_FOR, REMOTE_ADDR
     }
 
@@ -55,25 +55,25 @@ final class ControllerAdmTest extends TestCase
 
             // аунтентифицируемся под юзером и запросим админку
         })->login($reqForLoginUser, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
         })->adm(function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
 
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
 
             // зарегистрируем админа
-        })->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        })->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом и запросим админку
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
         })->adm(function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageAdm);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageAdm);
 
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
@@ -110,52 +110,52 @@ final class ControllerAdmTest extends TestCase
         $reqPaginator = new RequestPaginator();
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом и запросим админку
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим список
         })->admCats(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCats);
-            $this->assertArrayHasKey(FieldItems, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCats);
+            $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
 
             // создадим категорию
         })->admCat($reqForCat1, function (MyResponse $resp) use ($reqForCat1, $reqForCat2) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $this->assertArrayHasKey(FieldCatId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $this->assertArrayHasKey(EnumField::CatId->value, $resp->data);
 
-            $reqForCat1->catId = $resp->data[FieldCatId];
+            $reqForCat1->catId = $resp->data[EnumField::CatId->value];
             $reqForCat2->parentId = $reqForCat1->catId;
 
         })->admCat($reqForCat2, function (MyResponse $resp) use ($reqForCat2) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $this->assertArrayHasKey(FieldCatId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $this->assertArrayHasKey(EnumField::CatId->value, $resp->data);
 
-            $reqForCat2->catId = $resp->data[FieldCatId];
+            $reqForCat2->catId = $resp->data[EnumField::CatId->value];
 
             // получим список категорий
         })->admCats($reqPaginator, function (MyResponse $resp) use ($reqPaginator) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCats);
-            $this->assertArrayHasKey(FieldItems, $resp->data);
-            $this->assertGreaterThanOrEqual(2, count($resp->data[FieldItems]));
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCats);
+            $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
+            $this->assertGreaterThanOrEqual(2, count($resp->data[EnumField::Items->value]));
 
             $reqPaginator->limit = 1;
 
         })->admCats($reqPaginator, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCats);
-            $this->assertArrayHasKey(FieldItems, $resp->data);
-            $this->assertCount(1, $resp->data[FieldItems]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCats);
+            $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
+            $this->assertCount(1, $resp->data[EnumField::Items->value]);
 
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
 
         })->admCats(new RequestPaginator(), function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 
@@ -180,33 +180,33 @@ final class ControllerAdmTest extends TestCase
         $reqForCat->isDisabled = false;
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом и запросим админку
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим чистую форму для создания категории
         })->admCat(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageAdmCat);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageAdmCat);
 
             // создадим категорию
         })->admCat($reqForCat, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $this->assertArrayHasKey(FieldCatId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $this->assertArrayHasKey(EnumField::CatId->value, $resp->data);
 
-            $_GET[FieldCatId] = $resp->data[FieldCatId];
+            $_GET[EnumField::CatId->value] = $resp->data[EnumField::CatId->value];
 
             // получим категорию, данные вставятся в форму
         })->admCat(null, function (MyResponse $resp) use ($reqForCat) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $isHasCat = isset($resp->data[FieldItem]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $isHasCat = isset($resp->data[EnumField::Item->value]);
 
             $this->assertTrue($isHasCat);
 
             if ($isHasCat) {
-                $cat = new CatRow($resp->data[FieldItem]);
+                $cat = new CatRow($resp->data[EnumField::Item->value]);
                 $this->assertTrue($cat->cat_id > 0);
                 $this->assertEquals($reqForCat->name, $cat->name);
                 $this->assertEquals($reqForCat->parentId, $cat->parent_id);
@@ -223,18 +223,18 @@ final class ControllerAdmTest extends TestCase
             // изменим категорию
         })->admCat($reqForCat, function (MyResponse $resp) {
             // после одновления получаем catId и т.к. есть GET, то и саму категорию
-            checkBasicData($this, 200, $resp, 2, ViewPageAdmCat);
-            $this->assertArrayHasKey(FieldCatId, $resp->data);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmCat);
+            $this->assertArrayHasKey(EnumField::CatId->value, $resp->data);
 
             // получим категорию, данные вставятся в форму
         })->admCat(null, function (MyResponse $resp) use ($reqForCat) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $isHasCat = isset($resp->data[FieldItem]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $isHasCat = isset($resp->data[EnumField::Item->value]);
 
             $this->assertTrue($isHasCat);
 
             if ($isHasCat) {
-                $cat = new CatRow($resp->data[FieldItem]);
+                $cat = new CatRow($resp->data[EnumField::Item->value]);
                 $this->assertEquals($reqForCat->catId, $cat->cat_id);
                 $this->assertEquals($reqForCat->name, $cat->name);
                 $this->assertEquals($reqForCat->parentId, $cat->parent_id);
@@ -244,9 +244,9 @@ final class ControllerAdmTest extends TestCase
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
         })->admCat(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 
@@ -289,54 +289,54 @@ final class ControllerAdmTest extends TestCase
         $reqForCat->isDisabled = false;
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим список
         })->admItems(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItems);
-            $this->assertArrayHasKey(FieldItems, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItems);
+            $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
 
             // создадим категорию
         })->admCat($reqForCat, function (MyResponse $resp) use ($reqForItem1, $reqForItem2) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $this->assertArrayHasKey(FieldCatId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $this->assertArrayHasKey(EnumField::CatId->value, $resp->data);
 
-            $reqForItem1->catId = $reqForItem2->catId = $resp->data[FieldCatId];
+            $reqForItem1->catId = $reqForItem2->catId = $resp->data[EnumField::CatId->value];
 
             // создадим item
         })->admItem($reqForItem1, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItem);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItem);
 
         })->admItem($reqForItem2, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItem);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItem);
 
             // получим список
         })->admItems(null, function (MyResponse $resp) use ($reqPaginator) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItems);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItems);
 
-            $this->assertArrayHasKey(FieldItems, $resp->data);
-            $this->assertGreaterThanOrEqual(1, $resp->data[FieldItems]);
+            $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
+            $this->assertGreaterThanOrEqual(1, $resp->data[EnumField::Items->value]);
 
             $reqPaginator->limit = 1;
 
             // получим список
         })->admItems($reqPaginator, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItems);
-            $this->assertArrayHasKey(FieldItems, $resp->data);
-            $this->assertCount(1, $resp->data[FieldItems]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItems);
+            $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
+            $this->assertCount(1, $resp->data[EnumField::Items->value]);
 
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
 
         })->admItem(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 
@@ -371,44 +371,44 @@ final class ControllerAdmTest extends TestCase
         $reqForCat->isDisabled = false;
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим чистую форму
         })->admItem(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageAdmItem);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageAdmItem);
 
             // попытаемся создать, но будет ошибка, т.к. категории нет
         })->admItem($reqForItem, function (MyResponse $resp) {
-            checkBasicData($this, 500, $resp, 1, ViewPageAdmItem);
+            checkBasicData($this, 500, $resp, 1, EnumViewFile::PageAdmItem);
 
         })->admCat($reqForCat, function (MyResponse $resp) use ($reqForCat, $reqForItem) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmCat);
-            $this->assertArrayHasKey(FieldCatId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmCat);
+            $this->assertArrayHasKey(EnumField::CatId->value, $resp->data);
 
-            $reqForItem->catId = $reqForCat->catId = $resp->data[FieldCatId];
+            $reqForItem->catId = $reqForCat->catId = $resp->data[EnumField::CatId->value];
             sleep(2);
 
             // создадим item
         })->admItem($reqForItem, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItem);
-            $this->assertArrayHasKey(FieldItemId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItem);
+            $this->assertArrayHasKey(EnumField::ItemId->value, $resp->data);
 
-            $_GET[FieldItemId] = $resp->data[FieldItemId];
+            $_GET[EnumField::ItemId->value] = $resp->data[EnumField::ItemId->value];
 
             // получим item, для вставки данных в форму
         })->admItem(null, function (MyResponse $resp) use ($reqForItem, $dt) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItem);
-            $isHasItem = isset($resp->data[FieldItem]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItem);
+            $isHasItem = isset($resp->data[EnumField::Item->value]);
 
             $this->assertTrue($isHasItem);
 
             if ($isHasItem) {
-                $item = new ItemRow($resp->data[FieldItem]);
+                $item = new ItemRow($resp->data[EnumField::Item->value]);
                 $this->assertTrue($item->item_id > 0);
                 $this->assertEquals($reqForItem->title, $item->title);
                 $this->assertTrue(strlen($item->slug) > 0);
@@ -431,18 +431,18 @@ final class ControllerAdmTest extends TestCase
 
             // изменим
         })->admItem($reqForItem, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageAdmItem);
-            $this->assertArrayHasKey(FieldItemId, $resp->data);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmItem);
+            $this->assertArrayHasKey(EnumField::ItemId->value, $resp->data);
 
             // получим
         })->admItem(null, function (MyResponse $resp) use ($reqForItem) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmItem);
-            $isHasItem = isset($resp->data[FieldItem]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItem);
+            $isHasItem = isset($resp->data[EnumField::Item->value]);
 
             $this->assertTrue($isHasItem);
 
             if ($isHasItem) {
-                $item = new ItemRow($resp->data[FieldItem]);
+                $item = new ItemRow($resp->data[EnumField::Item->value]);
                 $this->assertEquals($reqForItem->itemId, $item->item_id);
                 $this->assertEquals($reqForItem->title, $item->title);
                 $this->assertTrue(strlen($item->slug) > 0);
@@ -458,9 +458,9 @@ final class ControllerAdmTest extends TestCase
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
         })->admItem(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 
@@ -498,48 +498,48 @@ final class ControllerAdmTest extends TestCase
         $reqForUser2->role = "";
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим список
         })->admUsers(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
-            $this->assertArrayHasKey(FieldUsers, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUsers);
+            $this->assertArrayHasKey(EnumField::Users->value, $resp->data);
 
             // создадим user1
         })->admUser($reqForUser1, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUser);
 
             // создадим user2
         })->admUser($reqForUser2, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUser);
 
             // получим список
         })->admUsers(null, function (MyResponse $resp) use ($reqPaginator) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUsers);
 
-            $this->assertArrayHasKey(FieldUsers, $resp->data);
-            $this->assertGreaterThanOrEqual(1, $resp->data[FieldUsers]);
+            $this->assertArrayHasKey(EnumField::Users->value, $resp->data);
+            $this->assertGreaterThanOrEqual(1, $resp->data[EnumField::Users->value]);
 
             $reqPaginator->limit = 1;
 
             // получим список
         })->admUsers($reqPaginator, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUsers);
-            $this->assertArrayHasKey(FieldUsers, $resp->data);
-            $this->assertCount(1, $resp->data[FieldUsers]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUsers);
+            $this->assertArrayHasKey(EnumField::Users->value, $resp->data);
+            $this->assertCount(1, $resp->data[EnumField::Users->value]);
 
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
 
         })->admUser(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 
@@ -570,34 +570,34 @@ final class ControllerAdmTest extends TestCase
         $reqForUser->role = "";
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим чистую форму
         })->admUser(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageAdmUser);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageAdmUser);
             sleep(2);
 
             // создадим
         })->admUser($reqForUser, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
-            $this->assertArrayHasKey(FieldUserId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUser);
+            $this->assertArrayHasKey(EnumField::UserId->value, $resp->data);
 
-            $_GET[FieldUserId] = $resp->data[FieldUserId];
+            $_GET[EnumField::UserId->value] = $resp->data[EnumField::UserId->value];
 
             // получим, для вставки данных в форму
         })->admUser(null, function (MyResponse $resp) use ($reqForUser, $dt, $reqForLoginUser) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
-            $isHasItem = isset($resp->data[FieldUser]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUser);
+            $isHasItem = isset($resp->data[EnumField::User->value]);
 
             $this->assertTrue($isHasItem);
 
             if ($isHasItem) {
-                $item = new UserRow($resp->data[FieldUser]);
+                $item = new UserRow($resp->data[EnumField::User->value]);
                 $this->assertTrue($item->user_id > 0);
                 $this->assertEquals($reqForUser->email, $item->email);
                 $this->assertEquals("", $item->pass);
@@ -626,18 +626,18 @@ final class ControllerAdmTest extends TestCase
 
             // изменим
         })->admUser($reqForUser, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageAdmUser);
-            $this->assertArrayHasKey(FieldUserId, $resp->data);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmUser);
+            $this->assertArrayHasKey(EnumField::UserId->value, $resp->data);
 
             // получим
         })->admUser(null, function (MyResponse $resp) use ($reqForUser) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmUser);
-            $isHasItem = isset($resp->data[FieldUser]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmUser);
+            $isHasItem = isset($resp->data[EnumField::User->value]);
 
             $this->assertTrue($isHasItem);
 
             if ($isHasItem) {
-                $item = new UserRow($resp->data[FieldUser]);
+                $item = new UserRow($resp->data[EnumField::User->value]);
                 $this->assertEquals($reqForUser->userId, $item->user_id);
                 $this->assertEquals($reqForUser->email, $item->email);
                 $this->assertEquals("", $item->pass);
@@ -654,13 +654,13 @@ final class ControllerAdmTest extends TestCase
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
         })->admUser(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
 
             // аунтентифицируемся под user-ом
         })->login($reqForLoginUser, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
         })->run();
     }
 
@@ -696,54 +696,55 @@ final class ControllerAdmTest extends TestCase
         $reqForOrder2->placeDelivery = randomString(10);
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим список
         })->admOrders(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrders);
-            $this->assertArrayHasKey(FieldOrders, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrders);
+            $this->assertArrayHasKey(EnumField::Orders->value, $resp->data);
 
             // создадим order1
         })->admOrder($reqForOrder1, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrder);
 
             // создадим order2
         })->admOrder($reqForOrder2, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrder);
 
             // получим список
         })->admOrders(null, function (MyResponse $resp) use ($reqPaginator) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrders);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrders);
 
-            $this->assertArrayHasKey(FieldOrders, $resp->data);
-            $this->assertGreaterThanOrEqual(1, $resp->data[FieldOrders]);
+            $this->assertArrayHasKey(EnumField::Orders->value, $resp->data);
+            $this->assertGreaterThanOrEqual(1, $resp->data[EnumField::Orders->value]);
 
             $reqPaginator->limit = 1;
 
             // получим список
         })->admOrders($reqPaginator, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrders);
-            $this->assertArrayHasKey(FieldOrders, $resp->data);
-            $this->assertCount(1, $resp->data[FieldOrders]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrders);
+            $this->assertArrayHasKey(EnumField::Orders->value, $resp->data);
+            $this->assertCount(1, $resp->data[EnumField::Orders->value]);
 
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
 
         })->admOrder(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 
     public function testOrder(): void
     {
         $dt = date_create();
+        //$a = Suit::Clubs->value;
 
         $reqForAdmin = new RequestReg();
         $reqForAdmin->email = randomEmail();
@@ -765,34 +766,34 @@ final class ControllerAdmTest extends TestCase
         $reqForOrder->placeDelivery = randomString(10);
 
         // зарегистрируем админа
-        $this->client->reg($reqForAdmin, FieldAdmin, true, function (MyResponse $resp) {
+        $this->client->reg($reqForAdmin, EnumField::Admin->value, true, function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 2);
 
             // аунтентифицируемся под админом
         })->login($reqForLoginAdmin, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageLogin);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageLogin);
 
             // запросим чистую форму
         })->admOrder(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 0, ViewPageAdmOrder);
+            checkBasicData($this, 200, $resp, 0, EnumViewFile::PageAdmOrder);
             sleep(2);
 
             // создадим
         })->admOrder($reqForOrder, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
-            $this->assertArrayHasKey(FieldOrderId, $resp->data);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrder);
+            $this->assertArrayHasKey(EnumField::OrderId->value, $resp->data);
 
-            $_GET[FieldOrderId] = $resp->data[FieldOrderId];
+            $_GET[EnumField::OrderId->value] = $resp->data[EnumField::OrderId->value];
 
             // получим, для вставки данных в форму
         })->admOrder(null, function (MyResponse $resp) use ($reqForOrder, $dt) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
-            $isHasItem = isset($resp->data[FieldOrder]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrder);
+            $isHasItem = isset($resp->data[EnumField::Order->value]);
 
             $this->assertTrue($isHasItem);
 
             if ($isHasItem) {
-                $item = new OrderRow($resp->data[FieldOrder]);
+                $item = new OrderRow($resp->data[EnumField::Order->value]);
                 $this->assertTrue($item->order_id > 0);
                 $this->assertTrue($item->user_id > 0);
                 $this->assertEquals($reqForOrder->contactPhone, $item->contact_phone);
@@ -800,7 +801,7 @@ final class ControllerAdmTest extends TestCase
                 $this->assertEquals($reqForOrder->comment, $item->comment);
                 $this->assertEquals($reqForOrder->placeDelivery, $item->place_delivery);
                 $this->assertEquals($_SERVER["REMOTE_ADDR"], $item->ip);
-                $this->assertEquals(StatusOrderCreated, $item->status);
+                $this->assertEquals(EnumStatusOrder::Created->value, $item->status);
                 $this->assertTrue(strlen($item->created_at) > 0);
                 $this->assertEquals($item->created_at, $item->updated_at);
                 $this->assertGreaterThan($dt->format(DatePattern), $item->created_at);
@@ -812,25 +813,25 @@ final class ControllerAdmTest extends TestCase
                 $reqForOrder->comment = null;
                 $reqForOrder->placeDelivery = null;
                 $reqForOrder->ip = randomIP();
-                $reqForOrder->status = StatusOrderFinished;
+                $reqForOrder->status = EnumStatusOrder::Finished->value;
 
                 sleep(2);
             }
 
             // изменим
         })->admOrder($reqForOrder, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 2, ViewPageAdmOrder);
-            $this->assertArrayHasKey(FieldOrderId, $resp->data);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmOrder);
+            $this->assertArrayHasKey(EnumField::OrderId->value, $resp->data);
 
             // получим
         })->admOrder(null, function (MyResponse $resp) use ($reqForOrder) {
-            checkBasicData($this, 200, $resp, 1, ViewPageAdmOrder);
-            $isHasItem = isset($resp->data[FieldOrder]);
+            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmOrder);
+            $isHasItem = isset($resp->data[EnumField::Order->value]);
 
             $this->assertTrue($isHasItem);
 
             if ($isHasItem) {
-                $item = new OrderRow($resp->data[FieldOrder]);
+                $item = new OrderRow($resp->data[EnumField::Order->value]);
                 $this->assertEquals($reqForOrder->orderId, $item->order_id);
                 $this->assertNull($item->user_id);
                 $this->assertEquals($reqForOrder->contactPhone, $item->contact_phone);
@@ -838,7 +839,7 @@ final class ControllerAdmTest extends TestCase
                 $this->assertNull($item->comment);
                 $this->assertNull($item->place_delivery);
                 $this->assertEquals($reqForOrder->ip, $item->ip);
-                $this->assertEquals(StatusOrderFinished, $item->status);
+                $this->assertEquals(EnumStatusOrder::Finished->value, $item->status);
                 $this->assertTrue(strlen($item->created_at) > 0);
                 $this->assertTrue(strlen($item->updated_at) > 0);
                 $this->assertNotEquals($item->created_at, $item->updated_at);
@@ -849,15 +850,15 @@ final class ControllerAdmTest extends TestCase
 
             // изменим с неправильным статусом, будет ошибка
         })->admOrder($reqForOrder, function (MyResponse $resp) {
-            checkBasicData($this, 500, $resp, 1, ViewPageAdmOrder);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrInternalServer, $resp->data[FieldError]);
+            checkBasicData($this, 500, $resp, 1, EnumViewFile::PageAdmOrder);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::InternalServer->value, $resp->data[EnumField::Error->value]);
         })->logout(function (MyResponse $resp) {
             checkBasicData($this, 200, $resp, 0);
         })->admOrder(null, function (MyResponse $resp) {
-            checkBasicData($this, 401, $resp, 1, ViewPageAccessDined);
-            $this->assertArrayHasKey(FieldError, $resp->data);
-            $this->assertEquals(ErrNotHasAccess, $resp->data[FieldError]);
+            checkBasicData($this, 401, $resp, 1, EnumViewFile::PageAccessDined);
+            $this->assertArrayHasKey(EnumField::Error->value, $resp->data);
+            $this->assertEquals(EnumErr::NotHasAccess->value, $resp->data[EnumField::Error->value]);
         })->run();
     }
 }

@@ -12,23 +12,23 @@ final class RequestItem
     public function __construct(array $post = []) // необходимо во время приема данных
     {
         if (count($post)) {
-            if (isset($post[FieldItemId])) {
-                $this->itemId = $post[FieldItemId];
+            if (isset($post[EnumField::ItemId->value])) {
+                $this->itemId = $post[EnumField::ItemId->value];
             }
-            if (isset($post[FieldTitle])) {
-                $this->title = $post[FieldTitle];
+            if (isset($post[EnumField::Title->value])) {
+                $this->title = $post[EnumField::Title->value];
             }
-            if (isset($post[FieldCatId])) {
-                $this->catId = $post[FieldCatId];
+            if (isset($post[EnumField::CatId->value])) {
+                $this->catId = $post[EnumField::CatId->value];
             }
-            if (isset($post[FieldDescription])) {
-                $this->description = $post[FieldDescription];
+            if (isset($post[EnumField::Description->value])) {
+                $this->description = $post[EnumField::Description->value];
             }
-            if (isset($post[FieldPrice])) {
-                $this->price = $post[FieldPrice];
+            if (isset($post[EnumField::Price->value])) {
+                $this->price = $post[EnumField::Price->value];
             }
-            if (isset($post[FieldIsDisabled])) {
-                $this->isDisabled = $post[FieldIsDisabled];
+            if (isset($post[EnumField::IsDisabled->value])) {
+                $this->isDisabled = $post[EnumField::IsDisabled->value];
             }
         }
     }
@@ -36,12 +36,12 @@ final class RequestItem
     public function toArray(): array
     {
         return [
-            FieldItemId => $this->itemId,
-            FieldTitle => $this->title,
-            FieldCatId => $this->catId,
-            FieldDescription => $this->description,
-            FieldPrice => $this->price,
-            FieldIsDisabled => $this->isDisabled,
+            EnumField::ItemId->value => $this->itemId,
+            EnumField::Title->value => $this->title,
+            EnumField::CatId->value => $this->catId,
+            EnumField::Description->value => $this->description,
+            EnumField::Price->value => $this->price,
+            EnumField::IsDisabled->value => $this->isDisabled,
         ];
     }
 }

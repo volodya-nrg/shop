@@ -6,15 +6,15 @@ final class RequestRecover
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($post[FieldEmail])) {
-            $this->email = $post[FieldEmail];
+        if (isset($post[EnumField::Email->value])) {
+            $this->email = $post[EnumField::Email->value];
         }
     }
 
     public function toArray(): array
     {
         return [
-            FieldEmail => $this->email,
+            EnumField::Email->value => $this->email,
         ];
     }
 }

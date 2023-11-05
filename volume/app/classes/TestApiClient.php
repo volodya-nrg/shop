@@ -35,16 +35,16 @@ final class TestApiClient
 
             $resp = (new ControllerReg())->index([]); // $resp может быть с ошибкой
 
-            if (!isset($resp->data[FieldError]) &&
-                isset($resp->data[FieldUserId]) &&
+            if (!isset($resp->data[EnumField::Error->value]) &&
+                isset($resp->data[EnumField::UserId->value]) &&
                 ($role !== "" || $isEmailConfirmed)) {
 
                 $serviceUsers = new ServiceUsers();
-                $userId = $resp->data[FieldUserId];
+                $userId = $resp->data[EnumField::UserId->value];
 
                 $result = $serviceUsers->one($userId);
                 if ($result === null) {
-                    abort(ErrNotFoundUser);
+                    abort(EnumErr::NotFoundUser->value);
                 } elseif ($result instanceof Error) {
                     abort($result->getMessage());
                 }

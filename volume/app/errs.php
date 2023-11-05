@@ -1,22 +1,24 @@
 <?php
 
-const ErrNotHasAccess = "нет доступа";
-const ErrNotConnectToDatabase = "нет соединения с БД";
-const ErrNotFoundClass = "не найден class";
-const ErrNotFoundMethod = "не найден method";
-const ErrNotFoundUser = "пользователь не найден";
-const ErrNotFoundKeyInArray = "не найден ключ в массиве";
-const ErrNotFoundRow = "не найдена запись";
-const ErrPassIsShort = "пароль слишком короткий (минимум " . PassMinLen . " символов)";
-const ErrPasswordsNotEqual = "пароли не совподают";
-const ErrEmailNotCorrect = "е-мэйл не корректный";
-const ErrAcceptAgreement = "примите условия оферты";
-const ErrAcceptPrivatePolicy = "примите политику конфиденциальности";
-const ErrMethodNotAllowed = "метод не разрешен";
-const ErrUserAlreadyHas = "такой пользователь уже существует, зайдите под своей учетной записи";
-const ErrCheckYourEmail = "подтвердите свой е-мэйл";
-const ErrInternalServer = "внутреняя ошибка сервера";
-const ErrInWhenTpl = "error in %s when '%s' -> %s";
-const ErrLoginOrPasswordNotCorrect = "логин или пароль не корректны";
-const ErrStmtIsFalse = "stmt is false";
-const ErrSqlQueryIsFalse = "sql query is false";
+enum EnumErr: string
+{
+    case NotHasAccess = "нет доступа";
+    case NotConnectToDatabase = "нет соединения с БД";
+    case NotFoundClass = "не найден class";
+    case NotFoundMethod = "не найден method";
+    case NotFoundUser = "пользователь не найден";
+    case NotFoundRow = "не найдена запись";
+    case PassIsShortTpl = "пароль слишком короткий (минимум %d символов)";
+    case PasswordsNotEqual = "пароли не совподают";
+    case EmailNotCorrect = "е-мэйл не корректный";
+    case AcceptAgreement = "примите условия оферты";
+    case AcceptPrivatePolicy = "примите политику конфиденциальности";
+    case MethodNotAllowed = "метод не разрешен";
+    case UserAlreadyHas = "такой пользователь уже существует, зайдите под своей учетной записи";
+    case CheckYourEmail = "подтвердите свой е-мэйл";
+    case InternalServer = "внутреняя ошибка сервера";
+    case InWhenTpl = "error in %s when '%s' -> %s";
+    case LoginOrPasswordNotCorrect = "логин или пароль не корректны";
+    case StmtIsFalse = "stmt is false";
+    case SqlQueryIsFalse = "sql query is false";
+}

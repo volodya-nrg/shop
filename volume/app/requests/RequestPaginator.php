@@ -7,19 +7,19 @@ final class RequestPaginator
 
     public function __construct(array $post = []) // необходимо во время приема данных
     {
-        if (isset($post[FieldLimit])) {
-            $this->limit = $post[FieldLimit];
+        if (isset($post[EnumField::Limit->value])) {
+            $this->limit = $post[EnumField::Limit->value];
         }
-        if (isset($post[FieldOffset])) {
-            $this->offset = $post[FieldOffset];
+        if (isset($post[EnumField::Offset->value])) {
+            $this->offset = $post[EnumField::Offset->value];
         }
     }
 
     public function toArray(): array
     {
         return [
-            FieldLimit => $this->limit,
-            FieldOffset => $this->offset,
+            EnumField::Limit->value => $this->limit,
+            EnumField::Offset->value => $this->offset,
         ];
     }
 }

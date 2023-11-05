@@ -2,20 +2,20 @@
 
 final class MyResponse
 {
-    private string $viewName;
+    private EnumViewFile $view;
     private int $httpCode;
     public array $data; // сюда помещаются все данные, каторые используются во view
 
-    public function __construct(string $viewName, int $httpCode = 200, array $data = [])
+    public function __construct(EnumViewFile $view, int $httpCode = 200, array $data = [])
     {
-        $this->viewName = $viewName;
+        $this->view = $view;
         $this->httpCode = $httpCode;
         $this->data = $data;
     }
 
-    public function getViewName(): string
+    public function getView(): EnumViewFile
     {
-        return $this->viewName;
+        return $this->view;
     }
 
     public function getHttpCode(): int

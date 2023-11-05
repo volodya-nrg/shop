@@ -18,7 +18,7 @@ foreach ($envRows as $row) {
 }
 
 require_once dirname(__FILE__) . "/consts.php";
-require_once dirname(__FILE__) . "/dict.php";
+require_once dirname(__FILE__) . "/dic.php";
 require_once dirname(__FILE__) . "/errs.php";
 require_once dirname(__FILE__) . "/funcs.php";
 
@@ -32,6 +32,6 @@ try {
     $GLOBALS["PDO"] = $PDO;
 } catch (\PDOException $e) {
     http_response_code(500);
-    error_log(sprintf(ErrInWhenTpl, "init.php", "PDO", $e->getMessage()));
-    die(ErrNotConnectToDatabase);
+    error_log(sprintf(EnumErr::InWhenTpl->value, __FILE__, "PDO", $e->getMessage()));
+    die(EnumErr::NotConnectToDatabase->value);
 }

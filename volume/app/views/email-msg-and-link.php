@@ -1,6 +1,6 @@
 <?php
-$msg = $__data[FieldAddress] ?? "";
-$address = $__data[FieldAddress] ?? "";
+$msg = $__data[EnumField::Address->value] ?? "";
+$address = $__data[EnumField::Address->value] ?? "";
 ?>
 <p>
     <?php echo $msg ?> <a href="<?php echo $address ?>"><?php echo $address ?></a>
