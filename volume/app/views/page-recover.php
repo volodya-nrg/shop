@@ -28,11 +28,11 @@ $dataSendMsg = $__data[EnumField::DataSendMsg->value] ?? "";
     <?php endif; ?>
 
     <form method="post" class="form" action="">
-        <div class="form__row">
-            <div class="form__title">Е-мэйл</div>
+        <div class="form_row">
+            <div class="form_title">Е-мэйл</div>
             <input type="email" name="<?php echo EnumField::Email->value ?>" value="" required="required"/>
         </div>
-        <div class="form__row align-right">
+        <div class="form_row align-right">
             <input class="btn" type="submit" value="Отправить"/>
         </div>
     </form>

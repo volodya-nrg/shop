@@ -46,10 +46,10 @@ textarea {
     display: block;
 }
 
-.form__row + .form__row {
+.form_row + .form_row {
     margin-top: 15px;
 }
 
-.form__title {
+.form_title {
     margin-bottom: 5px;
 }

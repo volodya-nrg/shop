@@ -2,7 +2,7 @@
     display: inline-flex;
 }
 
-.module-counter__minus, .module-counter__plus {
+.module-counter_minus, .module-counter_plus {
     width: 25px;
 }
 
@@ -14,7 +14,7 @@
     height: initial;
 }
 
-.module-counter.sx-lg .module-counter__minus, .module-counter.sx-lg .module-counter__plus {
+.module-counter.sx-lg .module-counter_minus, .module-counter.sx-lg .module-counter_plus {
     width: 35px;
     font-size: 20px;
 }

@@ -27,29 +27,29 @@
     margin-right: 10px;
 }
 
-.header-block__block-left {
+.header-block_block-left {
     display: flex;
     padding: 5px 0;
 }
 
-.header-block__block-right {
+.header-block_block-right {
     display: flex;
     align-items: center;
 }
 
-.header-block__block-right > *:not(:first-child) {
+.header-block_block-right > *:not(:first-child) {
     margin-left: 10px;
 }
 
-.header-block__cart {
+.header-block_cart {
     display: flex;
 }
 
-.header-block__cart-img {
+.header-block_cart-img {
     height: 17px;
 }
 
-.header-block__cart > *:not(:first-child) {
+.header-block_cart > *:not(:first-child) {
     margin-left: 5px;
 }
 

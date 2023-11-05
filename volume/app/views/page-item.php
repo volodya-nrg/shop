@@ -2,13 +2,13 @@
 $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
 ?>
 <div class="page-item">
-    <div class="page-item__breadcrumbs">
+    <div class="page-item_breadcrumbs">
         <?php
         echo template(EnumViewFile::ModuleBreakCrumbs);
         ?>
     </div>
-    <div class="page-item__main">
-        <div class="page-item__cover">
+    <div class="page-item_main">
+        <div class="page-item_cover">
             <?php if (count($item->pics)): ?>
                 <?php foreach ($item->pics as $val): ?>
                     <img src="<?php echo $val ?>">
@@ -17,7 +17,7 @@ $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
                 <img src="/images/internal/default-item.png">
             <?php endif; ?>
         </div>
-        <div class="page-item__data">
+        <div class="page-item_data">
             <h1><?php echo $item->title ?></h1>
             <?php if (count($item->props)): ?>
                 <ul>
@@ -35,7 +35,7 @@ $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
             </div>
         </div>
     </div>
-    <div class="page-item__info">
+    <div class="page-item_info">
         <p><?php echo $item->description ?></p>
     </div>
 </div>

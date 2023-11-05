@@ -47,13 +47,10 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $now = date(DatePattern, time());
             $user = new UserRow();
             $user->email = $req->email;
             $user->pass = password_hash($req->pass, PASSWORD_DEFAULT);
             $user->email_hash = randomString(32, true);
-            $user->created_at = $now;
-            $user->updated_at = $now;
 
             // запишем в базу и отправим е-мэйл
             $serviceUsers->db->beginTransaction();

@@ -20,20 +20,20 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
     <?php endif; ?>
 
     <form method="post" class="form" action="">
-        <div class="form__row">
-            <div class="form__title">Е-мэйл</div>
+        <div class="form_row">
+            <div class="form_title">Е-мэйл</div>
             <input type="email" name="<?php echo EnumField::Email->value ?>" value="<?php echo $requestedEmail ?>"
                    required="required"/>
         </div>
-        <div class="form__row">
-            <div class="form__title">Пароль</div>
+        <div class="form_row">
+            <div class="form_title">Пароль</div>
             <input type="password" name="<?php echo EnumField::Password->value ?>" value="" required="required"/>
         </div>
-        <div class="form__row">
-            <div class="form__title">Пароль (павтор)</div>
+        <div class="form_row">
+            <div class="form_title">Пароль (павтор)</div>
             <input type="password" name="<?php echo EnumField::PasswordConfirm->value ?>" value="" required="required"/>
         </div>
-        <div class="form__row">
+        <div class="form_row">
             <label for="page-reg-checkbox-agreement">
                 <input id="page-reg-checkbox-agreement"
                        name="<?php echo EnumField::Agreement->value ?>"
@@ -43,7 +43,7 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
                 /> Я принимаю <a href="/agreement">условия оферты</a>
             </label>
         </div>
-        <div class="form__row">
+        <div class="form_row">
             <label for="page-reg-checkbox-privacy-policy">
                 <input id="page-reg-checkbox-privacy-policy"
                        name="<?php echo EnumField::PrivacyPolicy->value ?>"
@@ -53,7 +53,7 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
                 /> Я принимаю <a href="/privacy-policy">политику конфиденциальности</a>
             </label>
         </div>
-        <div class="form__row align-right">
+        <div class="form_row align-right">
             <input class="btn" type="submit" value="Отправить"/>
         </div>
     </form>

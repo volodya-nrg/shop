@@ -15,7 +15,7 @@
     margin-left: 10px;
 }
 
-.module-cart-item__cover {
+.module-cart-item_cover {
     flex: 0 0 50px;
     display: flex;
     justify-content: center;
@@ -25,10 +25,10 @@
     background-color: whitesmoke;
 }
 
-.module-cart-item__content {
+.module-cart-item_content {
     flex-basis: 100%;
 }
 
-.module-cart-item__content > *:not(:last-child) {
+.module-cart-item_content > *:not(:last-child) {
     margin-bottom: 10px;
 }

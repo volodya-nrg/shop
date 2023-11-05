@@ -84,72 +84,131 @@ final class ServiceEmail
             return null;
         }
 
-        $this->conn = fsockopen(
+        $resource = fsockopen(
             $this->smtpServer,
             $this->port,
             $errCode,
             $errMsg,
             $this->timeout,
         );
-        if ($this->conn === false) {
+        if ($resource === false) {
             return new Error("not connect to smtp server: {$errCode}, {$errMsg}");
         }
 
-        fputs($this->conn, "EHLO {$serverName}{$this->br}");
-        if (!$this->isResponseCode("220")) {
+        $this->conn = $resource;
+
+        $result = fputs($this->conn, "EHLO {$serverName}{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in EHLO fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "220") {
             fclose($this->conn);
             return new Error("error in EHLO");
         }
 
-        fputs($this->conn, "AUTH LOGIN{$this->br}");
-        if (!$this->isResponseCode("250")) {
+        $result = fputs($this->conn, "AUTH LOGIN{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in AUTH fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "250") {
             fclose($this->conn);
             return new Error("error in AUTH LOGIN");
         }
 
-        fputs($this->conn, base64_encode($this->login) . $this->br);
-        if (!$this->isResponseCode("334")) {
+        $result = fputs($this->conn, base64_encode($this->login) . $this->br);
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in login fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "334") {
             fclose($this->conn);
             return new Error("error in login");
         }
 
-        fputs($this->conn, base64_encode($this->pass) . $this->br);
-        if (!$this->isResponseCode("334")) {
+        $result = fputs($this->conn, base64_encode($this->pass) . $this->br);
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in password fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "334") {
             fclose($this->conn);
             return new Error("error in password");
         }
 
-        fputs($this->conn, "MAIL FROM:{$this->from}{$this->br}");
-        if (!$this->isResponseCode("235")) {
+        $result = fputs($this->conn, "MAIL FROM:{$this->from}{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in MAIL FROM fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "235") {
             fclose($this->conn);
             return new Error("error in MAIL FROM");
         }
 
-        fputs($this->conn, "RCPT TO:{$to}{$this->br}");
-        if (!$this->isResponseCode("250")) {
+        $result = fputs($this->conn, "RCPT TO:{$to}{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in RCPT TO fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "250") {
             fclose($this->conn);
             return new Error("error in RCPT TO");
         }
 
-        fputs($this->conn, "DATA{$this->br}");
-        if (!$this->isResponseCode("250")) {
+        $result = fputs($this->conn, "DATA{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in DATA fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "250") {
             fclose($this->conn);
             return new Error("error in DATA");
         }
 
-        fputs($this->conn, "{$header}{$this->br}{$msg}{$this->br}.{$this->br}");
-        if (!$this->isResponseCode("354")) {
+        $result = fputs($this->conn, "{$header}{$this->br}{$msg}{$this->br}.{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in send fputs");
+        }
+
+        $respCode = $this->responseCode();
+        if ($respCode !== "354") {
             fclose($this->conn);
             return new Error("error in send");
         }
 
-        fputs($this->conn, "QUIT{$this->br}");
-        fclose($this->conn);
+        $result = fputs($this->conn, "QUIT{$this->br}");
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in QUIT fputs");
+        }
+
+        $result = fclose($this->conn);
+        if ($result === false) {
+            fclose($this->conn);
+            return new Error("error in fclose");
+        }
 
         return null;
     }
 
-    private function isResponseCode(string $expected): bool
+    private function responseCode(): string
     {
         $data = "";
 
@@ -161,7 +220,6 @@ final class ServiceEmail
             }
         }
 
-        $actual = substr($data, 0, 3);
-        return $expected === $actual;
+        return substr($data, 0, 3);
     }
 }

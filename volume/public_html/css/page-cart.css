@@ -6,11 +6,11 @@
     margin-left: 10px;
 }
 
-.page-cart__main {
+.page-cart_main {
     flex-basis: 100%;
 }
 
-.page-cart__checkout {
+.page-cart_checkout {
     flex: 0 0 200px;
     background-color: whitesmoke;
 }

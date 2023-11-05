@@ -30,15 +30,15 @@ $email = $__data[EnumField::Email->value] ?? "";
 
     <?php if ($email != ""): ?>
         <form method="post" class="form" action="">
-            <div class="form__row">
-                <div class="form__title">Пароль</div>
+            <div class="form_row">
+                <div class="form_title">Пароль</div>
                 <input type="password" name="<?php echo EnumField::Password->value ?>" value="" required="required"/>
             </div>
-            <div class="form__row">
-                <div class="form__title">Пароль (павтор)</div>
+            <div class="form_row">
+                <div class="form_title">Пароль (павтор)</div>
                 <input type="password" name="<?php echo EnumField::PasswordConfirm->value ?>" value="" required="required"/>
             </div>
-            <div class="form__row align-right">
+            <div class="form_row align-right">
                 <input class="btn" type="submit" value="Отправить"/>
             </div>
         </form>

@@ -18,25 +18,25 @@ $requestedDeliveryTo = $__data[EnumField::DeliveryTo->value] ?? "";
         <br/>
     <?php endif; ?>
     <form method="post" class="form" action="">
-        <div class="form__row">
-            <div class="form__title">Е-мэйл *</div>
+        <div class="form_row">
+            <div class="form_title">Е-мэйл *</div>
             <input type="email" name="<?php echo EnumField::Email->value ?>" value="<?php echo $requestedEmail ?>"
                    required="required"/>
         </div>
-        <div class="form__row">
-            <div class="form__title">Номер телефона *</div>
+        <div class="form_row">
+            <div class="form_title">Номер телефона *</div>
             <input type="password" name="<?php echo EnumField::PhoneNumber->value ?>" value="<?php echo $requestedPhoneNumber ?>"
                    required="required"/>
         </div>
-        <div class="form__row">
-            <div class="form__title">ФИО</div>
+        <div class="form_row">
+            <div class="form_title">ФИО</div>
             <input type="text" name="<?php echo EnumField::FIO->value ?>" value="<?php echo $requestedFIO ?>"/>
         </div>
-        <div class="form__row">
-            <div class="form__title">Доставить до</div>
+        <div class="form_row">
+            <div class="form_title">Доставить до</div>
             <input type="text" name="<?php echo EnumField::DeliveryTo->value ?>" value="<?php echo $requestedDeliveryTo ?>"/>
         </div>
-        <div class="form__row">
+        <div class="form_row">
             <input class="btn" type="submit" value="Отправить"/>
         </div>
     </form>

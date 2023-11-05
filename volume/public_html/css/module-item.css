@@ -7,7 +7,7 @@
 .module-item:hover {
     border-color: darkgray;
 }
-.module-item__cover {
+.module-item_cover {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -15,26 +15,26 @@
     overflow: hidden;
     background-color: whitesmoke;
 }
-.module-item__content {
+.module-item_content {
     display: flex;
     flex-direction: column;
     margin: 5px;
 }
-.module-item__content > *:not(:last-child) {
+.module-item_content > *:not(:last-child) {
     margin-bottom: 10px;
 }
-.module-item__title {
+.module-item_title {
     height: 53px;
     overflow: hidden;
 }
-.module-item__price-and-counter {
+.module-item_price-and-counter {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.module-item__price-and-counter > *:not(:last-child) {
-    margin-right: 0px;
+.module-item_price-and-counter > *:not(:last-child) {
+    margin-right: 0;
 }
-.module-item__price {
+.module-item_price {
     white-space: nowrap;
 }

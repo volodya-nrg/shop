@@ -6,24 +6,24 @@
     margin-right: 10px;
 }
 
-.page-cat__menu {
+.page-cat_menu {
     flex: 0 0 200px;
 }
 
-.page-cat__main {
+.page-cat_main {
     flex-basis: 100%;
 }
 
-.page-cat__breakcrumbs {
+.page-cat_breakcrumbs {
     margin-bottom: 10px;
     padding-top: 10px;
 }
 
-.page-cat__items {
+.page-cat_items {
     display: table;
     width: 100%;
 }
 
-.page-cat__paginator {
+.page-cat_paginator {
     margin-top: 10px;
 }

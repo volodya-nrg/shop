@@ -2,6 +2,8 @@
 
 require_once "../app/init.php";
 
+$_SERVER[EnumField::ModeIsTest->value] = false;
+
 $aURLData = parse_url($_SERVER['REQUEST_URI']);
 $aURLPath = explode("/", $aURLData["path"]);
 array_shift($aURLPath);
@@ -58,23 +60,51 @@ http_response_code($resp->getHttpCode());
     <title><?php echo $oPage->title ?></title>
 
     <link type="image/x-icon" rel="icon" href="/images/internal/favicon.png">
-    <link rel="stylesheet" href="/css.php"/>
-    <script src="/js.php"></script>
+
+    <!-- пока прикроем из-за дебага -->
+    <!-- <link rel="stylesheet" href="/css.php"/> -->
+    <!-- <script src="/js.php"></script> -->
+
+    <link rel="stylesheet" href="/css/base.css"/>
+    <link rel="stylesheet" href="/css/form.css"/>
+    <link rel="stylesheet" href="/css/notice.css"/>
+    <link rel="stylesheet" href="/css/module-item.css"/>
+    <link rel="stylesheet" href="/css/module-cart-item.css"/>
+    <link rel="stylesheet" href="/css/module-counter.css"/>
+    <link rel="stylesheet" href="/css/module-breakcrumbs.css"/>
+    <link rel="stylesheet" href="/css/module-catalog-menu.css"/>
+    <link rel="stylesheet" href="/css/module-paginator.css"/>
+    <link rel="stylesheet" href="/css/page-cat.css"/>
+    <link rel="stylesheet" href="/css/page-item.css"/>
+    <link rel="stylesheet" href="/css/page-cart.css"/>
+    <link rel="stylesheet" href="/css/page-order.css"/>
+    <link rel="stylesheet" href="/css/page-order-ok.css"/>
+
+    <script src="/js/public.js"></script>
 </head>
 <body id="body">
 <header class="header">
     <div class="layer-center">
         <div class="header-block">
-            <a class="header-block__block-left" href="/">
+            <a class="header-block_block-left" href="/">
                 <img src="/images/internal/logo.png"/>
             </a>
-            <div class="header-block__block-center">
+            <div class="header-block_block-center">
                 search
             </div>
-            <div class="header-block__block-right">
-                <a class="header-block__login" href="/login">Вход</a>
-                <a class="header-block__cart sx-inverse" href="/cart">
-                    <img class="header-block__cart-img" src="/images/internal/cart-shopping-solid.svg"/>
+            <div class="header-block_block-right">
+                <?php if (isset($_SESSION[EnumField::Admin->value])): ?>
+                    <a class="header-block_adm" href="/adm">Адм.</a>
+                <?php endif; ?>
+
+                <?php if (isset($_SESSION[EnumField::Profile->value])): ?>
+                    <a class="header-block_logout" href="/logout">Выход</a>
+                <?php else: ?>
+                    <a class="header-block_login" href="/login">Вход</a>
+                <?php endif; ?>
+
+                <a class="header-block_cart sx-inverse" href="/cart">
+                    <img class="header-block_cart-img" src="/images/internal/cart-shopping-solid.svg"/>
                     <span>0</span>
                 </a>
             </div>
