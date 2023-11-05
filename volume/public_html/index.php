@@ -65,8 +65,10 @@ http_response_code($resp->getHttpCode());
     <!-- <link rel="stylesheet" href="/css.php"/> -->
     <!-- <script src="/js.php"></script> -->
 
-    <link rel="stylesheet" href="/css/base.css"/>
+    <link rel="stylesheet" href="/css/typography.css"/>
     <link rel="stylesheet" href="/css/form.css"/>
+    <link rel="stylesheet" href="/css/styles.css"/>
+
     <link rel="stylesheet" href="/css/notice.css"/>
     <link rel="stylesheet" href="/css/module-item.css"/>
     <link rel="stylesheet" href="/css/module-cart-item.css"/>
@@ -82,44 +84,66 @@ http_response_code($resp->getHttpCode());
 
     <script src="/js/public.js"></script>
 </head>
-<body id="body">
-<header class="header">
-    <div class="layer-center">
-        <div class="header-block">
-            <a class="header-block_block-left" href="/">
-                <img src="/images/internal/logo.png"/>
-            </a>
-            <div class="header-block_block-center">
-                search
-            </div>
-            <div class="header-block_block-right">
-                <?php if (isset($_SESSION[EnumField::Admin->value])): ?>
-                    <a class="header-block_adm" href="/adm">Адм.</a>
-                <?php endif; ?>
+<body>
+<div class="app">
+    <div class="app_top">
+        <header>
+            <div class="container">
+                <div class="header">
+                    <div class="header_child align-left">
+                        <a class="header_logo" href="/">
+                            <img class="header_logo_img-desktop"
+                                 src="/images/internal/logo.png"
+                                 alt=""/>
+                        </a>
+                    </div>
+                    <div class="header_child align-center">search</div>
+                    <div class="header_child align-right">
+                        <div class="header_flexbox">
+                            <?php if (isset($_SESSION[EnumField::Admin->value])): ?>
+                                <a class="" href="/adm">Адм.</a>
+                            <?php endif; ?>
 
-                <?php if (isset($_SESSION[EnumField::Profile->value])): ?>
-                    <a class="header-block_logout" href="/logout">Выход</a>
-                <?php else: ?>
-                    <a class="header-block_login" href="/login">Вход</a>
-                <?php endif; ?>
+                            <?php if (isset($_SESSION[EnumField::Profile->value])): ?>
+                                <a class="" href="/logout">Выход</a>
+                            <?php else: ?>
+                                <a class="" href="/login">Вход</a>
+                            <?php endif; ?>
 
-                <a class="header-block_cart sx-inverse" href="/cart">
-                    <img class="header-block_cart-img" src="/images/internal/cart-shopping-solid.svg"/>
-                    <span>0</span>
-                </a>
+                            <a class="header_cart" href="/cart">
+                                <img class="" src="/images/internal/cart-shopping-solid.svg"/>
+                            </a>
+                            <span>0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </header>
+    </div>
+    <div class="app_mid">
+        <div class="container">
+            <?php echo template($resp->getView(), $resp->data); ?>
         </div>
     </div>
-</header>
-<main class="main">
-    <div class="layer-center">
-        <?php echo template($resp->getView(), $resp->data); ?>
+    <div class="app_bot">
+        <footer>
+            <div class="container">
+                <div class="footer">
+                    <div class="footer_row">
+                        <div class="footer_column align-right">
+                            1
+                        </div>
+                        <div class="footer_column align-center">
+                            2
+                        </div>
+                        <div class="footer_column align-right">
+                            3
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
-</main>
-<footer class="footer">
-    <div class="layer-center">
-        ...
-    </div>
-</footer>
+</div>
 </body>
 </html>

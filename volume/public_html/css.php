@@ -12,7 +12,7 @@ function compressCSS($buffer)
 
 ob_start("compressCSS");
 
-include("./css/base.css");
+include("./css/styles.css");
 include("./css/form.css");
 include("./css/notice.css");
 include("./css/module-item.css");
