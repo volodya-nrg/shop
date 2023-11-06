@@ -1,29 +1,34 @@
 <?php
 $error = $__data[EnumField::Error->value] ?? "";
 ?>
-<div class="page-cat">
-    <div class="page-cat_menu">
+<div class="main">
+    <div class="main_column sx-side">
         <?php
         echo template(EnumViewFile::ModuleCatalogMenu);
         ?>
     </div>
-    <div class="page-cat_main">
-        <div class="page-cat_breakcrumbs">
+    <div class="main_column">
+        <div>
             <?php
             echo template(EnumViewFile::ModuleBreakCrumbs);
             ?>
         </div>
-        <div class="page-cat_items">
-            <?php
-            for ($i = 0; $i < 3; $i++) {
-                echo template(EnumViewFile::ModuleItem);
-            }
-            ?>
-        </div>
-        <div class="page-cat_paginator">
-            <?php
-            echo template(EnumViewFile::ModulePaginator);
-            ?>
+        <div>
+            <h1>Lorem ipsum dolor sit amet, consectetur adipisicing elit</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad adipisci aut autem est iste maiores ntem
+                voluptates.</p>
+            <div>
+                <?php
+                for ($i = 0; $i < 3; $i++) {
+                    echo template(EnumViewFile::ModuleItem);
+                }
+                ?>
+            </div>
+            <div>
+                <?php
+                echo template(EnumViewFile::ModulePaginator);
+                ?>
+            </div>
         </div>
     </div>
 </div>

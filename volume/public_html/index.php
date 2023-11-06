@@ -41,9 +41,10 @@ try {
 //        }
 //    }
 } catch (Exception $e) {
+    error_log(sprintf(EnumErr::InWhenTpl->value, "index.php", "call class-method", $e->getMessage()));
+
     $oPage = new ControllerNotFound();
     $resp = $oPage->index($aArgs);
-    error_log(sprintf(EnumErr::InWhenTpl->value, "index.php", "call class-method", $e->getMessage()));
 }
 
 http_response_code($resp->getHttpCode());
@@ -65,22 +66,29 @@ http_response_code($resp->getHttpCode());
     <!-- <link rel="stylesheet" href="/css.php"/> -->
     <!-- <script src="/js.php"></script> -->
 
+    <link rel="stylesheet" href="/css/variables.css"/>
     <link rel="stylesheet" href="/css/typography.css"/>
     <link rel="stylesheet" href="/css/form.css"/>
     <link rel="stylesheet" href="/css/styles.css"/>
 
     <link rel="stylesheet" href="/css/notice.css"/>
+    <link rel="stylesheet" href="/css/tabs.css"/>
     <link rel="stylesheet" href="/css/module-item.css"/>
     <link rel="stylesheet" href="/css/module-cart-item.css"/>
     <link rel="stylesheet" href="/css/module-counter.css"/>
     <link rel="stylesheet" href="/css/module-breakcrumbs.css"/>
     <link rel="stylesheet" href="/css/module-catalog-menu.css"/>
     <link rel="stylesheet" href="/css/module-paginator.css"/>
+
     <link rel="stylesheet" href="/css/page-cat.css"/>
     <link rel="stylesheet" href="/css/page-item.css"/>
     <link rel="stylesheet" href="/css/page-cart.css"/>
     <link rel="stylesheet" href="/css/page-order.css"/>
     <link rel="stylesheet" href="/css/page-order-ok.css"/>
+
+    <?php if (isset($_SESSION[EnumField::Admin->value])): ?>
+        <link rel="stylesheet" href="/css/module-adm-list.css"/>
+    <?php endif; ?>
 
     <script src="/js/public.js"></script>
 </head>
@@ -101,17 +109,17 @@ http_response_code($resp->getHttpCode());
                     <div class="header_child align-right">
                         <div class="header_flexbox">
                             <?php if (isset($_SESSION[EnumField::Admin->value])): ?>
-                                <a class="" href="/adm">Адм.</a>
+                                <a href="/adm">Адм.</a>
                             <?php endif; ?>
 
                             <?php if (isset($_SESSION[EnumField::Profile->value])): ?>
-                                <a class="" href="/logout">Выход</a>
+                                <a href="/logout">Выход</a>
                             <?php else: ?>
-                                <a class="" href="/login">Вход</a>
+                                <a href="/login">Вход</a>
                             <?php endif; ?>
 
-                            <a class="header_cart" href="/cart">
-                                <img class="" src="/images/internal/cart-shopping-solid.svg"/>
+                            <a href="/cart">
+                                <img class="header_cart_img-desktop" src="/images/internal/cart-shopping-solid.svg"/>
                             </a>
                             <span>0</span>
                         </div>
@@ -121,9 +129,11 @@ http_response_code($resp->getHttpCode());
         </header>
     </div>
     <div class="app_mid">
-        <div class="container">
-            <?php echo template($resp->getView(), $resp->data); ?>
-        </div>
+        <main>
+            <div class="container">
+                <?php echo template($resp->getView(), $resp->data); ?>
+            </div>
+        </main>
     </div>
     <div class="app_bot">
         <footer>

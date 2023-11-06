@@ -1,0 +1,45 @@
+.module-adm-list {
+}
+
+.module-adm-list_top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.module-adm-list_search {
+    flex: 0 0 200px;
+}
+
+.module-adm-list_item {
+    display: flex;
+    border-bottom: var(--colorGray8) solid 1px;
+    padding: 4px 0;
+}
+
+.module-adm-list_item > *:not(:first-child) {
+    margin-left: 5px;
+}
+
+.module-adm-list_item_pos {
+    flex: 0 0 30px;
+}
+
+.module-adm-list_item_name {
+    flex-basis: 100%;
+}
+
+.module-adm-list_item_name.sx-is-disabled {
+    opacity: 0.5;
+}
+
+.module-adm-list_item_edit {
+    flex: 0 0 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.module-adm-list_item_edit img {
+    height: 15px;
+}

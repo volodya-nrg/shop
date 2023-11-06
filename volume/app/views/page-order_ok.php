@@ -1,5 +1,5 @@
-<?php
-?>
-<div class="page-order-ok align-center">
-    <span class="h4">order ok</span>
+<div class="main">
+    <div class="main_column">
+        <h4>order ok</h4>
+    </div>
 </div>

@@ -5,22 +5,29 @@ final class ControllerAdm extends ControllerBase
     public string $title = EnumDic::Administration->value;
     public string $description = "";
 
-    public function index(array $args): MyResponse
+    /**
+     * @throws Exception
+     */
+    public function __construct()
     {
         $err = $this->checkRule();
         if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
+            throw new Exception($err->getMessage());
         }
+    }
+
+    public function index(array $args): MyResponse
+    {
+        // TODO пока временно сделаем редирект, до тех пор пока не сделаем dashboard
+        if (!$_SERVER[EnumField::ModeIsTest->value]) {
+            redirect("/adm/items");
+        }
+
         return new MyResponse(EnumViewFile::PageAdm);
     }
 
     public function items(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -56,11 +63,6 @@ final class ControllerAdm extends ControllerBase
 
     public function item(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $serviceItems = new ServiceItems();
         $resp = new MyResponse(EnumViewFile::PageAdmItem);
 
@@ -124,11 +126,6 @@ final class ControllerAdm extends ControllerBase
 
     public function cats(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -164,11 +161,6 @@ final class ControllerAdm extends ControllerBase
 
     public function cat(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $serviceCats = new ServiceCats();
         $resp = new MyResponse(EnumViewFile::PageAdmCat);
 
@@ -231,11 +223,6 @@ final class ControllerAdm extends ControllerBase
 
     public function users(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -273,11 +260,6 @@ final class ControllerAdm extends ControllerBase
 
     public function user(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $serviceUsers = new ServiceUsers();
         $resp = new MyResponse(EnumViewFile::PageAdmUser);
 
@@ -344,11 +326,6 @@ final class ControllerAdm extends ControllerBase
 
     public function orders(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -385,11 +362,6 @@ final class ControllerAdm extends ControllerBase
 
     public function order(array $args): MyResponse
     {
-        $err = $this->checkRule();
-        if ($err instanceof Error) {
-            return new MyResponse(EnumViewFile::PageAccessDined, 401, [EnumField::Error->value => $err->getMessage()]);
-        }
-
         $serviceOrders = new ServiceOrders();
         $resp = new MyResponse(EnumViewFile::PageAdmOrder);
 

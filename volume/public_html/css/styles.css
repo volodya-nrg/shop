@@ -1,10 +1,32 @@
 body {
     margin: 0;
-    font-family: Arial, Tahoma, Helvetica, sans-serif;
+    font-family: var(--fontFamily);
     -webkit-font-smoothing: antialiased;
     font-size: 100%;
-    background-color: white; /* необходимо для надежности */
-    color: #4f4f4f;
+    background-color: var(--colorWhite); /* необходимо для надежности */
+    color: var(--colorGray2);
+}
+
+.container {
+    box-sizing: border-box;
+    max-width: var(--maxWidth);
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.text-eclipse {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-mute {
+    color: var(--colorGray5);
+}
+
+.text-mute a {
+    color: var(--colorGray4);
 }
 
 .text-nowrap {
@@ -31,23 +53,15 @@ body {
     visibility: hidden;
 }
 
-.container {
-    box-sizing: border-box;
-    max-width: 1024px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0;
-}
-
 .hr {
     height: 1px;
     margin: 8px 0;
     border: 0;
-    background-color: #f5f5f5;
+    background-color: var(--colorGray8);
 }
 
 .sx-bg-whitesmoke {
-    background-color: #f5f5f5;
+    background-color: var(--colorGray8);
 }
 
 .float-right {
@@ -76,14 +90,14 @@ body {
 .app_bot {
     flex: 1 0 auto;
     margin-top: 16px;
-    background-color: #353535;
+    background-color: var(--colorGray1);
 }
 
 /* ----------------------header-------------------- */
 
 header {
-    background-color: #f5f5f5;
-    border-bottom: #d3d3d3 solid 1px;
+    background-color: var(--colorGray8);
+    border-bottom: var(--colorGray7) solid 1px;
     box-shadow: 0 0 3.2px rgba(0, 0, 0, 0.1);
     min-height: 32px;
     padding: 4px 0;
@@ -121,9 +135,28 @@ header {
     height: 32px;
 }
 
-.header_cart img {
+.header_cart_img-desktop {
     display: block;
-    height: 24px;
+    height: 16px;
+}
+
+/* ----------------------main-------------------- */
+.main {
+    display: flex;
+}
+
+.main_column {
+    flex: 0 1 100%;
+}
+
+.main_column.sx-side {
+    flex: 1 0 200px;
+}
+
+.main_column + .main_column {
+    margin-left: 8px;
+    padding-left: 8px;
+    border-left: var(--colorGray8) solid 1px;
 }
 
 /* ----------------------footer-------------------- */
@@ -133,7 +166,7 @@ footer {
 }
 
 .footer {
-    color: #999999;
+    color: var(--colorGray5);
 }
 
 .footer_row {
@@ -154,7 +187,7 @@ footer {
 }
 
 .footer a {
-    color: #b3b3b3;
+    color: var(--colorGray6);
 }
 
 .footer ul {
@@ -163,5 +196,7 @@ footer {
     list-style: none;
 }
 
-@media (max-width: 1024px) {
+/* ----------------------etc-------------------- */
+
+@media (max-width: var(--maxWidth)) {
 }

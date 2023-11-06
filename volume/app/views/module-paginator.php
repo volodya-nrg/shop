@@ -1,25 +1,11 @@
+<?php
+$path = $__data[EnumField::Path->value] ?? "";
+$from = $__data[EnumField::From->value] ?? 0;
+$to = 10 + $from;
+?>
 <div class="module-paginator">
-    <ul>
-        <li>
-            <a href="#">1</a>
-        </li>
-        <li>
-            <a href="#">2</a>
-        </li>
-        <li>
-            <a href="#">3</a>
-        </li>
-        <li>
-            <a href="#">4</a>
-        </li>
-        <li>
-            <a href="#">5</a>
-        </li>
-        <li>
-            <a href="#">6</a>
-        </li>
-        <li>
-            <a href="#">7</a>
-        </li>
-    </ul>
+    <?php for ($i = $from; $i < $to; $i++): ?>
+        <a class="module-paginator_item"
+           href="<?php echo sprintf("%s?%s=%d", $path, EnumField::Page->value, $i) ?>"><?php echo $i ?></a>
+    <?php endfor; ?>
 </div>

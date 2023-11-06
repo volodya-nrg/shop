@@ -8,8 +8,8 @@ ini_set('memory_limit', '-1');
 
 error_reporting(E_ALL);
 
-$envContent = file_get_contents(dirname(__FILE__) . "/../.env");
-$envRows = explode(PHP_EOL, $envContent);
+// получим переменные окружения
+$envRows = explode(PHP_EOL, file_get_contents(dirname(__FILE__) . "/../.env"));
 foreach ($envRows as $row) {
     if (empty($row)) {
         continue;
@@ -17,11 +17,12 @@ foreach ($envRows as $row) {
     putenv($row);
 }
 
-require_once dirname(__FILE__) . "/consts.php";
-require_once dirname(__FILE__) . "/dic.php";
-require_once dirname(__FILE__) . "/errs.php";
-require_once dirname(__FILE__) . "/funcs.php";
+// подключим начальные файлы (константы, enum-ы, ф-ии)
+foreach (glob(dirname(__FILE__) . "/deps/*.php") as $filepath) {
+    require_once $filepath;
+}
 
+// подключимся к базе данных
 try {
     $PDOPattern = "mysql:host=%s;dbname=%s;charset=%s";
     $PDOConn = sprintf($PDOPattern, DB_HOST, DB_NAME, DB_CHARSET);

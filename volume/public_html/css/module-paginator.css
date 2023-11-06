@@ -1,10 +1,16 @@
-.module-paginator ul {
+.module-paginator {
     display: flex;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    justify-content: flex-end;
 }
 
-.module-paginator ul > li:not(:first-child) {
-    margin-left: 10px;
+.module-paginator > *:not(:first-child) {
+    margin-left: 8px;
+}
+
+.module-paginator_item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--colorGray8);
+    padding: 4px 8px;
 }

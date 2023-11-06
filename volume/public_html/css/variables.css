@@ -1,0 +1,20 @@
+:root {
+    --colorBlack: #000000;
+    --colorWhite: #ffffff;
+    --colorFloralwhite: #fffaf0;
+    --colorDanger: #ffb3b3;
+    --colorWarning: #ffc107;
+    --colorSuccess: #83ff9f;
+    --colorBlue: #007aff; /* тут в основном не используется */
+    --colorRed: #ff0000;
+    --colorGray1: #353535;
+    --colorGray2: #4f4f4f;
+    --colorGray3: #666666;
+    --colorGray4: #808080;
+    --colorGray5: #999999;
+    --colorGray6: #b3b3b3;
+    --colorGray7: #d3d3d3;
+    --colorGray8: #f5f5f5;
+    --fontFamily: Arial, Tahoma, Helvetica, sans-serif;
+    --maxWidth: 1024px;
+}

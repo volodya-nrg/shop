@@ -1,0 +1,23 @@
+.tabs_host-items {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.tabs_host-item {
+    margin-right: 4px;
+    padding: 8px;
+    cursor: pointer;
+    background-color: var(--colorGray8);
+}
+
+.tabs_host-item.sx-active {
+    background-color: var(--colorGray5);
+    color: var(--colorWhite);
+    cursor: default;
+}
+
+.tabs .tabs_contents {
+    box-sizing: border-box;
+    padding: 8px;
+    border: var(--colorGray8) solid 1px;
+}
