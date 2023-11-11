@@ -146,13 +146,18 @@ final class ControllerAdm extends ControllerBase
         $offset = 0;
         $serviceCats = new ServiceCats($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmCats);
+        $filter = "";
 
         if (isset($_GET) && count($_GET)) {
             $req = new RequestPaginator($_GET);
             $offset = $req->page * DefaultLimit;
+
+            if (isset($_GET[EnumField::Filter->value])) {
+                $filter = trim($_GET[EnumField::Filter->value]);
+            }
         }
 
-        $cats = $serviceCats->all(DefaultLimit, $offset);
+        $cats = $serviceCats->all(DefaultLimit, $offset, $filter);
         if ($cats instanceof Error) {
             $resp->setHttpCode(500);
             $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
@@ -165,7 +170,7 @@ final class ControllerAdm extends ControllerBase
             $resp->data[EnumField::Items->value][] = new AdmListItem($pos + 1, $cat->name, $cat->cat_id);
         }
 
-        $total = $serviceCats->total();
+        $total = $serviceCats->total($filter);
         if ($total instanceof Error) {
             $resp->setHttpCode(500);
             $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
@@ -173,6 +178,7 @@ final class ControllerAdm extends ControllerBase
             return $resp;
         }
 
+        $resp->data[EnumField::Filter->value] = $filter;
         $resp->data[EnumField::Offset->value] = $offset;
         $resp->data[EnumField::Total->value] = $total;
         $resp->data[EnumField::Tabs->value] = [

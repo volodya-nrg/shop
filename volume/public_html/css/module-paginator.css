@@ -1,10 +1,12 @@
 .module-paginator {
     display: flex;
     justify-content: flex-end;
+    flex-wrap: wrap;
 }
 
-.module-paginator > *:not(:first-child) {
-    margin-left: 8px;
+.module-paginator > * {
+    margin-right: 8px;
+    margin-bottom: 8px;
 }
 
 .module-paginator_item {

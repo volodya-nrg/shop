@@ -4,7 +4,9 @@ final class ServiceCats
 {
     private string $table = "cats";
     private array $fields = ["cat_id", "name", "slug", "parent_id", "pos", "is_disabled"];
+    private $whereNameLike = "WHERE name LIKE ?";
     public \PDO $db;
+
 
     public function __construct(\PDO $pdo)
     {
@@ -14,10 +16,12 @@ final class ServiceCats
     /**
      * @return Error|CatRow[]
      */
-    public function all($limit = -1, $offset = -1): array|Error
+    public function all($limit = -1, $offset = -1, $filter = ""): array|Error
     {
         $limitAndOffset = "";
         $fieldsString = implode(",", $this->fields);
+        $where = "";
+        $arData = [];
         $list = [];
 
         if ($limit > 0) {
@@ -27,13 +31,23 @@ final class ServiceCats
                 $limitAndOffset .= " OFFSET {$offset}";
             }
         }
+        if ($filter !== "") {
+            $where = $this->whereNameLike;
+            $arData[] = "%{$filter}%";
+        }
 
         try {
-            $stmt = $this->db->query("
-                SELECT {$fieldsString} 
-                FROM {$this->table} 
-                ORDER BY cat_id DESC {$limitAndOffset}");
+            $stmt = $this->db->prepare("
+                    SELECT {$fieldsString} 
+                    FROM {$this->table}
+                    {$where}
+                    ORDER BY cat_id DESC {$limitAndOffset}");
             if ($stmt === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
+
+            $result = $stmt->execute($arData);
+            if ($result === false) {
                 throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
 
@@ -166,14 +180,28 @@ final class ServiceCats
         }
     }
 
-    public function total(): int|Error
+    public function total($filter = ""): int|Error
     {
+        $where = "";
+        $arData = [];
+
+        if ($filter !== "") {
+            $where = $this->whereNameLike;
+            $arData[] = "%{$filter}%";
+        }
+
         try {
-            $stmt = $this->db->query("
+            $stmt = $this->db->prepare("
                 SELECT COUNT(*)
-                FROM {$this->table}");
+                FROM {$this->table}
+                {$where}");
             if ($stmt === false) {
-                throw new \PDOException(EnumErr::StmtIsFalse->value);
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
+
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
 
             $total = $stmt->fetchColumn();

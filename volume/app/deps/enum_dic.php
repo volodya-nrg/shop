@@ -19,4 +19,6 @@ enum EnumDic: string
     case RecoverDataSendMsgTpl = "Данные отправлены на ваш е-мэйл (%s). Следуйте инструкциям в письме.";
     case Registration = "Регистрация";
     case VerifyEmail = "Верификация е-мэйла";
+    case Filter = "Фильтр";
+    case AddWithPlus = "+ Добавить";
 }
