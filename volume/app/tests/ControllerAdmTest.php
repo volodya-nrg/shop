@@ -215,8 +215,8 @@ final class ControllerAdmTest extends TestCase
 
                 $reqForCat->catId = $cat->cat_id;
                 $reqForCat->name = randomString(10);
-                $reqForCat->parentId = random_int(1, 100);
-                $reqForCat->pos = random_int(1, 100);
+                $reqForCat->parentId = randomInt(1, 100);
+                $reqForCat->pos = randomInt(1, 100);
                 $reqForCat->isDisabled = true;
             }
 
@@ -270,7 +270,7 @@ final class ControllerAdmTest extends TestCase
         $reqForItem1->title = randomString(10);
         $reqForItem1->catId = 0;
         $reqForItem1->description = randomString(10);
-        $reqForItem1->price = random_int(100, 1000);
+        $reqForItem1->price = randomInt(100, 1000);
         $reqForItem1->isDisabled = false;
 
         $reqForItem2 = new RequestItem();
@@ -278,7 +278,7 @@ final class ControllerAdmTest extends TestCase
         $reqForItem2->title = randomString(10);
         $reqForItem2->catId = 0;
         $reqForItem2->description = randomString(10);
-        $reqForItem2->price = random_int(100, 1000);
+        $reqForItem2->price = randomInt(100, 1000);
         $reqForItem2->isDisabled = false;
 
         $reqForCat = new RequestCat();
@@ -363,7 +363,7 @@ final class ControllerAdmTest extends TestCase
         $reqForItem->title = randomString(10);
         $reqForItem->catId = 0;
         $reqForItem->description = randomString(10);
-        $reqForItem->price = random_int(100, 1000);
+        $reqForItem->price = randomInt(100, 1000);
         $reqForItem->isDisabled = false;
 
         $reqForCat = new RequestCat();
@@ -426,7 +426,7 @@ final class ControllerAdmTest extends TestCase
                 $reqForItem->itemId = $item->item_id;
                 $reqForItem->title = randomString(10);
                 $reqForItem->description = randomString(10);
-                $reqForItem->price = random_int(100, 1000);
+                $reqForItem->price = randomInt(100, 1000);
                 $reqForItem->isDisabled = true;
 
                 sleep(2);
@@ -487,8 +487,8 @@ final class ControllerAdmTest extends TestCase
         $reqForUser1->email = randomEmail();
         $reqForUser1->pass = randomString(10);
         $reqForUser1->emailHash = randomString(10);
-        $reqForUser1->birthdayDay = random_int(1, 31);
-        $reqForUser1->birthdayMon = random_int(1, 12);
+        $reqForUser1->birthdayDay = randomInt(1, 31);
+        $reqForUser1->birthdayMon = randomInt(1, 12);
         $reqForUser1->role = "";
 
         $reqForUser2 = new RequestUser();
@@ -496,8 +496,8 @@ final class ControllerAdmTest extends TestCase
         $reqForUser2->email = randomEmail();
         $reqForUser2->pass = randomString(10);
         $reqForUser2->emailHash = randomString(10);
-        $reqForUser2->birthdayDay = random_int(1, 31);
-        $reqForUser2->birthdayMon = random_int(1, 12);
+        $reqForUser2->birthdayDay = randomInt(1, 31);
+        $reqForUser2->birthdayMon = randomInt(1, 12);
         $reqForUser2->role = "";
 
         // зарегистрируем админа
@@ -568,8 +568,8 @@ final class ControllerAdmTest extends TestCase
         $reqForUser->email = randomEmail();
         $reqForUser->pass = randomString(10);
         $reqForUser->emailHash = randomString(10);
-        $reqForUser->birthdayDay = random_int(1, 31);
-        $reqForUser->birthdayMon = random_int(1, 12);
+        $reqForUser->birthdayDay = randomInt(1, 31);
+        $reqForUser->birthdayMon = randomInt(1, 12);
         $reqForUser->role = "";
 
         // зарегистрируем админа
@@ -617,8 +617,8 @@ final class ControllerAdmTest extends TestCase
                 $reqForUser->email = randomEmail();
                 $reqForUser->pass = randomString(10);
                 $reqForUser->emailHash = randomString(10);
-                $reqForUser->birthdayDay = random_int(1, 31);
-                $reqForUser->birthdayMon = random_int(1, 12);
+                $reqForUser->birthdayDay = randomInt(1, 31);
+                $reqForUser->birthdayMon = randomInt(1, 12);
                 $reqForUser->role = randomString(10);
 
                 $reqForLoginUser->email = $reqForUser->email;
@@ -684,7 +684,7 @@ final class ControllerAdmTest extends TestCase
 
         $reqForOrder1 = new RequestOrder();
         $reqForOrder1->orderId = 0;
-        $reqForOrder1->userId = random_int(1, 100);
+        $reqForOrder1->userId = randomInt(1, 100);
         $reqForOrder1->contactPhone = randomString(10);
         $reqForOrder1->contactName = randomString(10);
         $reqForOrder1->comment = randomString(10);
@@ -692,7 +692,7 @@ final class ControllerAdmTest extends TestCase
 
         $reqForOrder2 = new RequestOrder();
         $reqForOrder2->orderId = 0;
-        $reqForOrder2->userId = random_int(1, 100);
+        $reqForOrder2->userId = randomInt(1, 100);
         $reqForOrder2->contactPhone = randomString(10);
         $reqForOrder2->contactName = randomString(10);
         $reqForOrder2->comment = randomString(10);
@@ -762,7 +762,7 @@ final class ControllerAdmTest extends TestCase
 
         $reqForOrder = new RequestOrder();
         $reqForOrder->orderId = 0;
-        $reqForOrder->userId = random_int(1, 100);
+        $reqForOrder->userId = randomInt(1, 100);
         $reqForOrder->contactPhone = randomString(10);
         $reqForOrder->contactName = randomString(10);
         $reqForOrder->comment = randomString(10);

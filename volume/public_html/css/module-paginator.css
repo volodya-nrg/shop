@@ -14,3 +14,7 @@
     background-color: var(--colorGray8);
     padding: 4px 8px;
 }
+
+.module-paginator_item.sx-active {
+    background-color: var(--colorGray8);
+}

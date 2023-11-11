@@ -24,6 +24,7 @@ enum EnumViewFile: string
     case PageAdmOrders = "page-adm-orders.php";
     case PageAdmUser = "page-adm-user.php";
     case PageAdmUsers = "page-adm-users.php";
+    case PageAdmEtc = "page-adm-etc.php";
     case PageAgreement = "page-agreement.php";
     case PageCart = "page-cart.php";
     case PageCat = "page-cat.php";

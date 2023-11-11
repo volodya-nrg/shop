@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-final class OrderRow extends XRow
+final class OrderRow
 {
     public int $order_id = 0;
     public ?int $user_id = null; // гости тоже могут создавать заказы
@@ -12,4 +12,10 @@ final class OrderRow extends XRow
     public string $status = "";
     public string $created_at = "";
     public string $updated_at = "";
+    public function __construct(array $data = [])
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+    }
 }

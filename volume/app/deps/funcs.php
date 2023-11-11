@@ -38,12 +38,25 @@ function randomString(int $len = 32, bool $isAttachNumber = false): string
     return $result;
 }
 
+function randomInt(int $min, int $max): int
+{
+    $result = 0;
+
+    try {
+        $result = random_int($min, $max);
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+    }
+
+    return $result;
+}
+
 function lorem(int $words = 32): string
 {
     $aWords = [];
 
     for ($i = 0; $i < $words; $i++) {
-        $aWords[] = randomString(random_int(2, 10));
+        $aWords[] = randomString(randomInt(2, 10));
     }
 
     return implode(" ", $aWords);

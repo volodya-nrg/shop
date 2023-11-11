@@ -5,9 +5,6 @@ final class ControllerAdm extends ControllerBase
     public string $title = EnumDic::Administration->value;
     public string $description = "";
 
-    /** @var CatRow[] */
-    private array $items = [];
-
     /**
      * @throws Exception
      */
@@ -146,35 +143,46 @@ final class ControllerAdm extends ControllerBase
     public function cats(array $args): MyResponse
     {
         global $PDO;
-        $limit = DefaultLimit;
         $offset = 0;
-
-        if (isset($_POST) && count($_POST)) {
-            $req = new RequestPaginator($_POST);
-
-            if ($req->limit > 0 && $req->limit < DefaultLimit) {
-                $limit = $req->limit;
-            }
-            if ($req->offset > 0) {
-                $offset = $req->offset;
-            }
-        }
-
         $serviceCats = new ServiceCats($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmCats);
 
-        $result = $serviceCats->all($limit, $offset);
-        if ($result instanceof Error) {
+        if (isset($_GET) && count($_GET)) {
+            $req = new RequestPaginator($_GET);
+            $offset = $req->page * DefaultLimit;
+        }
+
+        $cats = $serviceCats->all(DefaultLimit, $offset);
+        if ($cats instanceof Error) {
             $resp->setHttpCode(500);
             $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-            error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceCats->all", $result->getMessage()));
+            error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceCats->all", $cats->getMessage()));
             return $resp;
         }
 
         $resp->data[EnumField::Items->value] = [];
-        foreach ($result as $value) {
-            $resp->data[EnumField::Items->value][] = get_object_vars($value);
+        foreach ($cats as $pos => $cat) {
+            $resp->data[EnumField::Items->value][] = new AdmListItem($pos + 1, $cat->name, $cat->cat_id);
         }
+
+        $total = $serviceCats->total();
+        if ($total instanceof Error) {
+            $resp->setHttpCode(500);
+            $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+            error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceCats->total", $total->getMessage()));
+            return $resp;
+        }
+
+        $resp->data[EnumField::Offset->value] = $offset;
+        $resp->data[EnumField::Total->value] = $total;
+        $resp->data[EnumField::Tabs->value] = [
+            new Tab("Items", "/adm/items", false),
+            new Tab("Cats", "/adm/cats", true),
+            new Tab("Infos", "/adm/infos", false),
+            new Tab("Users", "/adm/users", false),
+            new Tab("Orders", "/adm/orders", false),
+            new Tab("Etc", "/adm/etc", false),
+        ];
 
         return $resp;
     }
@@ -452,6 +460,44 @@ final class ControllerAdm extends ControllerBase
         return $resp;
     }
 
+    public function etc(array $args): MyResponse
+    {
+        global $PDO;
+        $resp = new MyResponse(EnumViewFile::PageAdmEtc);
+
+        if (!empty($_GET["addData"])) {
+            //0. тут надо все почистить
+            //1. добавить категории
+            //2. добавить товары
+            //3. добавить пользвателей
+            //4. добавить заказы
+            $serviceCats = new ServiceCats($PDO);
+            $serviceItems = new ServiceItems($PDO);
+            $serviceUsers = new ServiceUsers($PDO);
+            $serviceOrders = new ServiceOrders($PDO);
+
+            $result = $this->createCats();
+            if ($result instanceof Error) {
+                $resp->setHttpCode(500);
+                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
+                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "createCats", $result->getMessage()));
+                return $resp;
+            }
+            $aCatIds = $result;
+        }
+
+        $resp->data[EnumField::Tabs->value] = [
+            new Tab("Items", "/adm/items", false),
+            new Tab("Cats", "/adm/cats", false),
+            new Tab("Infos", "/adm/infos", false),
+            new Tab("Users", "/adm/users", false),
+            new Tab("Orders", "/adm/orders", false),
+            new Tab("Etc", "/adm/etc", true),
+        ];
+
+        return $resp;
+    }
+
     private function checkRule(): Error|null
     {
         if (empty($_SESSION[EnumField::Admin->value])) {
@@ -459,5 +505,89 @@ final class ControllerAdm extends ControllerBase
         }
 
         return null;
+    }
+
+    /**
+     * @return Error|int[]
+     */
+    private function createCats(): array|Error
+    {
+        global $PDO;
+
+        $serviceCats = new ServiceCats($PDO);
+        $aCatIdsLevel1 = [];
+        $aCatIdsLevel2 = [];
+        $aCatIdsLevel3 = [];
+
+        $cats = $serviceCats->all();
+
+        $PDO->beginTransaction();
+
+        foreach ($cats as $cat) {
+            $serviceCats->delete($cat->cat_id);
+        }
+
+        // создадим первый уровень
+        for ($i = 0; $i < randomInt(3, 6); $i++) {
+            $cat = new CatRow();
+            $cat->name = randomString(10, false);
+            $cat->slug = translit($cat->name);
+            //$cat->parent_id = 0;
+            $cat->pos = $i;
+            $cat->is_disabled = randomInt(0, 1);
+
+            $result = $serviceCats->create($cat);
+            if ($result instanceof Error) {
+                $PDO->rollBack();
+                return $result;
+            }
+
+            $cat->cat_id = $result;
+            $aCatIdsLevel1[] = $cat->cat_id;
+        }
+        // создадим второй уровень
+        foreach ($aCatIdsLevel1 as $catId) {
+            for ($i = 0; $i < randomInt(1, 5); $i++) {
+                $cat = new CatRow();
+                $cat->name = randomString(10, false);
+                $cat->slug = translit($cat->name);
+                $cat->parent_id = $catId;
+                $cat->pos = $i;
+                $cat->is_disabled = randomInt(0, 1);
+
+                $result = $serviceCats->create($cat);
+                if ($result instanceof Error) {
+                    $PDO->rollBack();
+                    return $result;
+                }
+
+                $cat->cat_id = $result;
+                $aCatIdsLevel2[] = $cat->cat_id;
+            }
+        }
+        // создадим третий уровень
+        foreach ($aCatIdsLevel2 as $catId) {
+            for ($i = 0; $i < randomInt(1, 10); $i++) {
+                $cat = new CatRow();
+                $cat->name = randomString(10, false);
+                $cat->slug = translit($cat->name);
+                $cat->parent_id = $catId;
+                $cat->pos = $i;
+                $cat->is_disabled = randomInt(0, 1);
+
+                $result = $serviceCats->create($cat);
+                if ($result instanceof Error) {
+                    $PDO->rollBack();
+                    return $result;
+                }
+
+                $cat->cat_id = $result;
+                $aCatIdsLevel3[] = $cat->cat_id;
+            }
+        }
+
+        $PDO->commit();
+
+        return $aCatIdsLevel3;
     }
 }

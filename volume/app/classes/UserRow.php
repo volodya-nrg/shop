@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-final class UserRow extends XRow
+final class UserRow
 {
     public int $user_id = 0;
     public string $email = "";
@@ -14,4 +14,10 @@ final class UserRow extends XRow
     public ?string $role = null;
     public string $created_at = "";
     public string $updated_at = "";
+    public function __construct(array $data = [])
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+    }
 }

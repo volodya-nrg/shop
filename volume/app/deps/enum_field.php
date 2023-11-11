@@ -18,6 +18,7 @@ enum EnumField: string
     case Email = "email";
     case Error = "error";
     case FIO = "fio";
+    case Filter = "filter";
     case From = "from";
     case Hash = "hash";
     case IP = "ip";
@@ -59,4 +60,6 @@ enum EnumField: string
     case Link = "link";
     case Tabs = "tabs";
     case Content = "content";
+    case Total = "total";
+    case CurPage = "curPage";
 }

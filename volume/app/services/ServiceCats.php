@@ -89,7 +89,7 @@ final class ServiceCats
             $item->slug,
             $item->parent_id,
             $item->pos,
-            (int)$item->is_disabled,
+            $item->is_disabled,
         ];
 
         try {
@@ -123,7 +123,7 @@ final class ServiceCats
             $item->slug,
             $item->parent_id,
             $item->pos,
-            (int)$item->is_disabled,
+            $item->is_disabled,
             $item->cat_id,
         ];
 
@@ -164,5 +164,26 @@ final class ServiceCats
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
+    }
+
+    public function total(): int|Error
+    {
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*)
+                FROM {$this->table}");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::StmtIsFalse->value);
+            }
+
+            $total = $stmt->fetchColumn();
+            if ($total === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
+        } catch (\PDOException $e) {
+            return new Error($e->getMessage());
+        }
+
+        return $total;
     }
 }
