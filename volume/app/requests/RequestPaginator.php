@@ -7,10 +7,9 @@ final class RequestPaginator
     public function __construct(array $post = []) // необходимо во время приема данных
     {
         if (isset($post[EnumField::Page->value])) {
-            $this->page = (int)$post[EnumField::Page->value];
-
-            if ($this->page) {
-                $this->page--;
+            $pageLoc = (int)$post[EnumField::Page->value];
+            if ($pageLoc > 0) {
+                $this->page = $pageLoc - 1;
             }
         }
     }
