@@ -1,9 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
 final class ControllerAdm extends ControllerBase
 {
     public string $title = EnumDic::Administration->value;
     public string $description = "";
+
+    /** @var CatRow[] */
+    private array $items = [];
 
     /**
      * @throws Exception
@@ -19,7 +22,10 @@ final class ControllerAdm extends ControllerBase
     public function index(array $args): MyResponse
     {
         // TODO пока временно сделаем редирект, до тех пор пока не сделаем dashboard
-        if (!$_SERVER[EnumField::ModeIsTest->value]) {
+
+        if ($_SERVER[EnumField::ModeIsTest->value]) {
+            $this->items($args);
+        } else {
             redirect("/adm/items");
         }
 
@@ -28,6 +34,7 @@ final class ControllerAdm extends ControllerBase
 
     public function items(array $args): MyResponse
     {
+        global $PDO;
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -42,7 +49,7 @@ final class ControllerAdm extends ControllerBase
             }
         }
 
-        $serviceItems = new ServiceItems();
+        $serviceItems = new ServiceItems($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmItems);
 
         $result = $serviceItems->all($limit, $offset);
@@ -53,17 +60,29 @@ final class ControllerAdm extends ControllerBase
             return $resp;
         }
 
+        $this->items = $result;
+
         $resp->data[EnumField::Items->value] = [];
         foreach ($result as $value) {
             $resp->data[EnumField::Items->value][] = get_object_vars($value);
         }
+
+        $resp->data[EnumField::Tabs->value] = [
+            new Tab("Items", "/adm/items", true),
+            new Tab("Cats", "/adm/cats", false),
+            new Tab("Infos", "/adm/infos", false),
+            new Tab("Users", "/adm/users", false),
+            new Tab("Orders", "/adm/orders", false),
+            new Tab("Etc", "/adm/etc", false),
+        ];
 
         return $resp;
     }
 
     public function item(array $args): MyResponse
     {
-        $serviceItems = new ServiceItems();
+        global $PDO;
+        $serviceItems = new ServiceItems($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmItem);
 
         if (isset($_POST) && count($_POST)) {
@@ -76,7 +95,7 @@ final class ControllerAdm extends ControllerBase
             $item->cat_id = $req->catId;
             $item->description = $req->description;
             $item->price = $req->price;
-            $item->is_disabled = $req->isDisabled;
+            $item->is_disabled = $req->isDisabled ? 1 : 0;
 
             if ($item->item_id == 0) {
                 $result = $serviceItems->create($item);
@@ -126,6 +145,7 @@ final class ControllerAdm extends ControllerBase
 
     public function cats(array $args): MyResponse
     {
+        global $PDO;
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -140,7 +160,7 @@ final class ControllerAdm extends ControllerBase
             }
         }
 
-        $serviceCats = new ServiceCats();
+        $serviceCats = new ServiceCats($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmCats);
 
         $result = $serviceCats->all($limit, $offset);
@@ -161,7 +181,8 @@ final class ControllerAdm extends ControllerBase
 
     public function cat(array $args): MyResponse
     {
-        $serviceCats = new ServiceCats();
+        global $PDO;
+        $serviceCats = new ServiceCats($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmCat);
 
         if (isset($_POST) && count($_POST)) {
@@ -173,7 +194,7 @@ final class ControllerAdm extends ControllerBase
             $cat->slug = translit($cat->name);
             $cat->parent_id = $req->parentId;
             $cat->pos = $req->pos;
-            $cat->is_disabled = $req->isDisabled;
+            $cat->is_disabled = $req->isDisabled ? 1 : 0;
 
             if ($cat->cat_id == 0) {
                 $result = $serviceCats->create($cat);
@@ -223,6 +244,7 @@ final class ControllerAdm extends ControllerBase
 
     public function users(array $args): MyResponse
     {
+        global $PDO;
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -237,7 +259,7 @@ final class ControllerAdm extends ControllerBase
             }
         }
 
-        $serviceUsers = new ServiceUsers();
+        $serviceUsers = new ServiceUsers($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmUsers);
 
         $result = $serviceUsers->all($limit, $offset);
@@ -260,7 +282,8 @@ final class ControllerAdm extends ControllerBase
 
     public function user(array $args): MyResponse
     {
-        $serviceUsers = new ServiceUsers();
+        global $PDO;
+        $serviceUsers = new ServiceUsers($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmUser);
 
         if (isset($_POST) && count($_POST)) {
@@ -326,6 +349,7 @@ final class ControllerAdm extends ControllerBase
 
     public function orders(array $args): MyResponse
     {
+        global $PDO;
         $limit = DefaultLimit;
         $offset = 0;
 
@@ -340,7 +364,7 @@ final class ControllerAdm extends ControllerBase
             }
         }
 
-        $serviceOrders = new ServiceOrders();
+        $serviceOrders = new ServiceOrders($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmOrders);
 
         $result = $serviceOrders->all($limit, $offset);
@@ -362,7 +386,8 @@ final class ControllerAdm extends ControllerBase
 
     public function order(array $args): MyResponse
     {
-        $serviceOrders = new ServiceOrders();
+        global $PDO;
+        $serviceOrders = new ServiceOrders($PDO);
         $resp = new MyResponse(EnumViewFile::PageAdmOrder);
 
         if (isset($_POST) && count($_POST)) {

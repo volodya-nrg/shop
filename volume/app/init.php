@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 session_start();
 
 ini_set('display_errors', '1');
@@ -30,7 +31,7 @@ try {
         [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC]
     );
     $PDO->exec("SET NAMES " . DB_CHARSET);
-    $GLOBALS["PDO"] = $PDO;
+    $GLOBALS["PDO"] = $PDO; // явно регисрируем чтоб было видно глобально (global $PDO)
 } catch (\PDOException $e) {
     http_response_code(500);
     error_log(sprintf(EnumErr::InWhenTpl->value, __FILE__, "PDO", $e->getMessage()));

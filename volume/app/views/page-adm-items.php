@@ -1,29 +1,20 @@
+<?php declare(strict_types=1);
+$tabs = $__data[EnumField::Tabs->value] ?? [];
+$items = $__data[EnumField::Items->value] ?? [];
+?>
 <div class="main">
     <div class="main_column">
-        <div class="tabs">
-            <div class="tabs_host-items">
-                <a class="tabs_host-item sx-active" href="/adm/items">
-                    Items
-                </a>
-                <a class="tabs_host-item" href="/adm/cats">
-                    Cats
-                </a>
-                <a class="tabs_host-item" href="/adm/infos">
-                    Infos
-                </a>
-            </div>
-            <div class="tabs_contents">
-                <?php
-                echo template(EnumViewFile::ModuleAdmList, []);
-                ?>
-                <br/>
-                <?php
-                echo template(EnumViewFile::ModulePaginator, [
-                    EnumField::Path->value => "",
-                    EnumField::From->value => 0,
-                ]);
-                ?>
-            </div>
-        </div>
+        <?php
+        $items = template(EnumViewFile::ModuleAdmList, $items);
+        $paginator = template(EnumViewFile::ModulePaginator, [
+            EnumField::Path->value => "/adm/items",
+            EnumField::From->value => 0,
+        ]);
+
+        echo template(EnumViewFile::ModuleTabs, [
+            EnumField::Tabs->value => $tabs,
+            EnumField::Content->value => "{$items}<br/>{$paginator}",
+        ]);
+        ?>
     </div>
 </div>

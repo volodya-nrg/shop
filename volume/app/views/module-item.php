@@ -1,3 +1,4 @@
+<?php declare(strict_types=1); ?>
 <div class="module-item float-left">
     <a class="module-item_cover" href="/item/1">
         <img src="/images/internal/default-item.png" alt="Lorem ipsum dolor"/>

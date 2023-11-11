@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $styles = $__data[EnumField::Styles->value] ?? "";
 $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
 ?>

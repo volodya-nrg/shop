@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class TestApiClient
 {
@@ -29,6 +29,7 @@ final class TestApiClient
     public function reg(?RequestReg $req, string $role, bool $isEmailConfirmed, callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($req, $role, $isEmailConfirmed, $cb) {
+            global $PDO;
             if ($req !== null) {
                 $_POST = $req->toArray();
             }
@@ -39,7 +40,7 @@ final class TestApiClient
                 isset($resp->data[EnumField::UserId->value]) &&
                 ($role !== "" || $isEmailConfirmed)) {
 
-                $serviceUsers = new ServiceUsers();
+                $serviceUsers = new ServiceUsers($PDO);
                 $userId = $resp->data[EnumField::UserId->value];
 
                 $result = $serviceUsers->one($userId);
@@ -107,7 +108,13 @@ final class TestApiClient
     public function adm(callable $cb): TestApiClient
     {
         $this->tasks[] = function () use ($cb) {
-            $cb((new ControllerAdm())->index([]));
+            try {
+                $resp = (new ControllerAdm())->index([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -120,7 +127,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->cats([]));
+            try {
+                $resp = (new ControllerAdm())->cats([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -133,7 +146,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->cat([]));
+            try {
+                $resp = (new ControllerAdm())->cat([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -146,7 +165,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->items([]));
+            try {
+                $resp = (new ControllerAdm())->items([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -159,7 +184,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->item([]));
+            try {
+                $resp = (new ControllerAdm())->item([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -172,7 +203,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->users([]));
+            try {
+                $resp = (new ControllerAdm())->users([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -185,7 +222,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->user([]));
+            try {
+                $resp = (new ControllerAdm())->user([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -198,7 +241,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->orders([]));
+            try {
+                $resp = (new ControllerAdm())->orders([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -211,7 +260,13 @@ final class TestApiClient
                 $_POST = $req->toArray();
             }
 
-            $cb((new ControllerAdm())->order([]));
+            try {
+                $resp = (new ControllerAdm())->order([]);
+            } catch (Exception $e) {
+                $resp = $this->getRespAdmAccessDined($e);
+            }
+
+            $cb($resp);
         };
 
         return $this;
@@ -223,5 +278,14 @@ final class TestApiClient
             $task();
             $_POST = []; // с каждой выполненой задачей явно убираем пост-запросы
         }
+    }
+
+    private function getRespAdmAccessDined(Exception $e): MyResponse
+    {
+        $resp = new MyResponse(EnumViewFile::PageAccessDined);
+        $resp->setHttpCode(401);
+        $resp->data[EnumField::Error->value] = $e->getMessage();
+
+        return $resp;
     }
 }

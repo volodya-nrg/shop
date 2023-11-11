@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $error = $__data[EnumField::Error->value] ?? "";
 $requestedEmail = $__data[EnumField::Email->value] ?? "";
 $requestedPhoneNumber = $__data[EnumField::PhoneNumber->value] ?? "";

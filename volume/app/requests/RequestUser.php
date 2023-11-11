@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class RequestUser
 {
@@ -7,8 +7,8 @@ final class RequestUser
     public string $pass = "";
     public ?string $emailHash = null;
     public ?string $avatar = null;
-    public ?string $birthdayDay = null;
-    public ?string $birthdayMon = null;
+    public ?int $birthdayDay = null;
+    public ?int $birthdayMon = null;
     public ?string $role = null;
 
     public function __construct(array $post = []) // необходимо во время приема данных

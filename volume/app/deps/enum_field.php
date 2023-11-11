@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 enum EnumField: string
 {
@@ -57,4 +57,6 @@ enum EnumField: string
     case UserId = "user_id";
     case Users = "users";
     case Link = "link";
+    case Tabs = "tabs";
+    case Content = "content";
 }

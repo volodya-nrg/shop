@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 
@@ -298,7 +298,8 @@ final class ControllerAdmTest extends TestCase
 
             // запросим список
         })->admItems(null, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItems);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmItems);
+            $this->assertArrayHasKey(EnumField::Tabs->value, $resp->data);
             $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
 
             // создадим категорию
@@ -317,8 +318,9 @@ final class ControllerAdmTest extends TestCase
 
             // получим список
         })->admItems(null, function (MyResponse $resp) use ($reqPaginator) {
-            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItems);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmItems);
 
+            $this->assertArrayHasKey(EnumField::Tabs->value, $resp->data);
             $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
             $this->assertGreaterThanOrEqual(1, $resp->data[EnumField::Items->value]);
 
@@ -326,7 +328,8 @@ final class ControllerAdmTest extends TestCase
 
             // получим список
         })->admItems($reqPaginator, function (MyResponse $resp) {
-            checkBasicData($this, 200, $resp, 1, EnumViewFile::PageAdmItems);
+            checkBasicData($this, 200, $resp, 2, EnumViewFile::PageAdmItems);
+            $this->assertArrayHasKey(EnumField::Tabs->value, $resp->data);
             $this->assertArrayHasKey(EnumField::Items->value, $resp->data);
             $this->assertCount(1, $resp->data[EnumField::Items->value]);
 

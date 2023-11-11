@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class RequestItem
 {
@@ -28,7 +28,7 @@ final class RequestItem
                 $this->price = $post[EnumField::Price->value];
             }
             if (isset($post[EnumField::IsDisabled->value])) {
-                $this->isDisabled = $post[EnumField::IsDisabled->value];
+                $this->isDisabled = $post[EnumField::IsDisabled->value] === "on";
             }
         }
     }
@@ -41,7 +41,7 @@ final class RequestItem
             EnumField::CatId->value => $this->catId,
             EnumField::Description->value => $this->description,
             EnumField::Price->value => $this->price,
-            EnumField::IsDisabled->value => $this->isDisabled,
+            EnumField::IsDisabled->value => $this->isDisabled ? "on": "",
         ];
     }
 }

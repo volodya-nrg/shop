@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class RequestCat
 {
@@ -23,7 +23,7 @@ final class RequestCat
             $this->pos = $post[EnumField::Pos->value];
         }
         if (isset($post[EnumField::IsDisabled->value])) {
-            $this->isDisabled = $post[EnumField::IsDisabled->value];
+            $this->isDisabled = $post[EnumField::IsDisabled->value] === "on";
         }
     }
 
@@ -34,7 +34,7 @@ final class RequestCat
             EnumField::Name->value => $this->name,
             EnumField::ParentId->value => $this->parentId,
             EnumField::Pos->value => $this->pos,
-            EnumField::IsDisabled->value => $this->isDisabled,
+            EnumField::IsDisabled->value => $this->isDisabled ? "on": "",
         ];
     }
 }

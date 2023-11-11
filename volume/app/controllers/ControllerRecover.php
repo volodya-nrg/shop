@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class ControllerRecover extends ControllerBase
 {
@@ -7,6 +7,7 @@ final class ControllerRecover extends ControllerBase
 
     public function index(array $args): MyResponse
     {
+        global $PDO;
         $resp = new MyResponse(EnumViewFile::PageRecover);
 
         if (isset($_POST) && count($_POST)) {
@@ -20,8 +21,8 @@ final class ControllerRecover extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers();
-            $serviceRecover = new ServiceRecovers();
+            $serviceUsers = new ServiceUsers($PDO);
+            $serviceRecover = new ServiceRecovers($PDO);
             $serviceEmail = new ServiceEmail(
                 EMAIL_SMTP_SERVER,
                 EMAIL_PORT,
@@ -92,12 +93,13 @@ final class ControllerRecover extends ControllerBase
 
     public function check(array $args): MyResponse
     {
+        global $PDO;
         $this->title = EnumDic::ChangePassword->value;
         $resp = new MyResponse(EnumViewFile::PageRecoverCheck);
         $hash = $_GET[EnumField::Hash->value] ?? "";
         $user = null;
-        $serviceUsers = new ServiceUsers();
-        $serviceRecover = new ServiceRecovers();
+        $serviceUsers = new ServiceUsers($PDO);
+        $serviceRecover = new ServiceRecovers($PDO);
 
         // если прислали хэш, то найдем строку
         if ($hash) {

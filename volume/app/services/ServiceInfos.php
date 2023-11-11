@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-final class ServiceCats
+final class ServiceInfos
 {
-    private string $table = "cats";
-    private array $fields = ["cat_id", "name", "slug", "parent_id", "pos", "is_disabled"];
+    private string $table = "infos";
+    private array $fields = ["info_id", "title", "slug", "description", "is_disabled", "created_at", "updated_at"];
     public \PDO $db;
 
     public function __construct(\PDO $pdo)
@@ -12,7 +12,7 @@ final class ServiceCats
     }
 
     /**
-     * @return Error|CatRow[]
+     * @return Error|InfoRow[]
      */
     public function all($limit = -1, $offset = -1): array|Error
     {
@@ -32,7 +32,7 @@ final class ServiceCats
             $stmt = $this->db->query("
                 SELECT {$fieldsString} 
                 FROM {$this->table} 
-                ORDER BY cat_id DESC {$limitAndOffset}");
+                ORDER BY created_at DESC {$limitAndOffset}");
             if ($stmt === false) {
                 throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
@@ -46,26 +46,27 @@ final class ServiceCats
         }
 
         foreach ($rows as $row) {
-            $list[] = new CatRow($row);
+            $list[] = new InfoRow($row);
         }
 
         return $list;
     }
 
-    public function one(int $itemId): null|Error|CatRow
+    public function one(int $infoId): null|Error|InfoRow
     {
+        $arData = [$infoId];
         $fieldsString = implode(",", $this->fields);
 
         try {
             $stmt = $this->db->prepare("
                 SELECT {$fieldsString} 
                 FROM {$this->table} 
-                WHERE cat_id=?");
+                WHERE info_id=?");
             if ($stmt === false) {
                 throw new \PDOException(EnumErr::PrepareIsFalse->value);
             }
 
-            $result = $stmt->execute([$itemId]);
+            $result = $stmt->execute($arData);
             if ($result === false) {
                 throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
@@ -78,24 +79,23 @@ final class ServiceCats
             return new Error($e->getMessage());
         }
 
-        return new CatRow($row);
+        return new InfoRow($row);
     }
 
-    public function create(CatRow $item): int|Error
+    public function create(InfoRow $info): int|Error
     {
         $newId = 0;
         $arData = [
-            $item->name,
-            $item->slug,
-            $item->parent_id,
-            $item->pos,
-            (int)$item->is_disabled,
+            $info->title,
+            $info->slug,
+            $info->description,
+            $info->is_disabled,
         ];
 
         try {
             $stmt = $this->db->prepare("
-                INSERT INTO {$this->table} (name, slug, parent_id, pos, is_disabled) 
-                VALUES (?,?,?,?,?)");
+                    INSERT INTO {$this->table} (title, slug, description, is_disabled) 
+                    VALUES (?,?,?,?)");
             if ($stmt === false) {
                 throw new \PDOException(EnumErr::PrepareIsFalse->value);
             }
@@ -116,22 +116,21 @@ final class ServiceCats
         return $newId;
     }
 
-    public function update(CatRow $item): Error|null
+    public function update(InfoRow $info): null|Error
     {
         $arData = [
-            $item->name,
-            $item->slug,
-            $item->parent_id,
-            $item->pos,
-            (int)$item->is_disabled,
-            $item->cat_id,
+            $info->title,
+            $info->slug,
+            $info->description,
+            $info->is_disabled,
+            $info->info_id,
         ];
 
         try {
             $stmt = $this->db->prepare("
                 UPDATE {$this->table} 
-                SET name=?, slug=?, parent_id=?, pos=?, is_disabled=? 
-                WHERE cat_id=?");
+                SET title=?, slug=?, description=?, is_disabled=? 
+                WHERE info_id=?");
             if ($stmt === false) {
                 throw new \PDOException(EnumErr::PrepareIsFalse->value);
             }
@@ -147,15 +146,15 @@ final class ServiceCats
         return null;
     }
 
-    public function delete(int $catId): bool|Error
+    public function delete(int $infoId): bool|Error
     {
-        $arData = [$catId];
+        $arData = [$infoId];
 
         try {
             $stmt = $this->db->prepare("
                 DELETE 
                 FROM {$this->table} 
-                WHERE cat_id=?");
+                WHERE info_id=?");
             if ($stmt === false) {
                 throw new \PDOException(EnumErr::PrepareIsFalse->value);
             }

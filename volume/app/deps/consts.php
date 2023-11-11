@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 define("ADDRESS", getenv("ADDRESS") ?: "http://localhost");
 
 define("DB_HOST", getenv("DB_HOST") ?: "");
@@ -8,13 +9,13 @@ define("DB_PASS", getenv("DB_PASS") ?: "");
 define("DB_CHARSET", getenv("DB_CHARSET") ?: "");
 
 define("EMAIL_SMTP_SERVER", getenv("EMAIL_SMTP_SERVER") ?: "");
-define("EMAIL_PORT", getenv("EMAIL_PORT") ?: "");
+define("EMAIL_PORT", (int)(getenv("EMAIL_PORT") ?: "0"));
 define("EMAIL_LOGIN", getenv("EMAIL_LOGIN") ?: "");
 define("EMAIL_PASS", getenv("EMAIL_PASS") ?: "");
 define("EMAIL_FROM", getenv("EMAIL_FROM") ?: "");
 
 // paths
-define("DIR_APP", dirname(__FILE__)."/..");
+define("DIR_APP", dirname(__FILE__) . "/..");
 const DIR_PUBLIC_HTML = DIR_APP . "/../public_html";
 const DIR_VIEWS = DIR_APP . "/views";
 const DIR_CONTROLLERS = DIR_APP . "/controllers";

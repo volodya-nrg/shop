@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 function template(EnumViewFile $__view, array $__data = []): string
 {

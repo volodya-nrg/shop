@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $error = $__data[EnumField::Error->value] ?? "";
 $successMsg = $__data[EnumField::Success->value] ?? "";
 $email = $__data[EnumField::Email->value] ?? "";

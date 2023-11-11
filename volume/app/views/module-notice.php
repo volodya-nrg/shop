@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $msg = $__data[EnumField::Msg->value] ?? "";
 $type = $__data[EnumField::Type->value] ?? "";
 ?>

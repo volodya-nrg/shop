@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 enum EnumErr: string
 {
@@ -20,5 +21,6 @@ enum EnumErr: string
     case InWhenTpl = "error in %s when '%s' -> %s";
     case LoginOrPasswordNotCorrect = "логин или пароль не корректны";
     case StmtIsFalse = "stmt is false";
+    case PrepareIsFalse = "prepare is false";
     case SqlQueryIsFalse = "sql query is false";
 }

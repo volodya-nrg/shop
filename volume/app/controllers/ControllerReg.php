@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class ControllerReg extends ControllerBase
 {
@@ -7,6 +7,7 @@ final class ControllerReg extends ControllerBase
 
     public function index(array $args): MyResponse
     {
+        global $PDO;
         $resp = new MyResponse(EnumViewFile::PageReg);
 
         if (isset($_POST) && count($_POST)) {
@@ -24,7 +25,7 @@ final class ControllerReg extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers();
+            $serviceUsers = new ServiceUsers($PDO);
             $serviceEmail = new ServiceEmail(
                 EMAIL_SMTP_SERVER,
                 EMAIL_PORT,
@@ -104,11 +105,12 @@ final class ControllerReg extends ControllerBase
 
     public function check(): MyResponse
     {
+        global $PDO;
         $resp = new MyResponse(EnumViewFile::PageRegCheck);
         $hash = $_GET[EnumField::Hash->value] ?? "";
 
         if ($hash) {
-            $serviceUsers = new ServiceUsers();
+            $serviceUsers = new ServiceUsers($PDO);
 
             $user = $serviceUsers->oneByEmailHash($hash);
             if ($user instanceof Error) {

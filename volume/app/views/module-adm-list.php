@@ -1,7 +1,14 @@
+<?php
+declare(strict_types=1);
+
+$tabs = $__data[EnumField::Tabs->value] ?? [];
+$items = $__data[EnumField::Items->value] ?? [];
+?>
 <div class="module-adm-list">
     <div class="module-adm-list_top">
         <form class="module-adm-list_search" method="get" action="">
-            <input type="text" name="filter" placeholder=""/>
+            <input type="text" name="filter" placeholder="filter"/>
+            <input type="submit" value="Ok"/>
         </form>
 
         <a href="/adm/items/item/0">+ Добавить</a>
@@ -9,7 +16,7 @@
 </div>
 <br/>
 <div>
-    <?php foreach ([1, 2, 3] as $key => $val): ?>
+    <?php foreach ($items as $key => $val): ?>
         <div class="module-adm-list_item">
             <div class="module-adm-list_item_pos text-mute">
                 <?php echo $key ?>.

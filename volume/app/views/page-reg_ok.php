@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $email = $__data[EnumField::Email->value] ?? "";
 ?>
 <div class="main">

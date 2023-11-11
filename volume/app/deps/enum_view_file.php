@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 enum EnumViewFile: string
 {
@@ -12,6 +12,7 @@ enum EnumViewFile: string
     case ModulePaginator = "module-paginator.php";
     case ModuleListItem = "module-list-item.php";
     case ModuleAdmList = "module-adm-list.php";
+    case ModuleTabs = "module-tabs.php";
     case EmailMsgAndLink = "email-msg-and-link.php";
     case PageAccessDined = "page-access-dined.php";
     case PageAdm = "page-adm.php";

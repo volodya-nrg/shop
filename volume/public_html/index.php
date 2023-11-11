@@ -1,5 +1,4 @@
-<?php
-
+<?php declare(strict_types=1);
 require_once "../app/init.php";
 
 $_SERVER[EnumField::ModeIsTest->value] = false;

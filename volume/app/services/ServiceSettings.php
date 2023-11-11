@@ -1,7 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
-final class ServiceSettings extends ServiceDB
+final class ServiceSettings
 {
-    protected string $table = "settings";
-    protected array $fields = ["setting_id", "value"];
+    private string $table = "settings";
+    private array $fields = ["setting_id", "value"];
+    public \PDO $db;
+
+    public function __construct(\PDO $pdo)
+    {
+        $this->db = $pdo;
+    }
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $path = $__data[EnumField::Path->value] ?? "";
 $from = $__data[EnumField::From->value] ?? 0;
 $to = 10 + $from;

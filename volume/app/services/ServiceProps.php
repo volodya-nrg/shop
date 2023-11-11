@@ -1,20 +1,42 @@
-<?php
+<?php declare(strict_types=1);
 
-final class ServiceProps extends ServiceDB
+final class ServiceProps
 {
-    protected string $table = "props";
-    protected array $fields = ["prop_id", "name"];
+    private string $table = "props";
+    private array $fields = ["prop_id", "name"];
+    public \PDO $db;
 
+    public function __construct(\PDO $pdo)
+    {
+        $this->db = $pdo;
+    }
+
+    /**
+     * @return Error|PropRow[]
+     */
     public function all(): array|Error
     {
+        $fieldsString = implode(",", $this->fields);
+        $list = [];
+
         try {
-            $stmt = $this->db->query("SELECT {$this->fieldsAsString()} FROM {$this->table} ORDER BY {$this->fields[0]} DESC");
+            $stmt = $this->db->query("
+                SELECT {$fieldsString} 
+                FROM {$this->table} 
+                ORDER BY prop_id DESC");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
+
+            $rows = $stmt->fetchAll();
+            if ($rows === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        $list = [];
-        foreach ($stmt->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $list[] = new PropRow($row);
         }
 
@@ -23,61 +45,105 @@ final class ServiceProps extends ServiceDB
 
     public function one(int $propId): null|Error|PropRow
     {
+        $arData = [$propId];
+        $fieldsString = implode(",", $this->fields);
+
         try {
-            $stmt = $this->db->prepare("SELECT {$this->fieldsAsString()} FROM {$this->table} WHERE {$this->fields[0]}=?");
-            $stmt->execute([$propId]);
-            $data = $stmt->fetch();
-            if ($data === false) {
+            $stmt = $this->db->prepare("
+                SELECT {$fieldsString} 
+                FROM {$this->table} 
+                WHERE prop_id=?");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
+
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
+
+            $row = $stmt->fetch();
+            if ($row === false) {
                 return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        return new PropRow($data);
+        return new PropRow($row);
     }
 
-    public function createOrUpdate(PropRow $prop): int|Error
+    public function create(PropRow $prop): int|Error
     {
-        $id = 0;
+        $newId = 0;
         $arData = [
-            $prop->prop_id,
             $prop->name,
         ];
 
         try {
-            if ($prop->prop_id > 0) {
-                $fields = $this->fieldsAsString(true, "=?,") . "=?";
-                $stmt = $this->db->prepare("UPDATE {$this->table} SET {$fields} WHERE {$this->fields[0]}=?");
-                $arData[] = $prop->prop_id;
-                $stmt->execute($arData);
-                $id = $prop->prop_id;
-            } else {
-                $stmt = $this->db->prepare("
-                    INSERT INTO {$this->table} ({$this->fieldsAsString(true)}) 
-                    VALUES ({$this->questionsAsString(true)})");
+            $stmt = $this->db->prepare("
+                    INSERT INTO {$this->table} (name) 
+                    VALUES (?)");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
 
-                $stmt->execute($arData);
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
 
-                $tmp = $this->db->lastInsertId();
-                if ($tmp) {
-                    $id = (int)$this->db->lastInsertId();
-                }
+            $lastInsertId = $this->db->lastInsertId();
+            if ($lastInsertId) {
+                $newId = (int)$lastInsertId;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        return $id;
+        return $newId;
+    }
+
+    public function update(PropRow $prop): null|Error
+    {
+        $arData = [
+            $prop->name,
+        ];
+
+        try {
+            $stmt = $this->db->prepare("
+                UPDATE {$this->table} 
+                SET name=? 
+                WHERE prop_id=?");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
+
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
+        } catch (\PDOException $e) {
+            return new Error($e->getMessage());
+        }
+
+        return null;
     }
 
     public function delete(int $propId): bool|Error
     {
+        $arData = [$propId];
+
         try {
-            return $this->db->
-            prepare("DELETE FROM {$this->table} WHERE {$this->fields[0]}=?")->
-            execute([$propId]);
-            // тут почистить все его значения
+            $stmt = $this->db->prepare("
+                DELETE 
+                FROM {$this->table} 
+                WHERE prop_id=?");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
+
+            return $stmt->execute($arData);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

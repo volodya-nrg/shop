@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
 ?>
 <div class="main">

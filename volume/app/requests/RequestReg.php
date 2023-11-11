@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 final class RequestReg
 {
@@ -20,10 +20,10 @@ final class RequestReg
             $this->passConfirm = $post[EnumField::PasswordConfirm->value];
         }
         if (isset($post[EnumField::Agreement->value])) {
-            $this->agreement = $post[EnumField::Agreement->value];
+            $this->agreement = $post[EnumField::Agreement->value] === "on";
         }
         if (isset($post[EnumField::PrivacyPolicy->value])) {
-            $this->privatePolicy = $post[EnumField::PrivacyPolicy->value];
+            $this->privatePolicy = $post[EnumField::PrivacyPolicy->value] === "on";
         }
     }
 
@@ -33,8 +33,8 @@ final class RequestReg
             EnumField::Email->value => $this->email,
             EnumField::Password->value => $this->pass,
             EnumField::PasswordConfirm->value => $this->passConfirm,
-            EnumField::Agreement->value => $this->agreement,
-            EnumField::PrivacyPolicy->value => $this->privatePolicy,
+            EnumField::Agreement->value => $this->agreement ? "on": "",
+            EnumField::PrivacyPolicy->value => $this->privatePolicy ? "on": "",
         ];
     }
 }

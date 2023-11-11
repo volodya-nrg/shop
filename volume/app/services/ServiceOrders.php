@@ -1,13 +1,24 @@
-<?php
+<?php declare(strict_types=1);
 
-final class ServiceOrders extends ServiceDB
+final class ServiceOrders
 {
-    protected string $table = "orders";
-    protected array $fields = ["order_id", "user_id", "contact_phone", "contact_name", "comment", "place_delivery", "ip", "status", "created_at", "updated_at"];
+    private string $table = "orders";
+    private array $fields = ["order_id", "user_id", "contact_phone", "contact_name", "comment", "place_delivery", "ip", "status", "created_at", "updated_at"];
+    public \PDO $db;
 
+    public function __construct(\PDO $pdo)
+    {
+        $this->db = $pdo;
+    }
+
+    /**
+     * @return Error|OrderRow[]
+     */
     public function all($limit = -1, $offset = -1): array|Error
     {
         $limitAndOffset = "";
+        $fieldsString = implode(",", $this->fields);
+        $list = [];
 
         if ($limit > 0) {
             $limitAndOffset .= "LIMIT {$limit}";
@@ -17,23 +28,24 @@ final class ServiceOrders extends ServiceDB
             }
         }
 
-        $fieldsString = implode(",", $this->fields);
-
         try {
             $stmt = $this->db->query("
                 SELECT {$fieldsString} 
                 FROM {$this->table} 
-                ORDER BY order_id DESC 
-                {$limitAndOffset}");
+                ORDER BY order_id DESC {$limitAndOffset}");
             if ($stmt === false) {
-                return new Error(EnumErr::StmtIsFalse->value);
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
+
+            $rows = $stmt->fetchAll();
+            if ($rows === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        $list = [];
-        foreach ($stmt->fetchAll() as $row) {
+        foreach ($rows as $row) {
             $list[] = new OrderRow($row);
         }
 
@@ -51,28 +63,28 @@ final class ServiceOrders extends ServiceDB
                 FROM {$this->table} 
                 WHERE order_id=?");
             if ($stmt === false) {
-                return new Error(EnumErr::StmtIsFalse->value);
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
             }
 
             $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(EnumErr::SqlQueryIsFalse->value);
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
 
-            $data = $stmt->fetch();
-            if ($data === false) {
+            $row = $stmt->fetch();
+            if ($row === false) {
                 return null;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        return new OrderRow($data);
+        return new OrderRow($row);
     }
 
     public function create(OrderRow $order): int|Error
     {
-        $id = 0;
+        $newId = 0;
         $userId = null;
         $contactName = null;
         $comment = null;
@@ -102,22 +114,27 @@ final class ServiceOrders extends ServiceDB
         ];
 
         try {
-            $result = $this->db->prepare("
+            $stmt = $this->db->prepare("
                     INSERT INTO {$this->table} (user_id, contact_phone, contact_name, comment, place_delivery, ip, status) 
-                    VALUES (?,?,?,?,?,?,?)")->execute($arData);
-            if ($result === false) {
-                return new Error(EnumErr::SqlQueryIsFalse->value);
+                    VALUES (?,?,?,?,?,?,?)");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
             }
 
-            $tmp = $this->db->lastInsertId();
-            if ($tmp) {
-                $id = (int)$this->db->lastInsertId();
+            $result = $stmt->execute($arData);
+            if ($result === false) {
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
+            }
+
+            $lastInsertId = $this->db->lastInsertId();
+            if ($lastInsertId) {
+                $newId = (int)$lastInsertId;
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }
 
-        return $id;
+        return $newId;
     }
 
     public function update(OrderRow $order): null|Error
@@ -152,12 +169,17 @@ final class ServiceOrders extends ServiceDB
         ];
 
         try {
-            $result = $this->db->prepare("
+            $stmt = $this->db->prepare("
                     UPDATE {$this->table} 
                     SET user_id=?, contact_phone=?, contact_name=?, comment=?, place_delivery=?, ip=?, status=?
-                    WHERE order_id=?")->execute($arData);
+                    WHERE order_id=?");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::PrepareIsFalse->value);
+            }
+
+            $result = $stmt->execute($arData);
             if ($result === false) {
-                return new Error(EnumErr::SqlQueryIsFalse->value);
+                throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
@@ -171,7 +193,15 @@ final class ServiceOrders extends ServiceDB
         $arData = [$orderId];
 
         try {
-            return $this->db->prepare("DELETE FROM {$this->table} WHERE order_id=?")->execute($arData);
+            $stmt = $this->db->prepare("
+                DELETE 
+                FROM {$this->table} 
+                WHERE order_id=?");
+            if ($stmt === false) {
+                throw new \PDOException(EnumErr::StmtIsFalse->value);
+            }
+
+            return $stmt->execute($arData);
         } catch (\PDOException $e) {
             return new Error($e->getMessage());
         }

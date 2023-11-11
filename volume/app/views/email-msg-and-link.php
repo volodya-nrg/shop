@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 $msg = $__data[EnumField::Address->value] ?? "";
 $address = $__data[EnumField::Address->value] ?? "";
 ?>

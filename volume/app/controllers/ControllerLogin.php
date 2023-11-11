@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 final class ControllerLogin extends ControllerBase
 {
@@ -7,6 +8,7 @@ final class ControllerLogin extends ControllerBase
 
     public function index(array $args): MyResponse
     {
+        global $PDO;
         $resp = new MyResponse(EnumViewFile::PageLogin);
 
         if (isset($_POST) && count($_POST)) {
@@ -20,7 +22,7 @@ final class ControllerLogin extends ControllerBase
                 return $resp;
             }
 
-            $serviceUsers = new ServiceUsers();
+            $serviceUsers = new ServiceUsers($PDO);
 
             // достанем пользователя
             $user = $serviceUsers->oneByEmail($req->email);

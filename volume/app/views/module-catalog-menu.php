@@ -1,3 +1,4 @@
+<?php declare(strict_types=1); ?>
 <div class="module-catalog-menu">
     <h2>Категории</h2>
     <ul>
