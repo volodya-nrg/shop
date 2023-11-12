@@ -1,4 +1,6 @@
-<?php declare(strict_types=1); ?>
+<?php declare(strict_types=1);
+$err = $__err ?? "";
+?>
 <div class="main">
     <div class="main_column">
         <div>
@@ -9,7 +11,7 @@
             <h1>Корзина</h1>
             <div class="page-cart_items">
                 <?php
-                for ($i=0; $i < 6; $i++) {
+                for ($i = 0; $i < 6; $i++) {
                     echo template(EnumViewFile::ModuleCartItem);
                 }
                 ?>

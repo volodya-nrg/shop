@@ -12,7 +12,6 @@ final class ControllerRecoverTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[EnumField::ModeIsTest->value] = true;
     }
 
     protected function tearDown(): void
@@ -50,7 +49,7 @@ final class ControllerRecoverTest extends TestCase
             // пользователь не найден, будет ошибка
         })->recover($req, function (MyResponse $resp) {
             checkBasicData($this, 400, $resp, 2, EnumViewFile::PageRecover);
-            $this->assertEquals(EnumErr::NotFoundUser->value, $resp->data[EnumField::Error->value]);
+            $this->assertEquals(EnumErr::NotFoundRow->value, $resp->data[EnumField::Error->value]);
             $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
 
             // зарегистрируем пользователя (е-мэйл не подтвержден)

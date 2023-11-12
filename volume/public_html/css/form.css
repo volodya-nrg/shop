@@ -1,5 +1,5 @@
-.form_title {
-    margin-bottom: 4px;
+.form {
+    /* пусть будет */
 }
 
 .form_row + .form_row {
@@ -8,6 +8,10 @@
 
 .form_row.sx-submit {
     margin-top: 32px;
+}
+
+.form_title {
+    margin-bottom: 4px;
 }
 
 .form_cols {

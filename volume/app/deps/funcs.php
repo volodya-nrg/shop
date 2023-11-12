@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-function template(EnumViewFile $__view, array $__data = []): string
+function template(EnumViewFile $__view, string $__err = "", array $__data = []): string
 {
     $output = "";
 
@@ -12,12 +12,6 @@ function template(EnumViewFile $__view, array $__data = []): string
     }
 
     return $output;
-}
-
-function redirect($url): never
-{
-    header("Location: {$url}");
-    exit;
 }
 
 function randomString(int $len = 32, bool $isAttachNumber = false): string
@@ -97,6 +91,36 @@ function translit(string $value)
     $value = trim($value, '-');
 
     return $value;
+}
+
+/**
+ * @return CatRowWithDeep[]
+ */
+function catsTreeAsList(CatsTree $catsTree, $deep = 0): array
+{
+    $result = [];
+
+    foreach ($catsTree->childs as $catTree) {
+        $result[] = new CatRowWithDeep($catTree->catRow, $deep);
+
+        if (count($catTree->childs)) {
+            $result = array_merge($result, catsTreeAsList($catTree, $deep + 1));
+        }
+    }
+
+    return $result;
+}
+
+function classMethodArgs(): array
+{
+    $aURLData = parse_url($_SERVER['REQUEST_URI']);
+    $aURLPath = explode("/", $aURLData["path"]);
+    array_shift($aURLPath);
+    $class = "Controller" . ucfirst(!empty($aURLPath[0]) ? trim(str_replace("-", "", $aURLPath[0])) : "main");
+    $method = !empty($aURLPath[1]) ? trim(str_replace("-", "_", $aURLPath[1])) : "index";
+    $aArgs = count($aURLPath) > 2 ? array_slice($aURLPath, 2) : [];
+
+    return [$class, $method, $aArgs];
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

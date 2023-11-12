@@ -1,4 +1,6 @@
-<?php declare(strict_types=1); ?>
+<?php declare(strict_types=1);
+$err = $__err ?? "";
+?>
 <div class="module-cart-item">
     <a class="module-cart-item_cover" href="/item/1">
         <img src="/images/internal/default-item.png" alt="Lorem ipsum dolor"/>

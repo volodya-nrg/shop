@@ -10,8 +10,8 @@ final class ControllerLogout extends ControllerBase
         if (isset($_SESSION[EnumField::Admin->value])) {
             unset($_SESSION[EnumField::Admin->value]);
         }
-        if (!$_SERVER[EnumField::ModeIsTest->value]) {
-            redirect("/");
+        if ($_SERVER[EnumField::ModeIsProd->value]) {
+            $this->redirect("/");
         }
 
         return new MyResponse(EnumViewFile::Default);

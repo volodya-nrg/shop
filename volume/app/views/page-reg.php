@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-$error = $__data[EnumField::Error->value] ?? "";
+$err = $__err ?? "";
 $requestedEmail = $__data[EnumField::RequestedEmail->value] ?? "";
 $requestedAgreement = $__data[EnumField::RequestedAgreement->value] ?? false;
 $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? false;
@@ -8,11 +8,11 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
     <div class="main_column">
         <h1 class="align-center">Регистрация</h1>
 
-        <?php if ($error != ""): ?>
+        <?php if ($err): ?>
             <div>
                 <?php
-                echo template(EnumViewFile::ModuleNotice, [
-                    EnumField::Msg->value => $error,
+                echo template(EnumViewFile::ModuleNotice, "", [
+                    EnumField::Msg->value => $err,
                     EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
                 ]);
                 ?>
@@ -20,7 +20,7 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
             <br/>
         <?php endif; ?>
 
-        <form method="post" class="form" action="">
+        <form method="post" class="form">
             <div class="form_row">
                 <div class="form_title">Е-мэйл</div>
                 <input type="email" name="<?php echo EnumField::Email->value ?>" value="<?php echo $requestedEmail ?>"
@@ -32,7 +32,8 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
             </div>
             <div class="form_row">
                 <div class="form_title">Пароль (павтор)</div>
-                <input type="password" name="<?php echo EnumField::PasswordConfirm->value ?>" value="" required="required"/>
+                <input type="password" name="<?php echo EnumField::PasswordConfirm->value ?>" value=""
+                       required="required"/>
             </div>
             <div class="form_row">
                 <label for="page-reg-checkbox-agreement">
@@ -48,7 +49,7 @@ $requestedPrivatePolicy = $__data[EnumField::RequestedPrivatePolicy->value] ?? f
                 <label for="page-reg-checkbox-privacy-policy">
                     <input id="page-reg-checkbox-privacy-policy"
                            name="<?php echo EnumField::PrivacyPolicy->value ?>"
-                           <?php if ($requestedPrivatePolicy): ?>checked="checked"<?php endif; ?>
+                        <?php echo $requestedPrivatePolicy ? 'checked="checked"' : '' ?>
                            type="checkbox"
                            required="required"
                     /> Я принимаю <a href="/privacy-policy">политику конфиденциальности</a>

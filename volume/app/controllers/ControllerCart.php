@@ -2,7 +2,7 @@
 
 final class ControllerCart extends ControllerBase
 {
-    public string $title = EnumDic::Administration->value;
+    public string $title = EnumDic::Cart->value;
     public string $description = "";
 
     public function index(array $args): MyResponse

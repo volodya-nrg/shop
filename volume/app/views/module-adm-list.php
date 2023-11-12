@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+$err = $__err ?? "";
 $path = $__data[EnumField::Path->value] ?? "";
 $items = $__data[EnumField::Items->value] ?? [];
 $offset = $__data[EnumField::Offset->value] ?? 0;

@@ -11,16 +11,16 @@ final class RequestCat
     public function __construct(array $post = []) // необходимо во время приема данных
     {
         if (isset($post[EnumField::CatId->value])) {
-            $this->catId = $post[EnumField::CatId->value];
+            $this->catId = (int)$post[EnumField::CatId->value];
         }
         if (isset($post[EnumField::Name->value])) {
             $this->name = $post[EnumField::Name->value];
         }
         if (isset($post[EnumField::ParentId->value])) {
-            $this->parentId = $post[EnumField::ParentId->value];
+            $this->parentId = (int)$post[EnumField::ParentId->value];
         }
         if (isset($post[EnumField::Pos->value])) {
-            $this->pos = $post[EnumField::Pos->value];
+            $this->pos = (int)$post[EnumField::Pos->value];
         }
         if (isset($post[EnumField::IsDisabled->value])) {
             $this->isDisabled = $post[EnumField::IsDisabled->value] === "on";

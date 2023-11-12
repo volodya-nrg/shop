@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-$err = $__data[EnumField::Error->value] ?? "";
+$err = $__err ?? "";
 $msg = $__data[EnumField::Msg->value] ?? "";
 ?>
 <div class="main">

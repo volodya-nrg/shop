@@ -10,41 +10,41 @@ final class ControllerLogin extends ControllerBase
     {
         global $PDO;
         $resp = new MyResponse(EnumViewFile::PageLogin);
+        $serviceUsers = new ServiceUsers($PDO);
 
         if (isset($_POST) && count($_POST)) {
             $req = new RequestLogin($_POST);
             $resp->data[EnumField::RequestedEmail->value] = $req->email;
 
-            $err = $this->check_request($req);
+            $err = $this->checkRequest($req);
             if ($err instanceof Error) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = $err->getMessage();
+                $resp->code = 400;
+                $resp->err = $err->getMessage();
                 return $resp;
             }
-
-            $serviceUsers = new ServiceUsers($PDO);
 
             // достанем пользователя
-            $user = $serviceUsers->oneByEmail($req->email);
-            if ($user instanceof Error) {
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "oneByEmail", $user->getMessage()));
+            $result = $serviceUsers->oneByEmail($req->email);
+            if ($result instanceof Error) {
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
-            } else if ($user === null) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = EnumErr::NotFoundUser->value;
+            } else if ($result === null) {
+                $resp->code = 400;
+                $resp->err = EnumErr::NotFoundRow->value;
                 return $resp;
-            } else if ($user instanceof UserRow && $user->email_hash !== null) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = EnumErr::CheckYourEmail->value;
+            } else if ($result instanceof UserRow && $result->email_hash !== null) {
+                $resp->code = 400;
+                $resp->err = EnumErr::CheckYourEmail->value;
                 return $resp;
             }
+
+            $user = $result;
 
             // проверим по паролю
             if (!password_verify($req->pass, $user->pass)) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = EnumErr::LoginOrPasswordNotCorrect->value;
+                $resp->code = 400;
+                $resp->err = EnumErr::LoginOrPasswordNotCorrect->value;
                 return $resp;
             }
 
@@ -55,15 +55,15 @@ final class ControllerLogin extends ControllerBase
                 $_SESSION[EnumField::Admin->value] = true;
             }
 
-            if (!$_SERVER[EnumField::ModeIsTest->value]) {
-                redirect("/profile");
+            if ($_SERVER[EnumField::ModeIsProd->value]) {
+                $this->redirect("/profile");
             }
         }
 
         return $resp;
     }
 
-    private function check_request(RequestLogin $req): Error|null
+    private function checkRequest(RequestLogin $req): Error|null
     {
         if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
             return new Error(EnumErr::EmailNotCorrect->value);

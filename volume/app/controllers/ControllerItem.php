@@ -2,7 +2,7 @@
 
 final class ControllerItem extends ControllerBase
 {
-    public string $title = EnumDic::Administration->value;
+    public string $title = "";
     public string $description = "";
 
     public function index(array $args): MyResponse

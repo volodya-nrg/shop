@@ -12,7 +12,6 @@ final class ControllerLoginTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[EnumField::ModeIsTest->value] = true;
     }
 
     protected function tearDown(): void
@@ -70,7 +69,7 @@ final class ControllerLoginTest extends TestCase
             checkBasicData($this, 400, $resp, 2, EnumViewFile::PageLogin);
             $this->assertArrayHasKey(EnumField::RequestedEmail->value, $resp->data);
             $this->assertTrue(strlen($resp->data[EnumField::RequestedEmail->value]) > 0);
-            $this->assertEquals(EnumErr::NotFoundUser->value, $resp->data[EnumField::Error->value]);
+            $this->assertEquals(EnumErr::NotFoundRow->value, $resp->data[EnumField::Error->value]);
 
             // создадим пользователя
         })->reg($reqForUser, "", true, function (MyResponse $resp) use ($req, $reqForUser) {

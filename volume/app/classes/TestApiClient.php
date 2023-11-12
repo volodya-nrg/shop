@@ -45,7 +45,7 @@ final class TestApiClient
 
                 $result = $serviceUsers->one($userId);
                 if ($result === null) {
-                    abort(EnumErr::NotFoundUser->value);
+                    abort(EnumErr::NotFoundRow->value);
                 } elseif ($result instanceof Error) {
                     abort($result->getMessage());
                 }

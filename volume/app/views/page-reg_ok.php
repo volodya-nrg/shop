@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+$err = $__err ?? "";
 $email = $__data[EnumField::Email->value] ?? "";
 ?>
 <div class="main">

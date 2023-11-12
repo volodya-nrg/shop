@@ -1,16 +1,16 @@
 <?php declare(strict_types=1);
-$error = $__data[EnumField::Error->value] ?? "";
+$err = $__err ?? "";
 $requestedEmail = $__data[EnumField::RequestedEmail->value] ?? "";
 ?>
 <div class="main">
     <div class="main_column">
         <h1 class="align-center">Вход</h1>
 
-        <?php if ($error !== ""): ?>
+        <?php if ($err): ?>
             <div>
                 <?php
-                echo template(EnumViewFile::ModuleNotice, [
-                    EnumField::Msg->value => $error,
+                echo template(EnumViewFile::ModuleNotice, "", [
+                    EnumField::Msg->value => $err,
                     EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
                 ]);
                 ?>

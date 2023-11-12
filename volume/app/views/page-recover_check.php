@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-$error = $__data[EnumField::Error->value] ?? "";
+$err = $__err ?? "";
 $successMsg = $__data[EnumField::Success->value] ?? "";
 $email = $__data[EnumField::Email->value] ?? "";
 ?>
@@ -7,11 +7,11 @@ $email = $__data[EnumField::Email->value] ?? "";
     <div class="main_column">
         <h1 class="align-center">Смена пароля</h1>
 
-        <?php if ($error != ""): ?>
+        <?php if ($err): ?>
             <div>
                 <?php
-                echo template(EnumViewFile::ModuleNotice, [
-                    EnumField::Msg->value => $error,
+                echo template(EnumViewFile::ModuleNotice, "", [
+                    EnumField::Msg->value => $err,
                     EnumField::Type->value => EnumNoticeStyleClass::Danger->value,
                 ]);
                 ?>
@@ -20,7 +20,7 @@ $email = $__data[EnumField::Email->value] ?? "";
         <?php elseif ($successMsg != ""): ?>
             <div>
                 <?php
-                echo template(EnumViewFile::ModuleNotice, [
+                echo template(EnumViewFile::ModuleNotice, "", [
                     EnumField::Msg->value => $successMsg,
                     EnumField::Type->value => EnumNoticeStyleClass::Success->value,
                 ]);

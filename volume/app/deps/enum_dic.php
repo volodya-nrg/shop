@@ -21,4 +21,18 @@ enum EnumDic: string
     case VerifyEmail = "Верификация е-мэйла";
     case Filter = "Фильтр";
     case AddWithPlus = "+ Добавить";
+    case BackWithPrefix = "< Назад";
+    case Name = "Название";
+    case Parent = "Родитель";
+    case Position = "Позиция";
+    case IfChooseThenDisabled = "Если выбран, то выключен";
+    case Send = "Отправить";
+    case Delete = "Удалить";
+    case CatsTreeAsListPrefix = "|---";
+    case AreYouSureYouWantToDelete = "Вы точно хотите удалить?";
+    case Cart = "Корзина";
+    case Checkout = "Оформление";
+    case Contacts = "Контакты";
+    case Info = "Информация";
+    case Search = "Поиск";
 }

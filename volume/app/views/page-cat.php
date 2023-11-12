@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-$error = $__data[EnumField::Error->value] ?? "";
+$err = $__err ?? "";
 ?>
 <div class="main">
     <div class="main_column sx-side">

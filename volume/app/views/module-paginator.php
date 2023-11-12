@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+$err = $__err ?? "";
 $total = $__data[EnumField::Total->value] ?? 0;
 $offset = $__data[EnumField::Offset->value] ?? 0;
 $filter = $__data[EnumField::Filter->value] ?? "";

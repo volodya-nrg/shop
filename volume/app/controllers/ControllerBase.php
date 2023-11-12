@@ -10,29 +10,34 @@ class ControllerBase
         return new MyResponse(EnumViewFile::Default);
     }
 
-    protected function view(EnumViewFile $viewFile, array $aData = []): string
+    protected function view(EnumViewFile $viewFile, string $err = "", array $aData = []): string
     {
-        return template($viewFile, $aData);
+        return template($viewFile, $err, $aData);
     }
 
-    protected function json(array $aData, $code = 0): string
+//    protected function json(array $aData, $code = 0): string
+//    {
+//        if ($code) {
+//            http_response_code($code);
+//        }
+//
+//        header("Content-type: application/json");
+//        return json_encode($aData);
+//    }
+//
+//    protected function xml(string $data, $code = 0): string
+//    {
+//        if ($code) {
+//            http_response_code($code);
+//        }
+//
+//        header("Content-Type: text/xml");
+//        header("Content-Length: " . strlen($data));
+//        return $data;
+//    }
+    protected function redirect(string $url): never
     {
-        if ($code) {
-            http_response_code($code);
-        }
-
-        header("Content-type: application/json");
-        return json_encode($aData);
-    }
-
-    protected function xml(string $data, $code = 0): string
-    {
-        if ($code) {
-            http_response_code($code);
-        }
-
-        header("Content-Type: text/xml");
-        header("Content-Length: " . strlen($data));
-        return $data;
+        header("Location: {$url}");
+        exit;
     }
 }

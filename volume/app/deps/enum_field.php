@@ -27,7 +27,7 @@ enum EnumField: string
     case ItemId = "item_id";
     case Items = "items";
     case Limit = "limit";
-    case ModeIsTest = "MODE_IS_TEST";
+    case ModeIsProd = "MODE_IS_PROD";
     case Msg = "msg";
     case Name = "name";
     case Offset = "offset";
@@ -62,4 +62,7 @@ enum EnumField: string
     case Content = "content";
     case Total = "total";
     case CurPage = "curPage";
+    case CatsTree = "cats_tree";
+    case CatsTreeAsList = "cats_tree_as_list";
+    case ActionDelete = "action_delete";
 }

@@ -41,7 +41,7 @@ final class ServiceCats
                     SELECT {$fieldsString} 
                     FROM {$this->table}
                     {$where}
-                    ORDER BY cat_id DESC {$limitAndOffset}");
+                    ORDER BY parent_id ASC, pos ASC, cat_id ASC {$limitAndOffset}"); // порядок сортировки важен
             if ($stmt === false) {
                 throw new \PDOException(EnumErr::SqlQueryIsFalse->value);
             }

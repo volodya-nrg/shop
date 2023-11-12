@@ -1,4 +1,6 @@
-<?php declare(strict_types=1); ?>
+<?php declare(strict_types=1);
+$err = $__err ?? "";
+?>
 <div class="module-catalog-menu">
     <h2>Категории</h2>
     <ul>

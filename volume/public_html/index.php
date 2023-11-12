@@ -1,37 +1,36 @@
 <?php declare(strict_types=1);
+
 require_once "../app/init.php";
 
-$_SERVER[EnumField::ModeIsTest->value] = false;
-
-$aURLData = parse_url($_SERVER['REQUEST_URI']);
-$aURLPath = explode("/", $aURLData["path"]);
-array_shift($aURLPath);
-$class = "Controller" . ucfirst(!empty($aURLPath[0]) ? trim(str_replace("-", "", $aURLPath[0])) : "main");
-$method = !empty($aURLPath[1]) ? trim(str_replace("-", "_", $aURLPath[1])) : "index";
-$aArgs = count($aURLPath) > 2 ? array_slice($aURLPath, 2) : [];
+$_SERVER[EnumField::ModeIsProd->value] = true;
+list($class, $method, $aArgs) = classMethodArgs();
 
 try {
     if (!class_exists($class)) {
-        throw new Exception(EnumErr::NotFoundClass->value);
+        throw new \Exception(EnumErr::NotFoundClass->value);
     }
 
     if ($class === "ControllerItem") {
         if ($method === "index" || count($aArgs)) {
-            throw new Exception(EnumErr::NotFoundMethod->value);
+            throw new \Exception(EnumErr::NotFoundMethod->value);
         }
         $aArgs = [$method];
         $method = "index";
     } elseif (!method_exists($class, $method)) {
-        throw new Exception(EnumErr::NotFoundMethod->value);
+        throw new \Exception(EnumErr::NotFoundMethod->value);
     }
 
     $oPage = new $class();
 
     if (!is_callable([$oPage, $method])) { // проверим можно ли вызывать (public, protected). Если private, то не получится вызвать.
-        throw new Exception(EnumErr::MethodNotAllowed->value);
+        throw new \Exception(EnumErr::MethodNotAllowed->value);
     }
 
     $resp = call_user_func([$oPage, $method], $aArgs);
+    if ($resp->err) {
+        error_log($resp->err);
+    }
+    http_response_code($resp->code);
 
 //    // если json, xml
 //    foreach (headers_list() as $val) {
@@ -39,14 +38,13 @@ try {
 //            exit($output);
 //        }
 //    }
-} catch (Exception $e) {
-    error_log(sprintf(EnumErr::InWhenTpl->value, "index.php", "call class-method", $e->getMessage()));
+} catch (\Exception $e) {
+    error_log($e->getMessage());
 
     $oPage = new ControllerNotFound();
     $resp = $oPage->index($aArgs);
+    http_response_code($resp->code);
 }
-
-http_response_code($resp->getHttpCode());
 ?>
 <!doctype html>
 <html lang="ru">
@@ -90,6 +88,10 @@ http_response_code($resp->getHttpCode());
     <?php endif; ?>
 
     <script src="/js/public.js"></script>
+
+    <?php if (isset($_SESSION[EnumField::Admin->value])): ?>
+        <script src="/js/admin.js"></script>
+    <?php endif; ?>
 </head>
 <body>
 <div class="app">
@@ -130,7 +132,7 @@ http_response_code($resp->getHttpCode());
     <div class="app_mid">
         <main>
             <div class="container">
-                <?php echo template($resp->getView(), $resp->data); ?>
+                <?php echo template($resp->view, $resp->err, $resp->data); ?>
             </div>
         </main>
     </div>

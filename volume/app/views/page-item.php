@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+$err = $__err ?? "";
 $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
 ?>
 <div class="main">
@@ -30,7 +31,7 @@ $item = $__data[EnumField::Item->value] ?? new ItemRow([]);
                     <?php endif; ?>
                     <div class="text-nowrap">
                         Цена: <span class="h3"><?php echo finePrice($item->price) ?></span> ₽
-                        <?php echo template(EnumViewFile::ModuleCounter, [
+                        <?php echo template(EnumViewFile::ModuleCounter, "", [
                             EnumField::Styles->value => "sx-lg",
                             EnumField::Item->value => $item,
                         ]) ?>

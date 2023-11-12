@@ -14,10 +14,10 @@ final class ControllerRecover extends ControllerBase
             $req = new RequestRecover($_POST);
             $resp->data[EnumField::RequestedEmail->value] = $req->email;
 
-            $err = $this->check_request_index($req);
+            $err = $this->checkRequestIndex($req);
             if ($err instanceof Error) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = $err->getMessage();
+                $resp->code = 400;
+                $resp->err = $err->getMessage();
                 return $resp;
             }
 
@@ -29,23 +29,22 @@ final class ControllerRecover extends ControllerBase
                 EMAIL_LOGIN,
                 EMAIL_PASS,
                 EMAIL_FROM,
-                $_SERVER[EnumField::ModeIsTest->value] === true,
+                $_SERVER[EnumField::ModeIsProd->value],
             );
 
             // возьмем пользователя
             $result = $serviceUsers->oneByEmail($req->email);
             if ($result instanceof Error) {
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->oneByEmail", $result->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             } elseif ($result === null) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = EnumErr::NotFoundUser->value;
+                $resp->code = 400;
+                $resp->err = EnumErr::NotFoundRow->value;
                 return $resp;
             } elseif ($result instanceof UserRow && $result->email_hash !== null) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = EnumErr::CheckYourEmail->value;
+                $resp->code = 400;
+                $resp->err = EnumErr::CheckYourEmail->value;
                 return $resp;
             }
             $user = $result;
@@ -56,28 +55,26 @@ final class ControllerRecover extends ControllerBase
 
             $serviceRecover->db->beginTransaction();
 
-            $err = $serviceRecover->create($recover);
-            if ($err instanceof Error) {
+            $result = $serviceRecover->create($recover);
+            if ($result instanceof Error) {
                 $serviceRecover->db->rollBack();
 
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceRecover->create", $err->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
-            $template = $this->view(EnumViewFile::EmailMsgAndLink, [
+            $template = $this->view(EnumViewFile::EmailMsgAndLink, "", [
                 EnumField::Msg->value => EnumDic::GoAheadForRecoverPass->value,
                 EnumField::Address->value => ADDRESS . "/recover/check?" . EnumField::Hash->value . "={$recover->hash}",
             ]);
 
-            $err = $serviceEmail->send($user->email, EnumDic::RecoverAccess->value, $template);
-            if ($err instanceof Error) {
+            $result = $serviceEmail->send($user->email, EnumDic::RecoverAccess->value, $template);
+            if ($result instanceof Error) {
                 $serviceRecover->db->rollBack();
 
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "send email", $err->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
@@ -103,22 +100,20 @@ final class ControllerRecover extends ControllerBase
 
         // если прислали хэш, то найдем строку
         if ($hash) {
-            $recover = $serviceRecover->one($hash);
-            if ($recover instanceof Error) {
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceRecover->one", $recover->getMessage()));
+            $result = $serviceRecover->one($hash);
+            if ($result instanceof Error) {
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
-            } elseif ($recover instanceof RecoverRow) {
-                $result = $serviceUsers->one($recover->user_id);
+            } elseif ($result instanceof RecoverRow) {
+                $result = $serviceUsers->one($result->user_id);
                 if ($result instanceof Error) {
-                    $resp->setHttpCode(500);
-                    $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                    error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->one", $result->getMessage()));
+                    error_log($result->getMessage());
+                    $resp->code = 500;
                     return $resp;
                 } elseif ($result === null) {
-                    $resp->setHttpCode(400);
-                    $resp->data[EnumField::Error->value] = EnumErr::NotFoundUser->value;
+                    $resp->code = 400;
+                    $resp->err = EnumErr::NotFoundRow->value;
                     return $resp;
                 }
 
@@ -130,10 +125,10 @@ final class ControllerRecover extends ControllerBase
         if (($user !== null) && isset($_POST) && count($_POST)) {
             $req = new RequestRecoverCheck($_POST);
 
-            $err = $this->check_request_check($req);
+            $err = $this->checkRequestCheck($req);
             if ($err instanceof Error) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = $err->getMessage();
+                $resp->code = 400;
+                $resp->err = $err->getMessage();
                 return $resp;
             }
 
@@ -145,9 +140,8 @@ final class ControllerRecover extends ControllerBase
             if ($result instanceof Error) {
                 $serviceUsers->db->rollBack();
 
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->createOrUpdate", $result->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
@@ -156,9 +150,8 @@ final class ControllerRecover extends ControllerBase
             if ($result instanceof Error) {
                 $serviceUsers->db->rollBack();
 
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceRecover->deleteByUserId", $result->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
@@ -171,7 +164,7 @@ final class ControllerRecover extends ControllerBase
         return $resp;
     }
 
-    private function check_request_index(RequestRecover $req): Error|null
+    private function checkRequestIndex(RequestRecover $req): Error|null
     {
         if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
             return new Error(EnumErr::EmailNotCorrect->value);
@@ -180,7 +173,7 @@ final class ControllerRecover extends ControllerBase
         return null;
     }
 
-    private function check_request_check(RequestRecoverCheck $req): Error|null
+    private function checkRequestCheck(RequestRecoverCheck $req): Error|null
     {
         if (strlen($req->pass) < PassMinLen) {
             return new Error(sprintf(EnumErr::PassIsShortTpl->value, PassMinLen));

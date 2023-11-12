@@ -2,7 +2,7 @@
 
 final class ControllerContacts extends ControllerBase
 {
-    public string $title = EnumDic::Administration->value;
+    public string $title = EnumDic::Contacts->value;
     public string $description = "";
 
     public function index(array $args): MyResponse

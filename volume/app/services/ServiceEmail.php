@@ -10,16 +10,16 @@ final class ServiceEmail
     private string $login;
     private string $pass;
     private string $from;
-    private bool $isTestMode;
+    private bool $isProdMode;
 
-    public function __construct(string $smtpServer, int $port, string $login, string $pass, string $from, bool $isTestMode)
+    public function __construct(string $smtpServer, int $port, string $login, string $pass, string $from, bool $isProdMode)
     {
         $this->smtpServer = $smtpServer;
         $this->port = $port;
         $this->login = $login;
         $this->pass = $pass;
         $this->from = $from;
-        $this->isTestMode = $isTestMode;
+        $this->isProdMode = $isProdMode;
     }
 
     public function send(string $to, string $subject, string $msg, array $aFilepath = []): null|Error
@@ -52,7 +52,7 @@ final class ServiceEmail
         $header .= "Subject: =?utf-8?b?" . base64_encode($subject) . "?=" . $this->br;
 
         if (count($files)) {
-            $bound = "--" . md5(uniqid(rand(), true));
+            $bound = "--" . md5(uniqid((string)rand(), true));
             $header .= "Content-Type: multipart/mixed; boundary=\"{$bound}\"" . $this->br;
 
             $temp = $this->br . "--{$bound}" . $this->br;
@@ -79,8 +79,9 @@ final class ServiceEmail
             $msg = base64_encode($msg);
         }
 
-        // если тестовый режим, то далее нет смысла идти
-        if ($this->isTestMode) {
+        // если prod-режим, то далее нет смысла идти
+        if ($this->isProdMode) {
+        } else {
             return null;
         }
 

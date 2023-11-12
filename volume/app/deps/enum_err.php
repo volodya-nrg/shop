@@ -7,7 +7,6 @@ enum EnumErr: string
     case NotConnectToDatabase = "нет соединения с БД";
     case NotFoundClass = "не найден class";
     case NotFoundMethod = "не найден method";
-    case NotFoundUser = "пользователь не найден";
     case NotFoundRow = "не найдена запись";
     case PassIsShortTpl = "пароль слишком короткий (минимум %d символов)";
     case PasswordsNotEqual = "пароли не совподают";

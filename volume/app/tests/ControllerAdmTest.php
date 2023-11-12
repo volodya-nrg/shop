@@ -12,7 +12,6 @@ final class ControllerAdmTest extends TestCase
     protected function setUp(): void
     {
         $this->client = new TestApiClient();
-        $_SERVER[EnumField::ModeIsTest->value] = true;
         $_SERVER["REMOTE_ADDR"] = $_SERVER["REMOTE_ADDR"] ?? "127.0.0.1"; // HTTP_X_FORWARDED_FOR, REMOTE_ADDR
     }
 

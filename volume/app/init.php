@@ -1,13 +1,15 @@
 <?php declare(strict_types=1);
 
-session_start();
-
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 ini_set('max_execution_time', '3600');
 ini_set('memory_limit', '-1');
+ini_set('session.gc_maxlifetime', 86400);
+ini_set('session.cookie_lifetime', 0);
 
+session_start();
 error_reporting(E_ALL);
+$_SERVER[EnumField::ModeIsProd->value] = false;
 
 // получим переменные окружения
 $envRows = explode(PHP_EOL, file_get_contents(dirname(__FILE__) . "/../.env"));

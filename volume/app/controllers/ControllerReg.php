@@ -9,6 +9,15 @@ final class ControllerReg extends ControllerBase
     {
         global $PDO;
         $resp = new MyResponse(EnumViewFile::PageReg);
+        $serviceUsers = new ServiceUsers($PDO);
+        $serviceEmail = new ServiceEmail(
+            EMAIL_SMTP_SERVER,
+            EMAIL_PORT,
+            EMAIL_LOGIN,
+            EMAIL_PASS,
+            EMAIL_FROM,
+            $_SERVER[EnumField::ModeIsProd->value],
+        );
 
         if (isset($_POST) && count($_POST)) {
             $req = new RequestReg($_POST);
@@ -18,33 +27,22 @@ final class ControllerReg extends ControllerBase
             $resp->data[EnumField::RequestedAgreement->value] = $req->agreement;
             $resp->data[EnumField::RequestedPrivatePolicy->value] = $req->privatePolicy;
 
-            $err = $this->check_request($req);
+            $err = $this->checkRequest($req);
             if ($err instanceof Error) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = $err->getMessage();
+                $resp->code = 400;
+                $resp->err = $err->getMessage();
                 return $resp;
             }
-
-            $serviceUsers = new ServiceUsers($PDO);
-            $serviceEmail = new ServiceEmail(
-                EMAIL_SMTP_SERVER,
-                EMAIL_PORT,
-                EMAIL_LOGIN,
-                EMAIL_PASS,
-                EMAIL_FROM,
-                $_SERVER[EnumField::ModeIsTest->value] === true,
-            );
 
             // проверим пользователя
             $result = $serviceUsers->oneByEmail($req->email);
             if ($result instanceof UserRow) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = ($result->email_hash === null) ? EnumErr::UserAlreadyHas->value : EnumErr::CheckYourEmail->value;
+                $resp->code = 400;
+                $resp->err = is_null($result->email_hash) ? EnumErr::UserAlreadyHas->value : EnumErr::CheckYourEmail->value;
                 return $resp;
             } elseif ($result instanceof Error) {
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->oneByEmail", $result->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
@@ -60,14 +58,13 @@ final class ControllerReg extends ControllerBase
             if ($userId instanceof Error) {
                 $serviceUsers->db->rollBack();
 
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->createOrUpdate", $userId->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
             $user->user_id = $userId;
 
-            $template = $this->view(EnumViewFile::EmailMsgAndLink, [
+            $template = $this->view(EnumViewFile::EmailMsgAndLink, "", [
                 EnumField::Msg->value => EnumDic::GoAheadForVerifyEmail->value,
                 EnumField::Address->value => ADDRESS . "/reg/check?" . EnumField::Hash->value . "={$user->email_hash}",
             ]);
@@ -76,9 +73,8 @@ final class ControllerReg extends ControllerBase
             if ($err instanceof Error) {
                 $serviceUsers->db->rollBack();
 
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceEmail->send", $err->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
@@ -88,8 +84,8 @@ final class ControllerReg extends ControllerBase
             $resp->data[EnumField::Hash->value] = $user->email_hash; // нужен для теста
             $resp->data[EnumField::UserId->value] = $user->user_id; // нужен для теста
 
-            if (!$_SERVER[EnumField::ModeIsTest->value]) {
-                redirect("/reg/ok?" . EnumField::Email->value . "={$user->email}");
+            if ($_SERVER[EnumField::ModeIsProd->value]) {
+                $this->redirect(sprintf("/reg/ok?%s=%s", EnumField::Email->value, $user->email));
             }
         }
 
@@ -112,25 +108,24 @@ final class ControllerReg extends ControllerBase
         if ($hash) {
             $serviceUsers = new ServiceUsers($PDO);
 
-            $user = $serviceUsers->oneByEmailHash($hash);
-            if ($user instanceof Error) {
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->oneByEmailHash", $user->getMessage()));
+            $result = $serviceUsers->oneByEmailHash($hash);
+            if ($result instanceof Error) {
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
-            } elseif ($user === null) {
-                $resp->setHttpCode(400);
-                $resp->data[EnumField::Error->value] = EnumErr::NotFoundUser->value;
+            } elseif ($result === null) {
+                $resp->code = 400;
+                $resp->err = EnumErr::NotFoundRow->value;
                 return $resp;
             }
 
+            $user = $result;
             $user->email_hash = null;
 
             $err = $serviceUsers->update($user);
             if ($err instanceof Error) {
-                $resp->setHttpCode(500);
-                $resp->data[EnumField::Error->value] = EnumErr::InternalServer->value;
-                error_log(sprintf(EnumErr::InWhenTpl->value, __METHOD__, "serviceUsers->createOrUpdate", $user->getMessage()));
+                error_log($result->getMessage());
+                $resp->code = 500;
                 return $resp;
             }
 
@@ -141,7 +136,7 @@ final class ControllerReg extends ControllerBase
         return $resp;
     }
 
-    private function check_request(RequestReg $req): Error|null
+    private function checkRequest(RequestReg $req): Error|null
     {
         if (!filter_var($req->email, FILTER_VALIDATE_EMAIL)) {
             return new Error(EnumErr::EmailNotCorrect->value);
